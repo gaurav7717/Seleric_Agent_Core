@@ -7,8 +7,9 @@ from seleric_mcp.catalogue_service.service import (
 
 
 def test_loads_seed(catalogue):
-    assert len(catalogue.cat.metrics) == 14
+    assert len(catalogue.cat.metrics) == 16
     assert "net_revenue" in catalogue.cat.metrics
+    assert "attributed_revenue" in catalogue.cat.metrics
     assert catalogue.version
 
 

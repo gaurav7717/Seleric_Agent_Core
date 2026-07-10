@@ -8,6 +8,7 @@ dimensions:
       commerce_orders: commerce_orders.brand_id
       meta_ad_performance: meta_ad_performance.brand_id
       customer_ltv: customer_ltv.brand_id
+      order_attribution: order_attribution.brand_id
   - id: report_date
     display_name: Report Date
     description: IST calendar day for P&L and ads facts.
@@ -21,6 +22,7 @@ dimensions:
     is_time: true
     views:
       commerce_orders: commerce_orders.order_date
+      order_attribution: order_attribution.order_date
   - id: payment_method
     display_name: Payment Method
     description: Payment method on the order (COD, prepaid gateways).
@@ -59,6 +61,33 @@ dimensions:
     display_name: Ad Name
     views:
       meta_ad_performance: meta_ad_performance.ad_name
+  - id: lt_platform
+    display_name: Last-Touch Platform
+    description: Platform credited by last-touch attribution (meta, google, organic, ...).
+    views:
+      order_attribution: order_attribution.lt_platform
+  - id: lt_channel
+    display_name: Last-Touch Channel
+    description: Channel credited by last-touch attribution.
+    views:
+      order_attribution: order_attribution.lt_channel
+  - id: lt_campaign_id
+    display_name: Last-Touch Campaign ID
+    views:
+      order_attribution: order_attribution.lt_campaign_id
+  - id: lt_campaign_name
+    display_name: Last-Touch Campaign Name
+    description: Campaign credited by last-touch attribution.
+    views:
+      order_attribution: order_attribution.lt_campaign_name
+  - id: lt_adset_name
+    display_name: Last-Touch Ad Set Name
+    views:
+      order_attribution: order_attribution.lt_adset_name
+  - id: lt_ad_name
+    display_name: Last-Touch Ad Name
+    views:
+      order_attribution: order_attribution.lt_ad_name
   - id: acquisition_channel
     display_name: Acquisition Channel
     description: Channel that acquired the customer (first order).

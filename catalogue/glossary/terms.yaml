@@ -47,6 +47,18 @@ terms:
     canonical_id: orders
   - term: gross margin
     canonical_id: gross_profit
+  - term: attributed revenue
+    canonical_id: attributed_revenue
+    definition: >
+      Business-truth net revenue (ex-GST) credited to the last marketing touch
+      (gold.fct_order_attribution). Not the platform-reported conversion value —
+      that is meta_ad_performance.purchase_value / google conversion_value.
+  - term: last-touch revenue
+    canonical_id: attributed_revenue
+  - term: campaign revenue
+    canonical_id: attributed_revenue
+  - term: attributed orders
+    canonical_id: attributed_orders
   - term: RTO
     canonical_id: null
     definition: >

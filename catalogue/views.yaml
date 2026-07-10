@@ -31,3 +31,9 @@ views:
     freshness:
       source: gold.fct_meta_ads_status_history
       expected_cadence: "daily, T-1, IST"
+  - name: order_attribution
+    title: Order Attribution (Gold)
+    date_dimension: order_date
+    freshness:
+      source: gold.fct_order_attribution
+      expected_cadence: "daily, T-1, IST"
