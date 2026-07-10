@@ -1,0 +1,106 @@
+# gold.fct_amazon_sp_orders — Amazon Seller-Partner orders (order grain).
+# Date axis: purchase_date. order_attribution_tag = 'ORGANIC' isolates non-ad orders.
+# Analytics Platform Reference §4.
+cubes:
+- name: gold_fct_amazon_sp_orders
+  sql_table: gold.fct_amazon_sp_orders
+  title: Amazon SP Orders (Gold)
+  description: >
+    Amazon Seller-Partner orders at brand × amazon_order_id grain. Date axis is
+    purchase_date. Filter order_attribution_tag = 'ORGANIC' for organic-only orders.
+    Order-level P&L (payout, fees, COGS) lives in amazon_sp_order_pnl. Serve view:
+    amazon_sp_orders. Data owner: Amazon SP ingestion. Currency: INR.
+  joins:
+  - name: gold_fct_amazon_sp_order_pnl
+    sql: "{gold_fct_amazon_sp_orders.brand_id} = {gold_fct_amazon_sp_order_pnl.brand_id} AND {gold_fct_amazon_sp_orders.amazon_order_id} = {gold_fct_amazon_sp_order_pnl.amazon_order_id}"
+    relationship: one_to_one
+  measures:
+  - name: order_count
+    sql: amazon_order_id
+    type: count_distinct
+    format: number
+    description: Distinct Amazon orders.
+  - name: total_order_total
+    sql: order_total
+    type: sum
+    format: currency
+    description: SUM(order_total) — order header value incl customer GST.
+  - name: total_order_total_placed
+    sql: order_total_placed
+    type: sum
+    format: currency
+  - name: items_shipped
+    sql: number_of_items_shipped
+    type: sum
+    format: number
+  - name: items_unshipped
+    sql: number_of_items_unshipped
+    type: sum
+    format: number
+  - name: cancelled_orders
+    sql: CASE WHEN lowerUTF8({CUBE}.order_status) IN ('cancelled', 'canceled') THEN {CUBE}.amazon_order_id END
+    type: count_distinct
+    format: number
+    description: Orders with order_status Cancelled/canceled (excluded from P&L).
+  - name: prime_orders
+    sql: CASE WHEN {CUBE}.is_prime = 1 THEN {CUBE}.amazon_order_id END
+    type: count_distinct
+    format: number
+  - name: business_orders
+    sql: CASE WHEN {CUBE}.is_business_order = 1 THEN {CUBE}.amazon_order_id END
+    type: count_distinct
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    title: Brand ID
+  - name: amazon_order_id
+    sql: amazon_order_id
+    type: string
+    primary_key: true
+  - name: company_id
+    sql: company_id
+    type: string
+  - name: purchase_date
+    sql: purchase_date
+    type: time
+    title: Purchase Date
+    description: Amazon order placement date (date axis for organic order reporting).
+  - name: purchase_timestamp
+    sql: purchase_timestamp
+    type: time
+  - name: order_status
+    sql: order_status
+    type: string
+    description: Amazon order status (Shipped, Pending, Unshipped, Cancelled, InvoiceUnconfirmed).
+  - name: order_attribution_tag
+    sql: upperUTF8(trimBoth(coalesce(order_attribution_tag, '')))
+    type: string
+    title: Attribution Tag
+    description: ORGANIC vs ad-attributed. Filter = 'ORGANIC' for organic-only reporting.
+  - name: fulfillment_channel
+    sql: fulfillment_channel
+    type: string
+    description: AFN (FBA) vs MFN (seller-fulfilled).
+  - name: sales_channel
+    sql: sales_channel
+    type: string
+  - name: order_type
+    sql: order_type
+    type: string
+  - name: marketplace_id
+    sql: marketplace_id
+    type: string
+  - name: ship_to_state
+    sql: ship_to_state
+    type: string
+  - name: ship_to_city
+    sql: ship_to_city
+    type: string
+  - name: ship_to_country_code
+    sql: ship_to_country_code
+    type: string
+  - name: currency_code
+    sql: currency_code
+    type: string

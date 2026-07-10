@@ -1,0 +1,29 @@
+id: orders
+display_name: Orders
+category: commerce
+status: approved
+description: >
+  Order count from gold.fct_orders (test orders excluded in Cube). Status
+  buckets on the same view: active_orders + cancelled_orders + refunded_orders
+  (cancelled takes precedence over refunded).
+formula:
+  human_readable: "Count of orders placed (is_test = false)"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Orders by payment method last 30 days"
+    request: {measures: [orders], dimensions: [payment_method], time_range: {preset: last_30d}}
+validation_tests:
+  - "orders >= active_orders for any slice"
+deprecated_aliases: [daily_pnl.orders_created, daily_pnl.total_orders]

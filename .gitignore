@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+var/
+.cubestore/
+cube/node_modules/
+.env
+.env.local
+.pytest_cache/
+dist/
+*.egg-info/

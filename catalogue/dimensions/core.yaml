@@ -1,0 +1,70 @@
+# Logical dimensions and their qualified Cube member per view.
+dimensions:
+  - id: brand_id
+    display_name: Brand
+    description: Brand identifier; filter when data spans multiple brands.
+    views:
+      canonical_pnl: canonical_pnl.brand_id
+      commerce_orders: commerce_orders.brand_id
+      meta_ad_performance: meta_ad_performance.brand_id
+      customer_ltv: customer_ltv.brand_id
+  - id: report_date
+    display_name: Report Date
+    description: IST calendar day for P&L and ads facts.
+    is_time: true
+    views:
+      canonical_pnl: canonical_pnl.report_date
+      meta_ad_performance: meta_ad_performance.report_date
+  - id: order_date
+    display_name: Order Date
+    description: IST order placement day.
+    is_time: true
+    views:
+      commerce_orders: commerce_orders.order_date
+  - id: payment_method
+    display_name: Payment Method
+    description: Payment method on the order (COD, prepaid gateways).
+    views:
+      commerce_orders: commerce_orders.payment_method
+  - id: utm_source
+    display_name: UTM Source
+    description: Landing UTM source recorded on the order.
+    views:
+      commerce_orders: commerce_orders.utm_source
+  - id: shipping_country
+    display_name: Shipping Country
+    views:
+      commerce_orders: commerce_orders.shipping_country
+  - id: shipping_region
+    display_name: Shipping Region / State
+    views:
+      commerce_orders: commerce_orders.shipping_region
+  - id: campaign_id
+    display_name: Campaign ID
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_id
+  - id: campaign_name
+    display_name: Campaign Name
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_name
+  - id: adset_name
+    display_name: Ad Set Name
+    views:
+      meta_ad_performance: meta_ad_performance.adset_name
+  - id: ad_id
+    display_name: Ad ID
+    views:
+      meta_ad_performance: meta_ad_performance.ad_id
+  - id: ad_name
+    display_name: Ad Name
+    views:
+      meta_ad_performance: meta_ad_performance.ad_name
+  - id: acquisition_channel
+    display_name: Acquisition Channel
+    description: Channel that acquired the customer (first order).
+    views:
+      customer_ltv: customer_ltv.acquisition_channel
+  - id: first_order_cohort_month
+    display_name: First-Order Cohort Month
+    views:
+      customer_ltv: customer_ltv.first_order_cohort_month

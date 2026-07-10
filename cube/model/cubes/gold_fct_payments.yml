@@ -1,0 +1,119 @@
+# gold.fct_payments — brand × transaction grain.
+cubes:
+- name: gold_fct_payments
+  sql_table: gold.fct_payments
+  title: Gold Payments
+  description: Payment transactions. Use payment_cashflow view. Filter is_test = false.
+  measures:
+  - name: transactions
+    type: count
+    format: number
+    filters:
+    - sql: '{CUBE}.is_test = 0'
+  - name: amount
+    sql: amount
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.is_test = 0'
+  - name: amount_signed
+    sql: amount_signed
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.is_test = 0'
+  - name: successful_payments
+    sql: CASE WHEN {CUBE}.is_successful = 1 AND {CUBE}.is_test = 0 THEN {CUBE}.transaction_id
+      END
+    type: count_distinct
+    format: number
+  - name: refund_transactions
+    sql: CASE WHEN {CUBE}.is_refund = 1 AND {CUBE}.is_test = 0 THEN {CUBE}.transaction_id
+      END
+    type: count_distinct
+    format: number
+  - name: refund_amount
+    sql: CASE WHEN {CUBE}.is_refund = 1 AND {CUBE}.is_test = 0 THEN {CUBE}.amount
+      ELSE 0 END
+    type: sum
+    format: currency
+  - name: net_amount
+    sql: sum({CUBE}.amount_signed)
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.is_test = 0'
+  - name: avg_transaction_value
+    sql: sum({CUBE}.amount) / nullIf(count(CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.transaction_id
+      END), 0)
+    type: number
+    format: currency
+    filters:
+    - sql: '{CUBE}.is_test = 0'
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: transaction_id
+    sql: transaction_id
+    type: string
+    primary_key: true
+  - name: transaction_date
+    sql: transaction_date
+    type: time
+    title: Transaction Date (IST)
+  - name: payment_gateway
+    sql: payment_gateway
+    type: string
+  - name: payment_method
+    sql: payment_method
+    type: string
+  - name: transaction_kind
+    sql: transaction_kind
+    type: string
+  - name: is_successful
+    sql: is_successful
+    type: boolean
+  - name: is_refund
+    sql: is_refund
+    type: boolean
+  - name: is_cod
+    sql: is_cod
+    type: boolean
+  - name: is_test
+    sql: is_test
+    type: boolean
+  - name: payment_key
+    sql: payment_key
+    type: string
+  - name: order_id
+    sql: order_id
+    type: string
+  - name: order_key
+    sql: order_key
+    type: string
+  - name: transaction_created_at
+    sql: transaction_created_at
+    type: time
+  - name: transaction_status
+    sql: transaction_status
+    type: string
+  - name: currency
+    sql: currency
+    type: string
+  - name: gateway_reference
+    sql: gateway_reference
+    type: string
+  - name: authorization_code
+    sql: authorization_code
+    type: string
+  - name: error_code
+    sql: error_code
+    type: string
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time
+  - name: dt
+    sql: dt
+    type: time

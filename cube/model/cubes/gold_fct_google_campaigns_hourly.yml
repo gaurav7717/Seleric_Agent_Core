@@ -1,0 +1,103 @@
+# gold.fct_google_campaigns_hourly — brand × date × hour × campaign × device × network.
+cubes:
+- name: gold_fct_google_campaigns_hourly
+  sql_table: gold.fct_google_campaigns_hourly
+  title: Gold Google Campaigns Hourly
+  description: Hourly Google campaign performance. Use google_ad_hourly view for dayparting.
+  measures:
+  - name: spend
+    sql: spend
+    type: sum
+    format: currency
+  - name: impressions
+    sql: impressions
+    type: sum
+    format: number
+  - name: clicks
+    sql: clicks
+    type: sum
+    format: number
+  - name: conversions
+    sql: conversions
+    type: sum
+    format: number
+  - name: conversion_value
+    sql: conversion_value
+    type: sum
+    format: currency
+  - name: roas
+    sql: sum(conversion_value) / nullIf(sum(spend), 0)
+    type: number
+  - name: ctr
+    sql: sum(clicks) / nullIf(sum(impressions), 0)
+    type: number
+    format: percent
+  - name: cpc
+    sql: sum(spend) / nullIf(sum(clicks), 0)
+    type: number
+    format: currency
+  - name: average_cpc
+    sql: average_cpc
+    type: sum
+    format: number
+  - name: cpm
+    sql: cpm
+    type: sum
+    format: number
+  - name: all_conversions
+    sql: all_conversions
+    type: sum
+    format: number
+  - name: cost_per_conversion
+    sql: cost_per_conversion
+    type: sum
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: report_date
+    sql: report_date
+    type: time
+    primary_key: true
+  - name: hour_of_day
+    sql: hour_of_day
+    type: number
+    primary_key: true
+  - name: campaign_id
+    sql: campaign_id
+    type: string
+  - name: campaign_name
+    sql: campaign_name
+    type: string
+  - name: campaign_type
+    sql: campaign_type
+    type: string
+  - name: segment_device
+    sql: segment_device
+    type: string
+  - name: segment_ad_network_type
+    sql: segment_ad_network_type
+    type: string
+  - name: google_hourly_key
+    sql: google_hourly_key
+    type: string
+  - name: customer_id
+    sql: customer_id
+    type: string
+  - name: account_name
+    sql: account_name
+    type: string
+  - name: campaign_key
+    sql: campaign_key
+    type: string
+  - name: bidding_strategy_type
+    sql: bidding_strategy_type
+    type: string
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time
+  - name: dt
+    sql: dt
+    type: time

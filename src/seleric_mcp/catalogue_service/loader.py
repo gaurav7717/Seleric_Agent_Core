@@ -1,0 +1,205 @@
+"""Load the versioned YAML catalogue into typed in-memory definitions.
+
+The YAML files under catalogue/ are the authoritative registry (reviewed like
+code). catalogue_version is a short content hash so every response can pin the
+exact registry it was answered from.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+from typing import Literal
+
+import yaml
+from pydantic import BaseModel, Field
+
+
+class Formula(BaseModel):
+    human_readable: str
+    authoritative_source: Literal["cube"] = "cube"
+
+
+class CubeMapping(BaseModel):
+    view: str
+    measure: str
+    measure_pct: str | None = None
+
+
+class RatioComponents(BaseModel):
+    numerator: str
+    denominator: str
+
+
+class AccessPolicy(BaseModel):
+    roles_allowed: list[str] = Field(default_factory=list)
+    scopes: list[str] = Field(default_factory=lambda: ["metrics:read"])
+
+
+class Freshness(BaseModel):
+    source: str
+    expected_cadence: str
+
+
+class MetricDef(BaseModel):
+    id: str
+    display_name: str
+    category: str
+    status: Literal["approved", "draft", "broken"] = "approved"
+    description: str
+    formula: Formula
+    cube_mapping: CubeMapping
+    aggregation: Literal["additive", "ratio"]
+    ratio_components: RatioComponents | None = None
+    companion_measures: list[str] = Field(default_factory=list)
+    unit: str
+    currency_default: str | None = None
+    grain: str
+    supported_dimensions: list[str] = Field(default_factory=list)
+    supported_filters: list[str] = Field(default_factory=list)
+    data_owner: str
+    access_policy: AccessPolicy = Field(default_factory=AccessPolicy)
+    examples: list[dict] = Field(default_factory=list)
+    validation_tests: list[str] = Field(default_factory=list)
+    deprecated_aliases: list[str] = Field(default_factory=list)
+
+
+class DimensionDef(BaseModel):
+    id: str
+    display_name: str
+    description: str = ""
+    is_time: bool = False
+    views: dict[str, str]  # view name -> qualified cube member
+
+
+class GlossaryTerm(BaseModel):
+    term: str
+    canonical_id: str | None = None
+    definition: str | None = None
+
+
+class ViewDef(BaseModel):
+    name: str
+    title: str
+    date_dimension: str | None = None
+    freshness: Freshness
+
+
+class BusinessRule(BaseModel):
+    id: str
+    description: str
+    blocking: bool
+
+
+class ActionContractDef(BaseModel):
+    id: str
+    display_name: str
+    domain: str
+    status: Literal["approved", "draft"] = "approved"
+    description: str
+    executor: Literal["pipeboard", "backend_api"]
+    executor_action_type: str
+    payload_schema: str
+    scopes_required: list[str]
+    risk_level: Literal["low", "medium", "high"]
+    confirmation_ttl_seconds: int = 300
+    business_rules: list[BusinessRule] = Field(default_factory=list)
+    preview: dict = Field(default_factory=dict)
+    data_owner: str
+
+
+class Deprecation(BaseModel):
+    old: str
+    new: str
+    reason: str
+
+
+class Catalogue(BaseModel):
+    version: str
+    metrics: dict[str, MetricDef]
+    dimensions: dict[str, DimensionDef]
+    glossary: list[GlossaryTerm]
+    views: dict[str, ViewDef]
+    actions: dict[str, ActionContractDef]
+    deprecations: list[Deprecation]
+
+
+def _read_yaml(path: Path) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def load_catalogue(catalogue_dir: Path) -> Catalogue:
+    hasher = hashlib.sha256()
+    yaml_files = sorted(catalogue_dir.rglob("*.yaml"))
+    if not yaml_files:
+        raise FileNotFoundError(f"No catalogue YAML found under {catalogue_dir}")
+    for p in yaml_files:
+        hasher.update(p.read_bytes())
+    version = hasher.hexdigest()[:12]
+
+    metrics: dict[str, MetricDef] = {}
+    for p in sorted((catalogue_dir / "metrics").glob("*.yaml")):
+        m = MetricDef.model_validate(_read_yaml(p))
+        metrics[m.id] = m
+
+    dimensions: dict[str, DimensionDef] = {}
+    for p in sorted((catalogue_dir / "dimensions").glob("*.yaml")):
+        for raw in _read_yaml(p).get("dimensions", []):
+            d = DimensionDef.model_validate(raw)
+            dimensions[d.id] = d
+
+    glossary = [
+        GlossaryTerm.model_validate(raw)
+        for raw in _read_yaml(catalogue_dir / "glossary" / "terms.yaml").get("terms", [])
+    ]
+
+    views: dict[str, ViewDef] = {}
+    for raw in _read_yaml(catalogue_dir / "views.yaml").get("views", []):
+        v = ViewDef.model_validate(raw)
+        views[v.name] = v
+
+    actions: dict[str, ActionContractDef] = {}
+    actions_dir = catalogue_dir / "actions"
+    if actions_dir.exists():
+        for p in sorted(actions_dir.glob("*.yaml")):
+            a = ActionContractDef.model_validate(_read_yaml(p))
+            actions[a.id] = a
+
+    deprecations = [
+        Deprecation.model_validate(raw)
+        for raw in _read_yaml(catalogue_dir / "deprecations.yaml").get("deprecations", [])
+    ]
+
+    cat = Catalogue(
+        version=version,
+        metrics=metrics,
+        dimensions=dimensions,
+        glossary=glossary,
+        views=views,
+        actions=actions,
+        deprecations=deprecations,
+    )
+    _check_integrity(cat)
+    return cat
+
+
+def _check_integrity(cat: Catalogue) -> None:
+    """Fail fast on internal inconsistencies (bad refs between YAML files)."""
+    problems: list[str] = []
+    for m in cat.metrics.values():
+        if m.cube_mapping.view not in cat.views:
+            problems.append(f"metric {m.id}: unknown view {m.cube_mapping.view}")
+        for dim_id in m.supported_dimensions:
+            dim = cat.dimensions.get(dim_id)
+            if dim is None:
+                problems.append(f"metric {m.id}: unknown dimension {dim_id}")
+            elif m.cube_mapping.view not in dim.views:
+                problems.append(
+                    f"metric {m.id}: dimension {dim_id} has no mapping for view {m.cube_mapping.view}"
+                )
+    for t in cat.glossary:
+        if t.canonical_id is not None and t.canonical_id not in cat.metrics:
+            problems.append(f"glossary term '{t.term}': unknown canonical_id {t.canonical_id}")
+    if problems:
+        raise ValueError("Catalogue integrity check failed:\n" + "\n".join(problems))

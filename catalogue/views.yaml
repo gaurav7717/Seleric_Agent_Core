@@ -1,0 +1,33 @@
+# Cube serve views exposed to the agent. Source of truth for names:
+# C:\SpacePeppers\SpacePeppers\cube_mcp\semantic_layer_serve\model\views\serve_views.yml
+views:
+  - name: canonical_pnl
+    title: Canonical Company P&L (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.int_finance_daily_rollups + gold.fct_order_items + ad spend facts
+      expected_cadence: "daily, T-1, IST"   # confirm exact refresh time with data engineering
+  - name: commerce_orders
+    title: Commerce Orders (Gold)
+    date_dimension: order_date
+    freshness:
+      source: gold.fct_orders
+      expected_cadence: "daily, T-1, IST"
+  - name: meta_ad_performance
+    title: Meta Ad Performance (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.fct_meta_ads_daily
+      expected_cadence: "daily, T-1, IST"
+  - name: customer_ltv
+    title: Customer LTV (Gold)
+    date_dimension: null   # dimension table; no daily time axis
+    freshness:
+      source: gold.dim_customers
+      expected_cadence: "daily, T-1, IST"
+  - name: meta_ad_status_changes
+    title: Meta Ad Status Changes (Gold)
+    date_dimension: changed_at
+    freshness:
+      source: gold.fct_meta_ads_status_history
+      expected_cadence: "daily, T-1, IST"

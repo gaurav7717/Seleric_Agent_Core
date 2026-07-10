@@ -1,0 +1,30 @@
+id: contribution_margin
+display_name: Contribution Margin
+category: financial
+status: approved
+description: >
+  Gross profit minus ad spend — profit contribution before fixed operating
+  costs. Percentage companion: contribution_margin_pct.
+formula:
+  human_readable: "Gross Profit - Total Ad Spend"
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.contribution_margin
+  measure_pct: canonical_pnl.contribution_margin_pct
+aggregation: additive
+unit: currency_and_percent
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Finance Analytics"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead]
+  scopes: [metrics:read]
+examples:
+  - question: "Contribution margin this month"
+    request: {measures: [contribution_margin], time_range: {preset: this_month}}
+validation_tests:
+  - "contribution_margin <= gross_profit for any period"
+deprecated_aliases: [daily_pnl.contribution_margin]

@@ -1,0 +1,30 @@
+id: total_cogs
+display_name: Total COGS (Net)
+category: financial
+status: approved
+description: >
+  Lifecycle net cost of goods sold by axis, including Amazon. Net basis:
+  product cost reversed on cancel/return where applicable. For gross basis
+  (product retained on cancel/return) see canonical_pnl.gross_cogs.
+formula:
+  human_readable: "Lifecycle net COGS (product + packaging + shipping + gateway fees + RTO + Amazon fees/cost)"
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.net_cogs
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Finance Analytics"
+access_policy:
+  roles_allowed: [exec, finance, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "What was COGS last month?"
+    request: {measures: [total_cogs], time_range: {preset: last_month}}
+validation_tests:
+  - "net_cogs is non-negative for a completed period"
+deprecated_aliases: [daily_pnl.total_cogs]

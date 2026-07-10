@@ -1,0 +1,88 @@
+# gold.dim_adset — cross-platform adset/adgroup dimension.
+cubes:
+- name: gold_dim_adset
+  sql_table: gold.dim_adset
+  title: Gold Adset Dimension
+  description: Unified Meta adsets and Google ad groups.
+  joins:
+  - name: gold_dim_ad
+    sql: '{gold_dim_adset.brand_id} = {gold_dim_ad.brand_id} AND {gold_dim_adset.adset_key}
+      = {gold_dim_ad.adset_key}'
+    relationship: one_to_many
+  measures:
+  - name: adsets
+    type: count
+    format: number
+  - name: active_adsets
+    sql: CASE WHEN {CUBE}.is_active = 1 THEN {CUBE}.adset_key END
+    type: count_distinct
+    format: number
+  - name: bid_amount
+    sql: bid_amount
+    type: sum
+    format: currency
+  - name: daily_budget_amount
+    sql: daily_budget_amount
+    type: sum
+    format: currency
+  - name: lifetime_budget_amount
+    sql: lifetime_budget_amount
+    type: sum
+    format: currency
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: adset_key
+    sql: adset_key
+    type: string
+    primary_key: true
+  - name: campaign_key
+    sql: campaign_key
+    type: string
+  - name: adset_id
+    sql: adset_id
+    type: string
+  - name: campaign_id
+    sql: campaign_id
+    type: string
+  - name: platform
+    sql: platform
+    type: string
+  - name: adset_name
+    sql: adset_name
+    type: string
+  - name: adset_status
+    sql: adset_status
+    type: string
+  - name: is_active
+    sql: is_active
+    type: boolean
+  - name: optimization_goal
+    sql: optimization_goal
+    type: string
+  - name: ad_group_type
+    sql: ad_group_type
+    type: string
+  - name: billing_event
+    sql: billing_event
+    type: string
+  - name: bid_strategy
+    sql: bid_strategy
+    type: string
+  - name: start_date
+    sql: start_date
+    type: time
+  - name: end_date
+    sql: end_date
+    type: time
+  - name: platform_created_at
+    sql: platform_created_at
+    type: time
+  - name: platform_updated_at
+    sql: platform_updated_at
+    type: time
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time

@@ -1,0 +1,18 @@
+# In-project Cube semantic layer. seleric-mcp queries this instance by default
+# (CUBE_API_URL=http://127.0.0.1:4001). The model lives in ./cube/model and is
+# versioned with this repo — edit YAML, Cube hot-reloads (CUBEJS_DEV_MODE).
+#
+#   docker compose up -d          # start cube-serve
+#   uv run python scripts/smoke_cube.py   # verify
+name: seleric-mcp
+
+services:
+  cube:
+    image: cubejs/cube:latest
+    restart: unless-stopped
+    volumes:
+      - ./cube:/cube/conf
+    env_file:
+      - ./cube/.env
+    ports:
+      - "127.0.0.1:${CUBE_HOST_PORT:-4001}:4000"

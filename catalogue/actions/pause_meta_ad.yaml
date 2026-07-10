@@ -1,0 +1,32 @@
+id: pause_meta_ad
+display_name: Pause Meta Ad
+domain: meta_ads
+status: approved
+description: >
+  Pause a single Meta ad. Proposal returns a preview with the ad's recent
+  performance and a single-use confirmation token; nothing executes until the
+  token is committed.
+executor: pipeboard
+executor_action_type: pause_ad
+payload_schema: PauseMetaAdPayload   # {ad_id: ^\d{5,25}$, brand_id: str, reason: 10-500 chars}
+scopes_required: [meta_ads:write:status]
+risk_level: medium
+confirmation_ttl_seconds: 300
+business_rules:
+  - id: ad_exists
+    description: Ad must appear in meta_ad_performance for this brand within the last 30 days.
+    blocking: true
+  - id: not_already_paused
+    description: >
+      Latest known status from meta_ad_status_changes should not already be
+      PAUSED. Best-effort — unverifiable status does not block, it is surfaced
+      in the preview.
+    blocking: false
+  - id: write_enabled
+    description: WRITE_ENABLED must be "true" at commit time (global kill switch).
+    blocking: true
+preview:
+  sources:
+    - cube: meta_ad_performance last-7d spend/roas/impressions for the ad
+    - cube: meta_ad_status_changes latest status event (best-effort)
+data_owner: "Growth"

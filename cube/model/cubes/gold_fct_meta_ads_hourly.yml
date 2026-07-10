@@ -1,0 +1,290 @@
+# gold.fct_meta_ads_hourly — brand × date × hour × account × campaign × adset × ad.
+cubes:
+- name: gold_fct_meta_ads_hourly
+  sql_table: gold.fct_meta_ads_hourly
+  title: Gold Meta Ads Hourly
+  description: Meta ad hourly performance from gold.fct_meta_ads_hourly. Use meta_ad_hourly
+    view.
+  measures:
+  - name: spend
+    sql: spend
+    type: sum
+    format: currency
+  - name: ad_spend
+    sql: spend
+    type: sum
+    format: currency
+  - name: impressions
+    sql: impressions
+    type: sum
+    format: number
+  - name: reach
+    sql: reach
+    type: sum
+    format: number
+  - name: frequency
+    sql: avg(frequency)
+    type: number
+  - name: clicks
+    sql: clicks
+    type: sum
+    format: number
+  - name: ctr
+    sql: 100.0 * sum(clicks) / nullIf(sum(impressions), 0)
+    type: number
+    format: percent
+  - name: cpm
+    sql: sum(spend) * 1000 / nullIf(sum(impressions), 0)
+    type: number
+    format: currency
+  - name: cpc
+    sql: sum(spend) / nullIf(sum(clicks), 0)
+    type: number
+    format: currency
+  - name: ctr_all
+    sql: ctr_all
+    type: sum
+    format: number
+  - name: cpc_all
+    sql: cpc_all
+    type: sum
+    format: number
+  - name: add_to_cart
+    sql: add_to_cart
+    type: sum
+    format: number
+  - name: cost_per_inline_post_engagement
+    sql: cost_per_inline_post_engagement
+    type: sum
+    format: number
+  - name: cost_per_outbound_click
+    sql: cost_per_outbound_click
+    type: sum
+    format: number
+  - name: cost_per_purchase
+    sql: cost_per_purchase
+    type: sum
+    format: number
+  - name: cpc_link
+    sql: cpc_link
+    type: sum
+    format: number
+  - name: full_view_impressions
+    sql: full_view_impressions
+    type: sum
+    format: number
+  - name: initiate_checkout
+    sql: initiate_checkout
+    type: sum
+    format: number
+  - name: inline_link_click_ctr
+    sql: inline_link_click_ctr
+    type: sum
+    format: number
+  - name: inline_link_clicks
+    sql: inline_link_clicks
+    type: sum
+    format: number
+  - name: inline_post_engagements
+    sql: inline_post_engagements
+    type: sum
+    format: number
+  - name: landing_page_views
+    sql: landing_page_views
+    type: sum
+    format: number
+  - name: leads
+    sql: leads
+    type: sum
+    format: number
+  - name: likes
+    sql: likes
+    type: sum
+    format: number
+  - name: link_clicks
+    sql: link_clicks
+    type: sum
+    format: number
+  - name: outbound_clicks
+    sql: outbound_clicks
+    type: sum
+    format: number
+  - name: outbound_clicks_ctr
+    sql: outbound_clicks_ctr
+    type: sum
+    format: number
+  - name: page_engagements
+    sql: page_engagements
+    type: sum
+    format: number
+  - name: post_comments
+    sql: post_comments
+    type: sum
+    format: number
+  - name: post_engagements
+    sql: post_engagements
+    type: sum
+    format: number
+  - name: post_reactions
+    sql: post_reactions
+    type: sum
+    format: number
+  - name: post_saves
+    sql: post_saves
+    type: sum
+    format: number
+  - name: purchase_roas_omni
+    sql: purchase_roas_omni
+    type: sum
+    format: currency
+  - name: purchase_value
+    sql: purchase_value
+    type: sum
+    format: number
+  - name: purchases
+    sql: purchases
+    type: sum
+    format: number
+  - name: unique_clicks
+    sql: unique_clicks
+    type: sum
+    format: number
+  - name: unique_ctr
+    sql: unique_ctr
+    type: sum
+    format: number
+  - name: video_thruplay_15s
+    sql: video_thruplay_15s
+    type: sum
+    format: number
+  - name: video_views_3s
+    sql: video_views_3s
+    type: sum
+    format: number
+  - name: view_content
+    sql: view_content
+    type: sum
+    format: number
+  - name: website_ctr
+    sql: website_ctr
+    type: sum
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: report_date
+    sql: report_date
+    type: time
+    primary_key: true
+  - name: date_start
+    sql: report_date
+    type: time
+  - name: hour_of_day
+    sql: hour_of_day
+    type: number
+    primary_key: true
+  - name: hourly_window
+    sql: hour_of_day
+    type: number
+    title: Hour of Day (0–23)
+  - name: account_id
+    sql: account_id
+    type: string
+  - name: campaign_id
+    sql: campaign_id
+    type: string
+  - name: campaign_name
+    sql: campaign_name
+    type: string
+  - name: adset_id
+    sql: adset_id
+    type: string
+  - name: adset_name
+    sql: adset_name
+    type: string
+  - name: ad_id
+    sql: ad_id
+    type: string
+  - name: ad_name
+    sql: ad_name
+    type: string
+  - name: meta_hourly_key
+    sql: meta_hourly_key
+    type: string
+  - name: account_name
+    sql: account_name
+    type: string
+  - name: campaign_status
+    sql: campaign_status
+    type: string
+  - name: campaign_objective
+    sql: campaign_objective
+    type: string
+  - name: adset_status
+    sql: adset_status
+    type: string
+  - name: optimization_goal
+    sql: optimization_goal
+    type: string
+  - name: billing_event
+    sql: billing_event
+    type: string
+  - name: ad_status
+    sql: ad_status
+    type: string
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time
+  - name: dt
+    sql: dt
+    type: time
+  - name: account_currency
+    sql: account_currency
+    type: string
+  - name: attribution_setting
+    sql: attribution_setting
+    type: string
+  - name: buying_type
+    sql: buying_type
+    type: string
+  - name: creative_body
+    sql: creative_body
+    type: string
+  - name: creative_call_to_action
+    sql: creative_call_to_action
+    type: string
+  - name: creative_destination_url
+    sql: creative_destination_url
+    type: string
+  - name: creative_id
+    sql: creative_id
+    type: string
+  - name: creative_image_url
+    sql: creative_image_url
+    type: string
+  - name: creative_instagram_url
+    sql: creative_instagram_url
+    type: string
+  - name: creative_key
+    sql: creative_key
+    type: string
+  - name: creative_name
+    sql: creative_name
+    type: string
+  - name: creative_thumbnail_url
+    sql: creative_thumbnail_url
+    type: string
+  - name: creative_title
+    sql: creative_title
+    type: string
+  - name: creative_type
+    sql: creative_type
+    type: string
+  - name: creative_video_id
+    sql: creative_video_id
+    type: string
+  - name: creative_video_watch_url
+    sql: creative_video_watch_url
+    type: string

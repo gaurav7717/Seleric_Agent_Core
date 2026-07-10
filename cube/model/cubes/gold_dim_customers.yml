@@ -1,0 +1,210 @@
+# gold.dim_customers — brand × customer grain.
+cubes:
+- name: gold_dim_customers
+  sql_table: gold.dim_customers
+  title: Gold Customers
+  description: Customer dimension with LTV and consent. Use customer_ltv view.
+  measures:
+  - name: customers
+    type: count
+    format: number
+  - name: lifetime_gross_revenue
+    sql: lifetime_gross_revenue
+    type: sum
+    format: currency
+  - name: lifetime_order_count
+    sql: lifetime_order_count
+    type: sum
+    format: number
+  - name: total_spent
+    sql: total_spent
+    type: sum
+    format: currency
+  - name: repeat_customers
+    sql: CASE WHEN {CUBE}.is_repeat_customer = 1 THEN {CUBE}.customer_id END
+    type: count_distinct
+    format: number
+  - name: avg_ltv
+    sql: sum(lifetime_gross_revenue) / nullIf(count(*), 0)
+    type: number
+    format: currency
+  - name: avg_ltv_ex_gst
+    sql: sum(lifetime_gross_revenue / 1.18) / nullIf(count(*), 0)
+    type: number
+    format: currency
+  - name: days_since_last_order
+    sql: avg(dateDiff('day', {CUBE}.last_order_at, today()))
+    type: number
+  - name: company_id
+    sql: company_id
+    type: sum
+    format: number
+  - name: is_email_verified
+    sql: is_email_verified
+    type: sum
+    format: number
+  - name: is_tax_exempt
+    sql: is_tax_exempt
+    type: sum
+    format: number
+  - name: accepts_marketing
+    sql: accepts_marketing
+    type: sum
+    format: number
+  - name: orders_count
+    sql: orders_count
+    type: sum
+    format: number
+  - name: last_order_id
+    sql: last_order_id
+    type: sum
+    format: number
+  - name: default_address_id
+    sql: default_address_id
+    type: sum
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: customer_id
+    sql: customer_id
+    type: string
+    primary_key: true
+  - name: is_repeat_customer
+    sql: is_repeat_customer
+    type: boolean
+  - name: email_marketing_state
+    sql: email_marketing_state
+    type: string
+  - name: sms_marketing_state
+    sql: sms_marketing_state
+    type: string
+  - name: default_country
+    sql: default_country
+    type: string
+  - name: default_province
+    sql: default_province
+    type: string
+  - name: first_order_at
+    sql: first_order_at
+    type: time
+  - name: first_order_cohort_month
+    sql: toStartOfMonth(first_order_at)
+    type: time
+    title: First Order Cohort Month
+  - name: acquisition_platform
+    sql: acquisition_platform
+    type: string
+  - name: acquisition_channel
+    sql: acquisition_channel
+    type: string
+  - name: acquisition_campaign
+    sql: acquisition_campaign
+    type: string
+  - name: first_order_product
+    sql: first_order_product
+    type: string
+  - name: last_order_at
+    sql: last_order_at
+    type: time
+  - name: store_id
+    sql: store_id
+    type: string
+  - name: email
+    sql: email
+    type: string
+  - name: first_name
+    sql: first_name
+    type: string
+  - name: last_name
+    sql: last_name
+    type: string
+  - name: customer_name
+    sql: customer_name
+    type: string
+  - name: phone
+    sql: phone
+    type: string
+  - name: state
+    sql: state
+    type: string
+  - name: currency
+    sql: currency
+    type: string
+  - name: last_order_name
+    sql: last_order_name
+    type: string
+  - name: customer_created_at
+    sql: customer_created_at
+    type: time
+  - name: customer_updated_at
+    sql: customer_updated_at
+    type: time
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time
+  - name: dt
+    sql: dt
+    type: time
+  - name: _raw_ingested_at
+    sql: _raw_ingested_at
+    type: time
+  - name: admin_graphql_api_id
+    sql: admin_graphql_api_id
+    type: string
+  - name: brand_id_customer_id
+    sql: brand_id_customer_id
+    type: string
+  - name: default_address1
+    sql: default_address1
+    type: string
+  - name: default_address2
+    sql: default_address2
+    type: string
+  - name: default_city
+    sql: default_city
+    type: string
+  - name: default_country_code
+    sql: default_country_code
+    type: string
+  - name: default_country_name
+    sql: default_country_name
+    type: string
+  - name: default_province_code
+    sql: default_province_code
+    type: string
+  - name: default_zip
+    sql: default_zip
+    type: string
+  - name: email_hash
+    sql: email_hash
+    type: string
+  - name: email_marketing_consent_updated_at
+    sql: email_marketing_consent_updated_at
+    type: time
+  - name: email_marketing_opt_in_level
+    sql: email_marketing_opt_in_level
+    type: string
+  - name: multipass_identifier
+    sql: multipass_identifier
+    type: string
+  - name: note
+    sql: note
+    type: string
+  - name: phone_hash
+    sql: phone_hash
+    type: string
+  - name: sms_marketing_consent_updated_at
+    sql: sms_marketing_consent_updated_at
+    type: time
+  - name: sms_marketing_opt_in_level
+    sql: sms_marketing_opt_in_level
+    type: string
+  - name: tags
+    sql: tags
+    type: string
+  - name: tax_exemptions
+    sql: tax_exemptions
+    type: string

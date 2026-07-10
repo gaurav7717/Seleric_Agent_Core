@@ -1,0 +1,36 @@
+id: avg_ltv
+display_name: Average Customer LTV
+category: customer
+status: approved
+description: >
+  Average lifetime gross revenue per customer from gold.dim_customers.
+  Ex-GST companion: avg_ltv_ex_gst. Companions on the same view: customers,
+  repeat_customers. A ratio — never sum rows. Note: customer_ltv is a
+  dimension snapshot; it has no daily time axis (cohort analysis uses the
+  first_order_cohort_month dimension).
+formula:
+  human_readable: "Lifetime gross revenue / customer count"
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.avg_ltv
+companion_measures: [customer_ltv.avg_ltv_ex_gst, customer_ltv.customers, customer_ltv.repeat_customers]
+aggregation: ratio
+ratio_components:
+  numerator: customer_ltv.lifetime_gross_revenue
+  denominator: customer_ltv.customers
+unit: currency
+currency_default: INR
+grain: customer
+supported_dimensions: [brand_id, acquisition_channel, first_order_cohort_month]
+supported_filters: [brand_id, acquisition_channel, first_order_cohort_month]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead]
+  scopes: [metrics:read]
+examples:
+  - question: "Average LTV by acquisition channel"
+    request: {measures: [avg_ltv], dimensions: [acquisition_channel], time_range: {preset: last_90d}}
+validation_tests:
+  - "avg_ltv >= aov for the same brand over all time"
+deprecated_aliases: []

@@ -1,0 +1,201 @@
+# gold.fct_order_attribution — brand × order last-touch attribution.
+cubes:
+- name: gold_fct_order_attribution
+  sql_table: gold.fct_order_attribution
+  title: Gold Order Attribution
+  description: 'Last-touch order attribution from gold.fct_order_attribution. Use
+    order_attribution view. Filter is_test = false. Do not use for company P&L totals.
+
+    '
+  joins:
+  - name: gold_dim_campaign
+    sql: '{gold_fct_order_attribution.brand_id} = {gold_dim_campaign.brand_id} AND
+      {gold_fct_order_attribution.lt_campaign_id} = {gold_dim_campaign.campaign_id}
+      AND {gold_dim_campaign.platform} = {gold_fct_order_attribution.lt_platform}'
+    relationship: many_to_one
+  measures:
+  - name: attributed_orders
+    sql: CASE WHEN {CUBE}.order_status IN ('active', 'partially_refunded') AND {CUBE}.is_test
+      = 0 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+  - name: placed_orders
+    sql: CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+  - name: attributed_net_revenue
+    sql: CASE WHEN {CUBE}.order_status IN ('active', 'partially_refunded') AND {CUBE}.is_test
+      = 0 THEN {CUBE}.net_revenue ELSE 0 END
+    type: sum
+    format: currency
+  - name: attributed_net_revenue_ex_gst
+    sql: CASE WHEN {CUBE}.order_status IN ('active', 'partially_refunded') AND {CUBE}.is_test
+      = 0 THEN {CUBE}.net_revenue_excl_tax ELSE 0 END
+    type: sum
+    format: currency
+  - name: gross_revenue
+    sql: CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.gross_revenue ELSE 0 END
+    type: sum
+    format: currency
+  - name: refund_amount
+    sql: CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.total_refund_amount ELSE 0 END
+    type: sum
+    format: currency
+  - name: meta_attributed_revenue
+    sql: CASE WHEN {CUBE}.lt_platform = 'meta' AND {CUBE}.order_status IN ('active',
+      'partially_refunded') AND {CUBE}.is_test = 0 THEN {CUBE}.net_revenue_excl_tax
+      ELSE 0 END
+    type: sum
+    format: currency
+  - name: google_attributed_revenue
+    sql: CASE WHEN {CUBE}.lt_platform = 'google' AND {CUBE}.order_status IN ('active',
+      'partially_refunded') AND {CUBE}.is_test = 0 THEN {CUBE}.net_revenue_excl_tax
+      ELSE 0 END
+    type: sum
+    format: currency
+  - name: organic_attributed_revenue
+    sql: CASE WHEN {CUBE}.lt_platform = 'organic' AND {CUBE}.order_status IN ('active',
+      'partially_refunded') AND {CUBE}.is_test = 0 THEN {CUBE}.net_revenue_excl_tax
+      ELSE 0 END
+    type: sum
+    format: currency
+  - name: meta_attributed_orders
+    sql: CASE WHEN {CUBE}.lt_platform = 'meta' AND {CUBE}.order_status IN ('active',
+      'partially_refunded') AND {CUBE}.is_test = 0 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+  - name: google_attributed_orders
+    sql: CASE WHEN {CUBE}.lt_platform = 'google' AND {CUBE}.order_status IN ('active',
+      'partially_refunded') AND {CUBE}.is_test = 0 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+  - name: organic_attributed_orders
+    sql: CASE WHEN {CUBE}.lt_platform = 'organic' AND {CUBE}.order_status IN ('active',
+      'partially_refunded') AND {CUBE}.is_test = 0 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+  - name: attributed_aov
+    sql: sum(CASE WHEN {CUBE}.order_status IN ('active', 'partially_refunded') AND {CUBE}.is_test
+      = 0 THEN {CUBE}.net_revenue_excl_tax ELSE 0 END) / nullIf(countDistinct(CASE
+      WHEN {CUBE}.order_status IN ('active', 'partially_refunded') AND {CUBE}.is_test
+      = 0 THEN {CUBE}.order_id END), 0)
+    type: number
+    format: currency
+  - name: is_new_customer
+    sql: is_new_customer
+    type: sum
+    format: number
+  - name: is_cod
+    sql: is_cod
+    type: sum
+    format: number
+  - name: net_revenue
+    sql: net_revenue
+    type: sum
+    format: currency
+  - name: net_revenue_excl_tax
+    sql: net_revenue_excl_tax
+    type: sum
+    format: currency
+  - name: total_refund_amount
+    sql: total_refund_amount
+    type: sum
+    format: currency
+  - name: is_guest_checkout
+    sql: is_guest_checkout
+    type: sum
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: order_id
+    sql: order_id
+    type: string
+    primary_key: true
+  - name: order_date
+    sql: order_date
+    type: time
+    title: Order Date (IST)
+  - name: lt_platform
+    sql: lt_platform
+    type: string
+  - name: lt_channel
+    sql: lt_channel
+    type: string
+  - name: lt_campaign_id
+    sql: lt_campaign_id
+    type: string
+  - name: lt_adset_id
+    sql: lt_adset_id
+    type: string
+  - name: lt_ad_id
+    sql: lt_ad_id
+    type: string
+  - name: lt_campaign_name
+    sql: lt_campaign_name
+    type: string
+  - name: lt_adset_name
+    sql: lt_adset_name
+    type: string
+  - name: lt_ad_name
+    sql: lt_ad_name
+    type: string
+  - name: attribution_method
+    sql: attribution_method
+    type: string
+  - name: attribution_confidence
+    sql: attribution_confidence
+    type: string
+  - name: order_status
+    sql: order_status
+    type: string
+  - name: is_test
+    sql: is_test
+    type: boolean
+  - name: attribution_key
+    sql: attribution_key
+    type: string
+  - name: order_key
+    sql: order_key
+    type: string
+  - name: order_created_at
+    sql: order_created_at
+    type: time
+  - name: lt_utm_source
+    sql: lt_utm_source
+    type: string
+  - name: lt_utm_medium
+    sql: lt_utm_medium
+    type: string
+  - name: lt_utm_campaign
+    sql: lt_utm_campaign
+    type: string
+  - name: lt_utm_content
+    sql: lt_utm_content
+    type: string
+  - name: lt_utm_term
+    sql: lt_utm_term
+    type: string
+  - name: source_name
+    sql: source_name
+    type: string
+  - name: referring_site
+    sql: referring_site
+    type: string
+  - name: landing_site
+    sql: landing_site
+    type: string
+  - name: lt_fbclid
+    sql: lt_fbclid
+    type: string
+  - name: lt_gclid
+    sql: lt_gclid
+    type: string
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time
+  - name: identity_resolution_method
+    sql: identity_resolution_method
+    type: string

@@ -1,0 +1,80 @@
+# gold.int_amazon_return_reconciliation — Amazon return/refund reconciliation.
+# Grain: record_id (one row per return line / RMA). Supplies accrual pending
+# refunds & label fees not yet in settlement. Analytics Platform Reference §17.2.
+cubes:
+- name: gold_int_amazon_return_reconciliation
+  sql_table: gold.int_amazon_return_reconciliation
+  title: Amazon Return Reconciliation (Gold)
+  description: >
+    Amazon return/refund reconciliation at record_id grain. Source of accrual
+    pending_refunds (REPORT_REFUND_PENDING_FINANCE) and pending_label_fees
+    (REPORT_REFUND_PENDING_FINANCE + LABEL_PENDING_FINANCE) deducted from Amazon
+    net profit. Operational / drill-down — not a revenue table. Serve view:
+    amazon_return_reconciliation.
+  measures:
+  - name: record_count
+    sql: record_id
+    type: count_distinct
+    format: number
+  - name: return_orders
+    sql: amazon_order_id
+    type: count_distinct
+    format: number
+  - name: report_refunded_amount
+    sql: report_refunded_amount
+    type: sum
+    format: currency
+  - name: pending_refunds
+    sql: CASE WHEN {CUBE}.reconciliation_status = 'REPORT_REFUND_PENDING_FINANCE' THEN {CUBE}.report_refunded_amount ELSE 0 END
+    type: sum
+    format: currency
+    description: Customer refunds processed but not yet in Amazon settlement payout.
+  - name: pending_label_fees
+    sql: CASE WHEN {CUBE}.reconciliation_status IN ('REPORT_REFUND_PENDING_FINANCE', 'LABEL_PENDING_FINANCE') THEN abs({CUBE}.report_return_label_cost) ELSE 0 END
+    type: sum
+    format: currency
+    description: Return-label costs not yet in settlement (both pending statuses).
+  - name: approved_returns
+    sql: CASE WHEN {CUBE}.is_return_approved = 1 THEN {CUBE}.record_id END
+    type: count_distinct
+    format: number
+  - name: rejected_returns
+    sql: CASE WHEN {CUBE}.is_return_rejected = 1 THEN {CUBE}.record_id END
+    type: count_distinct
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    title: Brand ID
+  - name: record_id
+    sql: record_id
+    type: string
+    primary_key: true
+  - name: amazon_order_id
+    sql: amazon_order_id
+    type: string
+  - name: amazon_rma_id
+    sql: amazon_rma_id
+    type: string
+  - name: order_item_id
+    sql: order_item_id
+    type: string
+  - name: reconciliation_status
+    sql: reconciliation_status
+    type: string
+    description: >
+      Drives P&L treatment — REPORT_REFUND_PENDING_FINANCE, LABEL_PENDING_FINANCE,
+      SETTLED, OPEN, REJECTED_*, etc. (Reference §17.2).
+  - name: return_request_status
+    sql: return_request_status
+    type: string
+  - name: return_type
+    sql: return_type
+    type: string
+  - name: resolution
+    sql: resolution
+    type: string
+  - name: return_request_date
+    sql: return_request_date
+    type: time

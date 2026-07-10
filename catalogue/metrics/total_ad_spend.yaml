@@ -1,0 +1,29 @@
+id: total_ad_spend
+display_name: Total Ad Spend
+category: marketing
+status: approved
+description: >
+  Blended paid media spend across platforms. Components exposed on the same
+  view: meta_spend, google_spend, amazon_spend.
+formula:
+  human_readable: "Meta Spend + Google Spend + Amazon Spend"
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.total_ad_spend
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Total ad spend last 7 days"
+    request: {measures: [total_ad_spend], time_range: {preset: last_7d}}
+validation_tests:
+  - "total_ad_spend >= meta_spend for any period"
+deprecated_aliases: [daily_pnl.total_ad_spend]

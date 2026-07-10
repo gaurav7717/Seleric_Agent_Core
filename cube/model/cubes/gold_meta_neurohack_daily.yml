@@ -1,0 +1,93 @@
+# Meta ads daily × neurohack tags (fan-out join for creative taxonomy analysis).
+cubes:
+- name: gold_meta_neurohack_daily
+  sql: "SELECT\n  toString(a.brand_id) AS brand_id,\n  a.report_date AS report_date,\n\
+    \  a.ad_id AS ad_id,\n  a.ad_name AS ad_name,\n  a.campaign_name AS campaign_name,\n\
+    \  a.campaign_id AS campaign_id,\n  m.tag_code AS tag_code,\n  m.tag_position\
+    \ AS tag_position,\n  n.category_code AS category_code,\n  n.category_name AS\
+    \ category_name,\n  n.hack_name AS hack_name,\n  n.hack_number AS hack_number,\n\
+    \  a.spend AS spend,\n  a.impressions AS impressions,\n  a.clicks AS clicks,\n\
+    \  a.link_clicks AS link_clicks,\n  a.purchases AS purchases,\n  a.purchase_value\
+    \ AS purchase_value\nFROM gold.fct_meta_ads_daily AS a INNER JOIN gold.dim_ad_neurohack_map\
+    \ AS m\n  ON a.brand_id = m.brand_id AND a.ad_id = m.ad_id\nLEFT JOIN gold.dim_neurohack\
+    \ AS n ON m.tag_code = n.tag_code\n"
+  title: Meta Ads by Neurohack Tag (Daily)
+  description: 'Meta ad metrics joined to neurohack tags. Multi-tag ads duplicate
+    spend across tags.
+
+    '
+  measures:
+  - name: spend
+    sql: spend
+    type: sum
+    format: currency
+  - name: impressions
+    sql: impressions
+    type: sum
+    format: number
+  - name: clicks
+    sql: clicks
+    type: sum
+    format: number
+  - name: link_clicks
+    sql: link_clicks
+    type: sum
+    format: number
+  - name: purchases
+    sql: purchases
+    type: sum
+    format: number
+  - name: purchase_value
+    sql: purchase_value
+    type: sum
+    format: currency
+  - name: roas
+    sql: sum(purchase_value) / nullIf(sum(spend), 0)
+    type: number
+  - name: ctr
+    sql: sum(clicks) / nullIf(sum(impressions), 0)
+    type: number
+    format: percent
+  - name: cpc
+    sql: sum(spend) / nullIf(sum(clicks), 0)
+    type: number
+    format: currency
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: report_date
+    sql: report_date
+    type: time
+    primary_key: true
+  - name: ad_id
+    sql: ad_id
+    type: string
+  - name: ad_name
+    sql: ad_name
+    type: string
+  - name: campaign_name
+    sql: campaign_name
+    type: string
+  - name: campaign_id
+    sql: campaign_id
+    type: string
+  - name: tag_code
+    sql: tag_code
+    type: string
+  - name: tag_position
+    sql: tag_position
+    type: number
+  - name: category_code
+    sql: category_code
+    type: string
+  - name: category_name
+    sql: category_name
+    type: string
+  - name: hack_name
+    sql: hack_name
+    type: string
+  - name: hack_number
+    sql: hack_number
+    type: number

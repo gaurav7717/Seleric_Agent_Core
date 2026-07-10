@@ -1,0 +1,215 @@
+# Daily channel P&L — gold.fct_order_attribution + line COGS + platform ad spend.
+# Replaces legacy channel_attribution_daily (serve.mart_*). Use channel_pnl view.
+cubes:
+- name: gold_channel_pnl
+  title: Channel P&L (Gold)
+  description: 'Meta / Google / Organic daily attribution with COGS and ad spend from
+    gold only. COGS uses fct_order_items.net_cost (placement minus refund reversals).
+    Realized orders exclude payment_pending per FINANCE_DEFINITIONS.
+    channel_net_profit = attributed_net_revenue_ex_gst − attributed_cogs − spend.
+
+    '
+  sql: "WITH attr AS (\n  SELECT\n    brand_id,\n    order_date AS report_date,\n\
+    \    lt_platform AS platform,\n    countDistinct(CASE\n      WHEN order_status\
+    \ IN ('active', 'partially_refunded') AND is_test = 0\n      THEN order_id END)\
+    \ AS active_orders,\n    countDistinct(CASE WHEN is_test = 0 THEN order_id END)\
+    \ AS placed_orders,\n    sum(CASE\n      WHEN order_status IN ('active', 'partially_refunded')\
+    \ AND is_test = 0\n      THEN net_revenue ELSE 0 END) AS attributed_net_revenue,\n\
+    \    sum(CASE\n      WHEN order_status IN ('active', 'partially_refunded') AND\
+    \ is_test = 0\n      THEN net_revenue_excl_tax ELSE 0 END) AS attributed_net_revenue_ex_gst,\n\
+    \    sum(CASE WHEN is_test = 0 THEN gross_revenue ELSE 0 END) AS gross_revenue\n\
+    \  FROM gold.fct_order_attribution\n  GROUP BY brand_id, order_date, lt_platform\n\
+    ),\ncogs AS (\n  SELECT\n    a.brand_id AS brand_id,\n    a.order_date AS report_date,\n\
+    \    a.lt_platform AS platform,\n    sum(CASE\n      WHEN a.order_status IN ('active',\
+    \ 'partially_refunded')\n       AND a.is_test = 0\n       AND o.included_in_pnl_cogs\
+    \ = 1\n      THEN o.net_cost ELSE 0 END) AS attributed_cogs\n  FROM gold.fct_order_attribution\
+    \ a\n  INNER JOIN gold.fct_order_items o\n    ON o.brand_id = a.brand_id AND o.order_id\
+    \ = a.order_id\n  GROUP BY a.brand_id, a.order_date, a.lt_platform\n),\nmeta_spend\
+    \ AS (\n  SELECT brand_id, report_date, 'meta' AS platform, sum(toFloat64(spend))\
+    \ AS spend\n  FROM gold.fct_meta_ads_daily\n  GROUP BY brand_id, report_date\n\
+    ),\ngoogle_spend AS (\n  SELECT brand_id, report_date, 'google' AS platform, sum(toFloat64(spend))\
+    \ AS spend\n  FROM gold.fct_google_ads_daily\n  GROUP BY brand_id, report_date\n\
+    ),\nspend AS (\n  SELECT * FROM meta_spend\n  UNION ALL\n  SELECT * FROM google_spend\n\
+    )\nSELECT\n  a.brand_id AS brand_id,\n  a.report_date AS report_date,\n  a.platform\
+    \ AS platform,\n  a.placed_orders AS placed_orders,\n  a.active_orders AS active_orders,\n\
+    \  a.attributed_net_revenue AS attributed_net_revenue,\n  a.attributed_net_revenue_ex_gst\
+    \ AS attributed_net_revenue_ex_gst,\n  a.gross_revenue AS gross_revenue,\n  coalesce(c.attributed_cogs,\
+    \ 0) AS attributed_cogs,\n  coalesce(s.spend, 0) AS spend\nFROM attr a\nLEFT JOIN\
+    \ cogs c\n  ON c.brand_id = a.brand_id\n AND c.report_date = a.report_date\n AND\
+    \ c.platform = a.platform\nLEFT JOIN spend s\n  ON s.brand_id = a.brand_id\n AND\
+    \ s.report_date = a.report_date\n AND s.platform = a.platform\n"
+  measures:
+  - name: attributed_orders
+    sql: active_orders
+    type: sum
+    format: number
+  - name: placed_orders
+    sql: placed_orders
+    type: sum
+    format: number
+  - name: attributed_net_revenue
+    sql: attributed_net_revenue
+    type: sum
+    format: currency
+  - name: attributed_net_revenue_ex_gst
+    sql: attributed_net_revenue_ex_gst
+    type: sum
+    format: currency
+  - name: attributed_revenue_ex_gst
+    sql: attributed_net_revenue_ex_gst
+    type: sum
+    format: currency
+  - name: gross_revenue
+    sql: gross_revenue
+    type: sum
+    format: currency
+  - name: attributed_cogs
+    sql: attributed_cogs
+    type: sum
+    format: currency
+  - name: spend
+    sql: spend
+    type: sum
+    format: currency
+  - name: meta_attributed_revenue
+    sql: attributed_net_revenue
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''meta'''
+  - name: google_attributed_revenue
+    sql: attributed_net_revenue
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''google'''
+  - name: organic_attributed_revenue
+    sql: attributed_net_revenue
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''organic'''
+  - name: meta_attributed_revenue_ex_gst
+    sql: attributed_net_revenue_ex_gst
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''meta'''
+  - name: google_attributed_revenue_ex_gst
+    sql: attributed_net_revenue_ex_gst
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''google'''
+  - name: organic_attributed_revenue_ex_gst
+    sql: attributed_net_revenue_ex_gst
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''organic'''
+  - name: meta_attributed_cogs
+    sql: attributed_cogs
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''meta'''
+  - name: google_attributed_cogs
+    sql: attributed_cogs
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''google'''
+  - name: organic_attributed_cogs
+    sql: attributed_cogs
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''organic'''
+  - name: meta_attributed_orders
+    sql: active_orders
+    type: sum
+    format: number
+    filters:
+    - sql: '{CUBE}.platform = ''meta'''
+  - name: google_attributed_orders
+    sql: active_orders
+    type: sum
+    format: number
+    filters:
+    - sql: '{CUBE}.platform = ''google'''
+  - name: organic_attributed_orders
+    sql: active_orders
+    type: sum
+    format: number
+    filters:
+    - sql: '{CUBE}.platform = ''organic'''
+  - name: meta_ad_spend
+    sql: spend
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''meta'''
+  - name: google_ad_spend
+    sql: spend
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''google'''
+  - name: attributed_gross_profit
+    sql: attributed_net_revenue_ex_gst - attributed_cogs
+    type: sum
+    format: currency
+  - name: meta_net_profit
+    sql: attributed_net_revenue_ex_gst - attributed_cogs - spend
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''meta'''
+  - name: google_net_profit
+    sql: attributed_net_revenue_ex_gst - attributed_cogs - spend
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''google'''
+  - name: organic_net_profit
+    sql: attributed_net_revenue_ex_gst - attributed_cogs
+    type: sum
+    format: currency
+    filters:
+    - sql: '{CUBE}.platform = ''organic'''
+  - name: meta_roas
+    sql: 'sum(CASE WHEN {CUBE}.platform = ''meta'' THEN {CUBE}.attributed_net_revenue
+      ELSE 0 END) / nullIf(sum(CASE WHEN {CUBE}.platform = ''meta'' THEN {CUBE}.spend
+      ELSE 0 END), 0)
+
+      '
+    type: number
+  - name: google_roas
+    sql: 'sum(CASE WHEN {CUBE}.platform = ''google'' THEN {CUBE}.attributed_net_revenue
+      ELSE 0 END) / nullIf(sum(CASE WHEN {CUBE}.platform = ''google'' THEN {CUBE}.spend
+      ELSE 0 END), 0)
+
+      '
+    type: number
+  - name: channel_net_profit
+    sql: attributed_net_revenue_ex_gst - attributed_cogs - spend
+    type: sum
+    format: currency
+  - name: channel_roas
+    sql: sum(attributed_net_revenue_ex_gst) / nullIf(sum(spend), 0)
+    type: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+  - name: report_date
+    sql: report_date
+    type: time
+    title: Date (IST)
+  - name: date_start
+    sql: report_date
+    type: time
+    title: Date Start (IST)
+  - name: platform
+    sql: platform
+    type: string

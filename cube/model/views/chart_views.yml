@@ -1,0 +1,255 @@
+# Chart-aligned views — legacy cube names backed by gold.* only.
+# All 29 dashboard charts query these views. See CHART_QUERY_REFERENCE.md.
+views:
+  - name: daily_pnl
+    title: Daily P&L (Gold)
+    description: >
+      Canonical company P&L (rebuilt: int_finance_daily_rollups + line-item cost
+      split + platform ad spend; reconciles with historical + P&L dashboards).
+      total_cogs = net_cogs (lifecycle net COGS incl Amazon).
+      gross_profit = total_sales_ex_gst − net_cogs (contribution before marketing).
+      net_profit = total_sales_ex_gst − net_cogs − total_ad_spend.
+      MCP: cube_daily_pnl, cube_pnl_waterfall, cube_pnl_today_yesterday.
+    cubes:
+      - join_path: gold_fct_daily_pnl
+        includes:
+          - name: net_revenue_excl_tax
+            alias: total_sales_ex_gst
+          - name: total_sales_incl_tax
+          - name: net_cogs
+            alias: total_cogs
+          - name: product_cost
+          - name: gross_cogs
+          - name: gross_revenue
+          - name: gross_sales_excl_tax
+          - name: total_refund_amount
+          - name: returns_excl_tax
+          - name: total_tax_collected
+          - name: total_discounts_excl_tax
+          - name: shipping_charged_to_customers
+          - name: gross_profit
+          - name: gross_margin_pct
+          - name: meta_spend
+          - name: google_spend
+          - name: total_ad_spend
+          - name: meta_roas
+          - name: google_roas
+          - name: blended_roas
+          - name: contribution_margin
+          - name: contribution_margin_pct
+          - name: simplified_net_profit
+          - name: packaging_cost
+          - name: shipping_cost
+          - name: payment_gateway_fees
+          - name: rto_cost
+          - name: total_operating_cost
+          - name: operating_cost_after_contribution
+          - name: net_profit
+          - name: net_margin_pct
+          - name: mer
+          - name: orders_created
+          - name: total_orders
+          - name: active_orders
+          - name: cancelled_orders
+          - name: refunded_orders
+          - name: cod_orders
+          - name: prepaid_orders
+          - name: voided_orders
+          - name: gross_roas
+          - name: net_roas
+          - name: be_roas
+          - name: prepaid_pct
+          - name: cod_pct
+          - name: avg_order_value
+          - name: brand_id
+          - name: report_date
+
+  - name: channel_pnl
+    title: Channel P&L (Gold)
+    description: >
+      Meta / Google / Organic daily attribution with COGS and ad spend.
+      MCP: cube_channel_pnl.
+    cubes:
+      - join_path: gold_channel_pnl
+        includes:
+          - meta_attributed_revenue
+          - google_attributed_revenue
+          - organic_attributed_revenue
+          - meta_attributed_revenue_ex_gst
+          - google_attributed_revenue_ex_gst
+          - organic_attributed_revenue_ex_gst
+          - attributed_revenue_ex_gst
+          - meta_attributed_cogs
+          - google_attributed_cogs
+          - organic_attributed_cogs
+          - meta_attributed_orders
+          - google_attributed_orders
+          - organic_attributed_orders
+          - meta_ad_spend
+          - google_ad_spend
+          - meta_net_profit
+          - google_net_profit
+          - organic_net_profit
+          - meta_roas
+          - google_roas
+          - attributed_cogs
+          - attributed_gross_profit
+          - channel_net_profit
+          - channel_roas
+          - brand_id
+          - date_start
+          - platform
+
+  - name: marketing_performance
+    title: Meta Marketing Performance (Gold)
+    description: >
+      Meta ads daily from gold.fct_meta_ads_daily. MCP: cube_meta_ads.
+    cubes:
+      - join_path: gold_fct_meta_ads_daily
+        includes:
+          - ad_spend
+          - impressions
+          - clicks
+          - link_clicks
+          - purchases
+          - purchase_value
+          - roas
+          - ctr
+          - cpc
+          - cpm
+          - add_to_carts
+          - initiated_checkouts
+          - conversion_rate
+          - video_views
+          - post_engagements
+          - landing_page_views
+          - brand_id
+          - date_start
+          - campaign_id
+          - campaign_name
+          - adset_id
+          - adset_name
+          - ad_id
+          - ad_name
+
+  - name: ad_performance
+    title: Meta Ad Hourly Performance (Gold)
+    description: >
+      Hour-of-day spend and delivery from gold.fct_meta_ads_hourly.
+      Only cube with hourly_window. Purchases/ROAS use marketing_performance (daily).
+    cubes:
+      - join_path: gold_fct_meta_ads_hourly
+        includes:
+          - ad_spend
+          - impressions
+          - clicks
+          - ctr
+          - cpc
+          - cpm
+          - brand_id
+          - date_start
+          - hourly_window
+          - campaign_id
+          - campaign_name
+          - adset_id
+          - adset_name
+          - ad_id
+          - ad_name
+
+  - name: dw_meta_ads_attribution
+    title: Meta Campaign Attribution (Gold)
+    description: >
+      Campaign-level attributed revenue + COGS + spend. Not for company total ad spend.
+    cubes:
+      - join_path: gold_meta_campaign_attribution
+        includes:
+          - attributed_revenue
+          - attributed_orders
+          - attributed_cogs
+          - attributed_gross_profit
+          - ad_spend
+          - roas
+          - brand_id
+          - date_start
+          - campaign_id
+          - campaign_name
+
+  - name: shopify_orders
+    title: Shopify Orders (Gold)
+    description: >
+      Order trends from gold.fct_orders. Always filter created_at_ist (IST). MCP: cube_commerce_orders.
+    cubes:
+      - join_path: gold_fct_orders
+        includes:
+          - gross_revenue
+          - net_revenue
+          - net_sales_ex_gst
+          - shipping_revenue
+          - orders
+          - net_orders
+          - active_orders
+          - cancelled_orders
+          - returned_orders
+          - return_rate
+          - aov
+          - orders_with_shipping
+          - brand_id
+          - created_at_ist
+          - returned_at_ist
+          - order_status
+          - return_status
+          - fulfillment_status
+          - ship_country
+          - ship_province
+          - shipping_city
+          - utm_source
+          - utm_medium
+          - utm_campaign
+
+  - name: shopify_order_line_items
+    title: Shopify Order Line Items (Gold)
+    description: Line-item discounts, units, and margin from gold.fct_order_items.
+    cubes:
+      - join_path: gold_fct_order_items
+        includes:
+          - total_line_discounts
+          - net_line_revenue_ex_gst
+          - gross_profit_ex_gst
+          - total_cogs
+          - avg_unit_price
+          - avg_discounted_unit_price
+          - units_per_order
+          - unique_products
+          - line_item_count
+          - brand_id
+          - created_at_ist
+          - sku
+          - product_title
+          - return_status
+
+  - name: product_performance
+    title: Product / SKU Performance (Gold)
+    description: >
+      SKU revenue, COGS, returns from gold.fct_order_items.
+      MCP tool cube_product_performance.
+    cubes:
+      - join_path: gold_fct_order_items
+        includes:
+          - gross_line_revenue_ex_gst
+          - net_line_revenue_ex_gst
+          - total_quantity
+          - gross_profit_ex_gst
+          - total_cogs
+          - returned_units
+          - cancelled_units
+          - total_line_discounts
+          - avg_unit_price
+          - avg_discounted_unit_price
+          - brand_id
+          - created_at_ist
+          - sku
+          - product_title
+          - return_status
+          - ship_city
+          - ship_province
+          - ship_country

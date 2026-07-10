@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "seleric-mcp": {
+      "command": "C:\\SpacePeppers\\SpacePeppers\\Base_Agent\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "seleric_mcp",
+        "--transport",
+        "stdio"
+      ]
+    }
+  }
+}

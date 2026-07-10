@@ -1,0 +1,17 @@
+# Pre-migration names -> current canonical surface. Source: cube_mcp/semantic_layer_serve/AGENTS.md (2026-07-10).
+deprecations:
+  - old: gold.fct_daily_pnl
+    new: canonical_pnl
+    reason: Broken product-cost basis (negative COGS, net_profit > net_revenue). No longer exposed.
+  - old: gold.fct_finance_waterfall_daily
+    new: canonical_pnl
+    reason: Shared the broken product-cost basis of fct_daily_pnl.
+  - old: finance_waterfall
+    new: canonical_pnl.statutory_net_sales_excl_gst / canonical_pnl.deferred_revenue_excl_gst
+    reason: View removed 2026-07-10; statutory/deferred net sales moved onto canonical_pnl.
+  - old: meta_neurohack_performance
+    new: meta_neurotag_analysis
+    reason: Legacy SQL bridge without attribution or split-credit; prefer cube_meta_neurotag.
+  - old: daily_pnl.*
+    new: canonical_pnl.*
+    reason: Chart-era view; canonical_pnl (rebuilt on int_finance_daily_rollups) is the P&L source of truth for the agent.

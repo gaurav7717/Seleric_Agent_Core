@@ -1,0 +1,41 @@
+[project]
+name = "seleric-mcp"
+version = "0.1.0"
+description = "Model-agnostic MCP gateway over the Seleric Cube semantic layer with safe action execution"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp[cli]>=1.9.0",
+    "openai>=1.60",
+    "pydantic>=2.7",
+    "httpx>=0.27",
+    "PyJWT>=2.8",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "structlog>=24.1",
+    "uvicorn>=0.30",
+    "starlette>=0.37",
+    "tzdata>=2024.1",
+]
+
+[project.scripts]
+seleric-mcp = "seleric_mcp.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/seleric_mcp"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "live: tests that require a reachable Cube server at CUBE_API_URL (deselect with '-m \"not live\"')",
+]

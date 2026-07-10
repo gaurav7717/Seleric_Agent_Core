@@ -1,0 +1,90 @@
+# gold.fct_amazon_order_items — Amazon SP order line items (item grain).
+# Analytics Platform Reference §5. Drill-down for Amazon SKU/ASIN economics.
+cubes:
+- name: gold_fct_amazon_order_items
+  sql_table: gold.fct_amazon_order_items
+  title: Amazon SP Order Items (Gold)
+  description: >
+    Amazon line items at brand × amazon_order_id × order_item_id grain. SKU/ASIN
+    revenue, quantity and matched product COGS. Drill-down only — order-level P&L
+    (fees, payout) is in amazon_sp_order_pnl. Serve view: amazon_order_items.
+  joins:
+  - name: gold_fct_amazon_sp_orders
+    sql: "{gold_fct_amazon_order_items.brand_id} = {gold_fct_amazon_sp_orders.brand_id} AND {gold_fct_amazon_order_items.amazon_order_id} = {gold_fct_amazon_sp_orders.amazon_order_id}"
+    relationship: many_to_one
+  measures:
+  - name: line_item_count
+    type: count
+    format: number
+  - name: quantity_ordered
+    sql: quantity_ordered
+    type: sum
+    format: number
+  - name: quantity_shipped
+    sql: quantity_shipped
+    type: sum
+    format: number
+  - name: item_revenue
+    sql: item_price_amount
+    type: sum
+    format: currency
+    description: SUM(item_price_amount) — item price incl customer GST.
+  - name: item_tax
+    sql: item_tax_amount
+    type: sum
+    format: currency
+  - name: promotion_discount
+    sql: promotion_discount_amount
+    type: sum
+    format: currency
+  - name: product_cost
+    sql: total_cogs
+    type: sum
+    format: currency
+    description: Matched product COGS (cost_per_item × quantity).
+  - name: lines_missing_cost
+    sql: CASE WHEN coalesce({CUBE}.is_cost_set, 0) = 0 THEN {CUBE}.order_item_id END
+    type: count_distinct
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    title: Brand ID
+  - name: amazon_order_id
+    sql: amazon_order_id
+    type: string
+    primary_key: true
+  - name: order_item_id
+    sql: order_item_id
+    type: string
+    primary_key: true
+  - name: seller_sku
+    sql: seller_sku
+    type: string
+    title: Seller SKU
+  - name: asin
+    sql: asin
+    type: string
+    title: ASIN
+  - name: title
+    sql: title
+    type: string
+  - name: purchase_date
+    sql: purchase_date
+    type: time
+  - name: order_status
+    sql: order_status
+    type: string
+  - name: fulfillment_channel
+    sql: fulfillment_channel
+    type: string
+  - name: pnl_refund_status
+    sql: pnl_refund_status
+    type: string
+  - name: payout_basis
+    sql: payout_basis
+    type: string
+  - name: is_cost_set
+    sql: is_cost_set
+    type: boolean

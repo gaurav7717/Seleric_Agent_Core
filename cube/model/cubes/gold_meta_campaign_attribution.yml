@@ -1,0 +1,79 @@
+# Meta campaign attribution — gold.fct_order_attribution + line COGS + Meta ad spend.
+# Replaces legacy dw_meta_ads_attribution. Use dw_meta_ads_attribution view.
+cubes:
+- name: gold_meta_campaign_attribution
+  title: Meta Campaign Attribution (Gold)
+  description: 'Campaign-level attributed revenue, COGS, and spend from gold only.
+    Do NOT use ad_spend here for company totals — use daily_pnl.total_ad_spend.
+
+    '
+  sql: "WITH attr AS (\n  SELECT\n    brand_id,\n    order_date AS report_date,\n\
+    \    lt_campaign_id AS campaign_id,\n    lt_campaign_name AS campaign_name,\n\
+    \    countDistinct(CASE\n      WHEN order_status IN ('active', 'partially_refunded')\
+    \ AND is_test = 0\n      THEN order_id END) AS attributed_orders,\n    sum(CASE\n\
+    \      WHEN order_status IN ('active', 'partially_refunded') AND is_test = 0\n\
+    \      THEN net_revenue ELSE 0 END) AS attributed_revenue,\n    sum(CASE\n   \
+    \   WHEN order_status IN ('active', 'partially_refunded') AND is_test = 0\n  \
+    \    THEN net_revenue_excl_tax ELSE 0 END) AS attributed_revenue_ex_gst\n  FROM\
+    \ gold.fct_order_attribution\n  WHERE lt_platform = 'meta'\n  GROUP BY brand_id,\
+    \ order_date, lt_campaign_id, lt_campaign_name\n),\ncogs AS (\n  SELECT\n    a.brand_id\
+    \ AS brand_id,\n    a.order_date AS report_date,\n    a.lt_campaign_id AS campaign_id,\n\
+    \    sum(CASE\n      WHEN a.order_status IN ('active', 'partially_refunded')\n\
+    \       AND a.is_test = 0\n       AND o.included_in_pnl_cogs = 1\n      THEN o.total_cost\
+    \ ELSE 0 END) AS attributed_cogs\n  FROM gold.fct_order_attribution a\n  INNER\
+    \ JOIN gold.fct_order_items o\n    ON o.brand_id = a.brand_id AND o.order_id =\
+    \ a.order_id\n  WHERE a.lt_platform = 'meta'\n  GROUP BY a.brand_id, a.order_date,\
+    \ a.lt_campaign_id\n),\nspend AS (\n  SELECT\n    brand_id,\n    report_date,\n\
+    \    campaign_id,\n    any(campaign_name) AS campaign_name,\n    sum(toFloat64(spend))\
+    \ AS ad_spend\n  FROM gold.fct_meta_ads_daily\n  GROUP BY brand_id, report_date,\
+    \ campaign_id\n)\nSELECT\n  coalesce(a.brand_id, s.brand_id) AS brand_id,\n  coalesce(a.report_date,\
+    \ s.report_date) AS report_date,\n  coalesce(a.campaign_id, s.campaign_id) AS\
+    \ campaign_id,\n  coalesce(a.campaign_name, s.campaign_name) AS campaign_name,\n\
+    \  coalesce(a.attributed_orders, 0) AS attributed_orders,\n  coalesce(a.attributed_revenue,\
+    \ 0) AS attributed_revenue,\n  coalesce(a.attributed_revenue_ex_gst, 0) AS attributed_revenue_ex_gst,\n\
+    \  coalesce(c.attributed_cogs, 0) AS attributed_cogs,\n  coalesce(s.ad_spend,\
+    \ 0) AS ad_spend\nFROM attr a\nFULL OUTER JOIN spend s\n  ON s.brand_id = a.brand_id\n\
+    \ AND s.report_date = a.report_date\n AND s.campaign_id = a.campaign_id\nLEFT\
+    \ JOIN cogs c\n  ON c.brand_id = coalesce(a.brand_id, s.brand_id)\n AND c.report_date\
+    \ = coalesce(a.report_date, s.report_date)\n AND c.campaign_id = coalesce(a.campaign_id,\
+    \ s.campaign_id)\n"
+  measures:
+  - name: attributed_revenue
+    sql: attributed_revenue
+    type: sum
+    format: currency
+  - name: attributed_orders
+    sql: attributed_orders
+    type: sum
+    format: number
+  - name: attributed_cogs
+    sql: attributed_cogs
+    type: sum
+    format: currency
+  - name: attributed_gross_profit
+    sql: attributed_revenue - attributed_cogs
+    type: sum
+    format: currency
+  - name: ad_spend
+    sql: ad_spend
+    type: sum
+    format: currency
+  - name: roas
+    sql: sum(attributed_revenue) / nullIf(sum(ad_spend), 0)
+    type: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+  - name: report_date
+    sql: report_date
+    type: time
+  - name: date_start
+    sql: report_date
+    type: time
+  - name: campaign_id
+    sql: campaign_id
+    type: string
+  - name: campaign_name
+    sql: campaign_name
+    type: string

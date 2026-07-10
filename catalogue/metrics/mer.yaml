@@ -1,0 +1,31 @@
+id: mer
+display_name: MER (Marketing Efficiency Ratio)
+category: marketing
+status: approved
+description: >
+  Marketing Efficiency Ratio: net revenue (ex-GST) divided by total ad spend.
+  A ratio — never sum or average daily MER rows; recompute from components.
+formula:
+  human_readable: "Net Revenue (ex-GST) / Total Ad Spend"
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.mer
+aggregation: ratio
+ratio_components:
+  numerator: canonical_pnl.net_revenue_excl_tax
+  denominator: canonical_pnl.total_ad_spend
+unit: ratio
+grain: day
+supported_dimensions: [brand_id, report_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "What was MER last 30 days vs the prior 30?"
+    request: {measures: [mer], time_range: {preset: last_30d}, compare_period: previous_period}
+validation_tests:
+  - "period MER equals sum(net_revenue_excl_tax)/sum(total_ad_spend) for the same slice"
+deprecated_aliases: [daily_pnl.mer]

@@ -1,0 +1,140 @@
+# gold.fct_google_ads_status_history — entity change audit.
+cubes:
+- name: gold_fct_google_ads_status_history
+  sql_table: gold.fct_google_ads_status_history
+  title: Gold Google Ads Status History
+  description: Google campaign/adgroup/ad status and budget change events. Use ad_status_changes
+    view.
+  measures:
+  - name: change_events
+    type: count
+    format: number
+  - name: status_changes
+    sql: CASE WHEN {CUBE}.is_status_change = 1 THEN {CUBE}.entity_id END
+    type: count_distinct
+    format: number
+  - name: budget_changes
+    sql: CASE WHEN {CUBE}.is_budget_change = 1 THEN {CUBE}.entity_id END
+    type: count_distinct
+    format: number
+  - name: daily_budget_amount
+    sql: daily_budget_amount
+    type: sum
+    format: currency
+  - name: company_id
+    sql: company_id
+    type: sum
+    format: number
+  - name: is_first_seen
+    sql: is_first_seen
+    type: sum
+    format: number
+  - name: is_bid_strategy_change
+    sql: is_bid_strategy_change
+    type: sum
+    format: number
+  - name: cpc_bid_amount
+    sql: cpc_bid_amount
+    type: sum
+    format: number
+  - name: cpm_bid_amount
+    sql: cpm_bid_amount
+    type: sum
+    format: number
+  - name: cpv_bid_amount
+    sql: cpv_bid_amount
+    type: sum
+    format: number
+  - name: prev_daily_budget_amount
+    sql: prev_daily_budget_amount
+    type: sum
+    format: number
+  - name: prev_cpc_bid_amount
+    sql: prev_cpc_bid_amount
+    type: sum
+    format: number
+  - name: prev_cpm_bid_amount
+    sql: prev_cpm_bid_amount
+    type: sum
+    format: number
+  - name: prev_cpv_bid_amount
+    sql: prev_cpv_bid_amount
+    type: sum
+    format: number
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: entity_type
+    sql: entity_type
+    type: string
+    primary_key: true
+  - name: entity_id
+    sql: entity_id
+    type: string
+    primary_key: true
+  - name: changed_at
+    sql: changed_at
+    type: time
+    primary_key: true
+  - name: entity_name
+    sql: entity_name
+    type: string
+  - name: status
+    sql: status
+    type: string
+  - name: is_status_change
+    sql: is_status_change
+    type: boolean
+  - name: is_budget_change
+    sql: is_budget_change
+    type: boolean
+  - name: campaign_id
+    sql: campaign_id
+    type: string
+  - name: adgroup_id
+    sql: adgroup_id
+    type: string
+  - name: ad_id
+    sql: ad_id
+    type: string
+  - name: shop_domain
+    sql: shop_domain
+    type: string
+  - name: prev_snapshot_at
+    sql: prev_snapshot_at
+    type: time
+  - name: changed_fields
+    sql: changed_fields
+    type: string
+  - name: bidding_strategy_type
+    sql: bidding_strategy_type
+    type: string
+  - name: entity_sub_type
+    sql: entity_sub_type
+    type: string
+  - name: final_url
+    sql: final_url
+    type: string
+  - name: entity_name_prev
+    sql: entity_name_prev
+    type: string
+  - name: prev_status
+    sql: prev_status
+    type: string
+  - name: prev_bidding_strategy_type
+    sql: prev_bidding_strategy_type
+    type: string
+  - name: prev_entity_sub_type
+    sql: prev_entity_sub_type
+    type: string
+  - name: prev_final_url
+    sql: prev_final_url
+    type: string
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time
+  - name: dt
+    sql: dt
+    type: time

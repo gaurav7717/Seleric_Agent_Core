@@ -1,0 +1,26 @@
+id: new_customer_orders
+display_name: New Customer Orders
+category: commerce
+status: approved
+description: Orders placed by first-time customers.
+formula:
+  human_readable: "Count of orders where the customer has no prior order"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.new_customer_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Share of new customer orders last month"
+    request: {measures: [new_customer_orders, orders], time_range: {preset: last_month}}
+validation_tests:
+  - "new_customer_orders <= orders for any slice"
+deprecated_aliases: []

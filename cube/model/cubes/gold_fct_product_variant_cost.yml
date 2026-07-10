@@ -1,0 +1,114 @@
+# gold.fct_product_variant_cost — current COGS snapshot per variant.
+cubes:
+- name: gold_fct_product_variant_cost
+  sql_table: gold.fct_product_variant_cost
+  title: Gold Variant Cost (Current)
+  description: Current product cost snapshot. Use variant_economics view.
+  measures:
+  - name: variants
+    type: count
+    format: number
+  - name: product_cost_ex_gst
+    sql: product_cost_ex_gst
+    type: sum
+    format: currency
+  - name: total_variable_cost_per_unit
+    sql: total_variable_cost_per_unit
+    type: sum
+    format: currency
+  - name: gross_margin_per_unit
+    sql: gross_margin_per_unit
+    type: avg
+    format: currency
+  - name: inventory_value
+    sql: inventory_value
+    type: sum
+    format: currency
+  - name: inventory_quantity
+    sql: inventory_quantity
+    type: sum
+    format: number
+  - name: variants_missing_cost
+    sql: CASE WHEN {CUBE}.is_cost_set = 0 THEN {CUBE}.variant_id END
+    type: count_distinct
+    format: number
+  - name: product_id
+    sql: product_id
+    type: sum
+    format: number
+  - name: compare_at_price
+    sql: compare_at_price
+    type: sum
+    format: currency
+  - name: cost_per_item
+    sql: cost_per_item
+    type: sum
+    format: currency
+  - name: markup_amount
+    sql: markup_amount
+    type: sum
+    format: currency
+  - name: markup_pct
+    sql: avg(markup_pct)
+    type: number
+    format: percent
+  - name: gross_margin_pct
+    sql: avg(gross_margin_pct)
+    type: number
+    format: percent
+  - name: packaging_cost
+    sql: packaging_cost
+    type: sum
+    format: currency
+  - name: payment_gateway_fee
+    sql: payment_gateway_fee
+    type: sum
+    format: currency
+  - name: rto
+    sql: rto
+    type: sum
+    format: currency
+  - name: shipping_cost
+    sql: shipping_cost
+    type: sum
+    format: currency
+  - name: unit_cost_shopify
+    sql: unit_cost_shopify
+    type: sum
+    format: currency
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    primary_key: true
+  - name: variant_id
+    sql: variant_id
+    type: string
+    primary_key: true
+  - name: sku
+    sql: sku
+    type: string
+  - name: product_title
+    sql: product_title
+    type: string
+  - name: is_cost_set
+    sql: is_cost_set
+    type: boolean
+  - name: price
+    sql: price
+    type: number
+  - name: price_excl_tax
+    sql: price_excl_tax
+    type: number
+  - name: variant_cost_key
+    sql: variant_cost_key
+    type: string
+  - name: variant_title
+    sql: variant_title
+    type: string
+  - name: _snapshot_date
+    sql: _snapshot_date
+    type: time
+  - name: _loaded_at
+    sql: _loaded_at
+    type: time

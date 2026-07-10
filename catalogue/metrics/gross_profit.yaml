@@ -1,0 +1,30 @@
+id: gross_profit
+display_name: Gross Profit
+category: financial
+status: approved
+description: >
+  Net revenue (ex-GST) minus lifecycle net COGS, before ad spend and
+  operating costs. Percentage companion: gross_margin_pct.
+formula:
+  human_readable: "Net Revenue (ex-GST) - Net COGS"
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.gross_profit
+  measure_pct: canonical_pnl.gross_margin_pct
+aggregation: additive
+unit: currency_and_percent
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Finance Analytics"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead]
+  scopes: [metrics:read]
+examples:
+  - question: "Gross profit trend this month"
+    request: {measures: [gross_profit], time_range: {preset: this_month}, granularity: day}
+validation_tests:
+  - "gross_margin_pct is between -100 and 100 for any non-empty slice"
+deprecated_aliases: [daily_pnl.gross_profit]

@@ -1,0 +1,92 @@
+# Daily session funnel + company P&L on same report_date.
+cubes:
+- name: gold_daily_performance
+  title: Daily Performance Bridge (Gold)
+  description: >
+    Joins daily session-funnel counts with company P&L on report_date. P&L sourced
+    from int_finance_daily_rollups (net sales, lifecycle net COGS) + platform ad spend
+    — same basis as canonical_pnl (gold.fct_daily_pnl is deprecated/broken).
+  sql: |
+    WITH funnel AS (
+      SELECT
+        brand_id,
+        session_date AS report_date,
+        count(*) AS sessions,
+        countDistinct(CASE WHEN converted = 1 THEN session_id END) AS converted_sessions,
+        countDistinct(CASE WHEN stage_purchased = 1 THEN session_id END) AS purchases
+      FROM gold.fct_session_funnel
+      GROUP BY brand_id, session_date
+    ),
+    spend AS (
+      SELECT brand_id, report_date, sum(sp) AS total_ad_spend FROM (
+        SELECT brand_id, report_date, toFloat64(spend) AS sp FROM gold.fct_meta_ads_daily
+        UNION ALL SELECT brand_id, report_date, toFloat64(spend) FROM gold.fct_google_ads_daily
+        UNION ALL SELECT brand_id, report_date, toFloat64(coalesce(spend, cost)) FROM gold.fct_amazon_ads_campaigns_daily
+      ) u GROUP BY brand_id, report_date
+    )
+    SELECT
+      p.brand_id AS brand_id,
+      p.report_date AS report_date,
+      coalesce(f.sessions, 0) AS sessions,
+      coalesce(f.converted_sessions, 0) AS converted_sessions,
+      coalesce(f.purchases, 0) AS purchases,
+      -- Company-wide revenue base (+ Amazon net; refunds stored negative) —
+      -- same scope as net_cogs_by_axis and ad spend. Mirrors gold_fct_daily_pnl.
+      toFloat64(coalesce(p.net_sales_excl_tax_mgmt_with_adj, 0))
+        + toFloat64(coalesce(p.amazon_gross_revenue, 0))
+        + toFloat64(coalesce(p.amazon_refunds, 0)) AS net_revenue_excl_tax,
+      toFloat64(coalesce(p.net_cogs_by_axis, 0)) AS net_cogs,
+      coalesce(s.total_ad_spend, 0) AS total_ad_spend
+    FROM gold.int_finance_daily_rollups p
+    LEFT JOIN funnel f
+      ON f.brand_id = p.brand_id AND f.report_date = p.report_date
+    LEFT JOIN spend s
+      ON s.brand_id = p.brand_id AND s.report_date = p.report_date
+  measures:
+  - name: sessions
+    sql: sessions
+    type: sum
+    format: number
+  - name: converted_sessions
+    sql: converted_sessions
+    type: sum
+    format: number
+  - name: purchases
+    sql: purchases
+    type: sum
+    format: number
+  - name: overall_conversion_rate
+    sql: 100.0 * sum(converted_sessions) / nullIf(sum(sessions), 0)
+    type: number
+    format: percent
+  - name: net_revenue_excl_tax
+    sql: net_revenue_excl_tax
+    type: sum
+    format: currency
+    description: Net sales ex-GST incl Amazon net — same company-wide scope as net_cogs and ad spend.
+  - name: net_cogs
+    sql: net_cogs
+    type: sum
+    format: currency
+    description: Lifecycle net COGS incl Amazon (int_finance net_cogs_by_axis).
+  - name: gross_profit
+    sql: sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.net_cogs)
+    type: number
+    format: currency
+    description: Net sales ex-GST − net COGS (contribution before marketing).
+  - name: net_profit
+    sql: sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.net_cogs) - sum({CUBE}.total_ad_spend)
+    type: number
+    format: currency
+    description: Net sales ex-GST − net COGS − total ad spend.
+  - name: total_ad_spend
+    sql: total_ad_spend
+    type: sum
+    format: currency
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+  - name: report_date
+    sql: report_date
+    type: time

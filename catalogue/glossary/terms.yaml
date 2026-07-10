@@ -1,0 +1,55 @@
+# Business language -> canonical metric id. This is what makes
+# catalogue_search_metrics("topline") resolve without guessing.
+terms:
+  - term: topline
+    canonical_id: net_revenue
+  - term: net sales
+    canonical_id: net_revenue
+  - term: revenue
+    canonical_id: net_revenue
+  - term: bottom line
+    canonical_id: net_profit
+  - term: profit
+    canonical_id: net_profit
+  - term: MER
+    canonical_id: mer
+    definition: "Marketing Efficiency Ratio = net revenue (ex-GST) / total ad spend"
+  - term: marketing efficiency ratio
+    canonical_id: mer
+  - term: ROAS
+    canonical_id: blended_roas
+    definition: >
+      Blended ROAS by default; Meta platform-reported ROAS is the separate
+      metric meta_roas.
+  - term: return on ad spend
+    canonical_id: blended_roas
+  - term: AOV
+    canonical_id: aov
+  - term: basket size
+    canonical_id: aov
+  - term: average order value
+    canonical_id: aov
+  - term: COGS
+    canonical_id: total_cogs
+  - term: cost of goods
+    canonical_id: total_cogs
+  - term: ad spend
+    canonical_id: total_ad_spend
+  - term: marketing spend
+    canonical_id: total_ad_spend
+  - term: contribution
+    canonical_id: contribution_margin
+  - term: LTV
+    canonical_id: avg_ltv
+  - term: lifetime value
+    canonical_id: avg_ltv
+  - term: order volume
+    canonical_id: orders
+  - term: gross margin
+    canonical_id: gross_profit
+  - term: RTO
+    canonical_id: null
+    definition: >
+      Return to Origin — an order returned before/at delivery, reversed out of
+      net revenue. RTO cost is a COGS component (canonical_pnl.rto_cost); not a
+      standalone catalogued metric yet.

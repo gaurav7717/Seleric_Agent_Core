@@ -1,0 +1,605 @@
+# Canonical company P&L — brand_id × report_date (IST).
+#
+# SOURCE CHANGE (2026-07-10): this cube no longer reads gold.fct_daily_pnl.
+# That pre-aggregated table was found broken (negative product_cost, meta/google
+# ad spend = 0, net_profit > net_revenue for every brand) and is deprecated
+# upstream (used by no backend route). This cube is now assembled from the
+# authoritative sources that reconcile with the line-item P&L engine
+# (lineItemHistoricalSql.js) and the /api/v1/historical + /api/v1/pnl dashboards:
+#   * gold.int_finance_daily_rollups  — revenue, lifecycle gross/net COGS by axis,
+#                                        returns/cancels, Amazon SP slices
+#   * gold.fct_order_items            — Shopify cost split (product/pack/ship/gw/rto)
+#                                        composed on placement + event date axes
+#   * gold.fct_meta_ads_daily / fct_google_ads_daily / fct_amazon_ads_campaigns_daily
+#                                        — daily ad spend, impressions, clicks
+#   * gold.fct_orders                 — payment-mix, tax collected, shipping charged
+#
+# Grain: one row per (brand_id, report_date). Sum daily rows for period totals.
+# net_cogs / gross_cogs use event-date lifecycle arms (cancel on cancellation_date,
+# return on return_event_date) so period sums reconcile with the dashboards.
+# Formulas: mage-ai/docs/FINANCE_DEFINITIONS.md; Analytics Platform Reference §11–14.
+cubes:
+- name: gold_fct_daily_pnl
+  title: Canonical Company P&L (Gold)
+  data_source: default
+  description: >
+    Company net profit, MER, ROAS and the full operating waterfall at brand ×
+    report_date (IST). Rebuilt on int_finance_daily_rollups + line-item cost split
+    + platform ad spend so numbers reconcile with the historical dashboard and P&L
+    routes. Serve view: canonical_pnl · chart view: daily_pnl · MCP: cube_canonical_pnl.
+    net_profit = net_revenue_excl_tax − net_cogs − total_ad_spend.
+  sql: |
+    WITH li_costs AS (
+      SELECT brand_id, report_date,
+        sum(product_cost)    AS product_cost,
+        sum(packaging_cost)  AS packaging_cost,
+        sum(shipping_cost)   AS shipping_cost,
+        sum(gateway_fee)     AS payment_gateway_fees,
+        sum(rto_cost)        AS rto_cost,
+        sum(lines)           AS cogs_lines,
+        sum(lines_costed)    AS cogs_lines_costed
+      FROM (
+        -- ACTIVE arm on placement (order_date): product + packaging + shipping + online gateway
+        SELECT brand_id, order_date AS report_date,
+          toFloat64(total_cost)                                   AS product_cost,
+          toFloat64(placed_packaging_cost)                        AS packaging_cost,
+          toFloat64(placed_shipping_cost)                         AS shipping_cost,
+          if(is_online_payment = 1, toFloat64(placed_gateway_fee), 0) AS gateway_fee,
+          0                                                       AS rto_cost,
+          1                                                       AS lines,
+          toUInt8(coalesce(is_cost_set, 0))                       AS lines_costed
+        FROM gold.fct_order_items
+        WHERE coalesce(is_gift_card, 0) = 0
+          AND pnl_refund_class = 'ACTIVE'
+          AND is_placement_gross_eligible = 1
+        UNION ALL
+        -- CANCELLATION arm on cancellation_date: online gateway fee only (product returned to stock)
+        SELECT brand_id, cancellation_date AS report_date,
+          0, 0, 0,
+          if(is_online_payment = 1, toFloat64(placed_gateway_fee), 0),
+          0, 0, 0
+        FROM gold.fct_order_items
+        WHERE coalesce(is_gift_card, 0) = 0 AND is_cancelled_line = 1
+        UNION ALL
+        -- RETURN arm on return_event_date: packaging + shipping + online gateway + RTO (no product)
+        SELECT brand_id, return_event_date AS report_date,
+          0,
+          toFloat64(placed_packaging_cost),
+          toFloat64(placed_shipping_cost),
+          if(is_online_payment = 1, toFloat64(placed_gateway_fee), 0),
+          toFloat64(rto_cost),
+          0, 0
+        FROM gold.fct_order_items
+        WHERE coalesce(is_gift_card, 0) = 0 AND is_return_line = 1
+      ) arms
+      WHERE report_date IS NOT NULL
+      GROUP BY brand_id, report_date
+    ),
+    spend AS (
+      SELECT brand_id, report_date,
+        sum(meta_spend) AS meta_spend, sum(google_spend) AS google_spend, sum(amazon_spend) AS amazon_spend,
+        sum(meta_impr) AS meta_impressions, sum(google_impr) AS google_impressions,
+        sum(meta_clk) AS meta_clicks, sum(google_clk) AS google_clicks,
+        sum(meta_pv) AS meta_purchase_value_reported, sum(meta_pur) AS meta_purchases_reported,
+        sum(google_cv) AS google_conversion_value, sum(google_conv) AS google_conversions
+      FROM (
+        SELECT brand_id, report_date, toFloat64(spend) meta_spend, 0 google_spend, 0 amazon_spend,
+          toFloat64(impressions) meta_impr, 0 google_impr, toFloat64(clicks) meta_clk, 0 google_clk,
+          toFloat64(purchase_value) meta_pv, toFloat64(purchases) meta_pur, 0 google_cv, 0 google_conv
+        FROM gold.fct_meta_ads_daily
+        UNION ALL
+        SELECT brand_id, report_date, 0, toFloat64(spend), 0,
+          0, toFloat64(impressions), 0, toFloat64(clicks),
+          0, 0, toFloat64(conversion_value), toFloat64(conversions)
+        FROM gold.fct_google_ads_daily
+        UNION ALL
+        SELECT brand_id, report_date, 0, 0, toFloat64(coalesce(spend, cost)),
+          0, 0, 0, 0, 0, 0, 0, 0
+        FROM gold.fct_amazon_ads_campaigns_daily
+      ) u
+      GROUP BY brand_id, report_date
+    ),
+    ordermix AS (
+      SELECT brand_id, order_date AS report_date,
+        countIf(coalesce(is_cod, 0) = 1)                    AS cod_orders,
+        countIf(coalesce(is_cod, 0) = 0)                    AS prepaid_orders,
+        countIf(refunded_date IS NOT NULL)                  AS refunded_orders,
+        sum(toFloat64(coalesce(total_tax, 0)))              AS total_tax_collected,
+        sum(toFloat64(coalesce(total_shipping_charged, 0))) AS shipping_charged_to_customers
+      FROM gold.fct_orders
+      WHERE coalesce(is_test, 0) = 0 AND coalesce(is_draft_order, 0) = 0
+      GROUP BY brand_id, order_date
+    )
+    SELECT
+      f.brand_id AS brand_id,
+      f.report_date AS report_date,
+      concat(toString(f.brand_id), '|', toString(f.report_date)) AS pnl_key,
+      -- revenue (ex/incl GST)
+      toFloat64(coalesce(f.catalog_gross_incl_gst, 0))          AS gross_revenue,
+      toFloat64(coalesce(f.gross_sales_excl_tax, 0))
+        + toFloat64(coalesce(f.amazon_gross_revenue, 0))        AS gross_sales_excl_tax,
+      toFloat64(coalesce(f.discounts_excl_gst, 0))              AS total_discounts_excl_tax,
+      -- Company-wide P&L revenue base = Shopify mgmt net sales + Amazon net
+      -- (amazon_refunds stored negative). net_cogs and ad spend are already
+      -- company-wide; without the Amazon terms the P&L deducts Amazon costs
+      -- from Shopify-only revenue and understates net_profit by Amazon net revenue.
+      toFloat64(coalesce(f.net_sales_excl_tax_mgmt_with_adj, 0))
+        + toFloat64(coalesce(f.amazon_gross_revenue, 0))
+        + toFloat64(coalesce(f.amazon_refunds, 0))              AS net_revenue_excl_tax,
+      toFloat64(coalesce(f.net_sales_excl_tax_mgmt_with_adj, 0)) AS shopify_net_revenue_excl_tax,
+      toFloat64(coalesce(f.amazon_gross_revenue, 0))
+        + toFloat64(coalesce(f.amazon_refunds, 0))              AS amazon_net_revenue,
+      toFloat64(coalesce(f.catalog_gross_incl_gst, 0))
+        + toFloat64(coalesce(f.amazon_gross_revenue, 0))        AS total_sales_incl_tax,
+      toFloat64(coalesce(o.total_tax_collected, 0))             AS total_tax_collected,
+      toFloat64(coalesce(o.shipping_charged_to_customers, 0))   AS shipping_charged_to_customers,
+      toFloat64(coalesce(f.returns_excl_tax, 0))                AS returns_excl_tax,
+      toFloat64(coalesce(f.returned_revenue_incl_gst, 0))       AS returned_revenue_incl_gst,
+      toFloat64(coalesce(f.cancelled_revenue_excl_tax, 0))      AS cancelled_revenue_excl_tax,
+      toFloat64(coalesce(f.cancelled_revenue_incl_tax, 0))      AS cancelled_revenue,
+      toFloat64(coalesce(f.statutory_net_excl_gst, 0))          AS statutory_net_sales_excl_gst,
+      toFloat64(coalesce(f.deferred_revenue_excl_gst, 0))       AS deferred_revenue_excl_gst,
+      -- COGS: split (Shopify line-item lifecycle) + Amazon slices
+      toFloat64(coalesce(c.product_cost, 0)) + toFloat64(coalesce(f.amazon_product_cost, 0)) AS product_cost,
+      toFloat64(coalesce(c.packaging_cost, 0))                  AS packaging_cost,
+      toFloat64(coalesce(c.shipping_cost, 0))                   AS shipping_cost,
+      toFloat64(coalesce(c.payment_gateway_fees, 0))            AS payment_gateway_fees,
+      toFloat64(coalesce(c.rto_cost, 0))                        AS rto_cost,
+      toFloat64(coalesce(f.amazon_product_cost, 0))             AS amazon_product_cost,
+      toFloat64(coalesce(f.amazon_platform_fees, 0))            AS amazon_platform_fees,
+      toFloat64(coalesce(f.gross_cogs_by_axis, 0))              AS gross_cogs,
+      toFloat64(coalesce(f.net_cogs_by_axis, 0))                AS net_cogs,
+      toFloat64(coalesce(c.cogs_lines, 0))                      AS cogs_lines,
+      toFloat64(coalesce(c.cogs_lines_costed, 0))               AS cogs_lines_costed,
+      -- ad spend / delivery
+      toFloat64(coalesce(s.meta_spend, 0))                      AS meta_spend,
+      toFloat64(coalesce(s.google_spend, 0))                    AS google_spend,
+      toFloat64(coalesce(s.amazon_spend, 0))                    AS amazon_spend,
+      toFloat64(coalesce(s.meta_impressions, 0))                AS meta_impressions,
+      toFloat64(coalesce(s.google_impressions, 0))              AS google_impressions,
+      toFloat64(coalesce(s.meta_clicks, 0))                     AS meta_clicks,
+      toFloat64(coalesce(s.google_clicks, 0))                   AS google_clicks,
+      toFloat64(coalesce(s.meta_purchase_value_reported, 0))    AS meta_purchase_value_reported,
+      toFloat64(coalesce(s.meta_purchases_reported, 0))         AS meta_purchases_reported,
+      toFloat64(coalesce(s.google_conversion_value, 0))         AS google_conversion_value,
+      toFloat64(coalesce(s.google_conversions, 0))              AS google_conversions,
+      -- order counts
+      toFloat64(coalesce(f.gmv_orders, 0))                      AS total_orders,
+      toFloat64(coalesce(f.clean_gmv_orders, 0))                AS active_orders,
+      toFloat64(coalesce(f.realized_orders, 0))                 AS realized_orders,
+      toFloat64(coalesce(f.delivered_orders, 0))                AS delivered_orders,
+      toFloat64(coalesce(f.cancelled_orders, 0))                AS cancelled_orders,
+      toFloat64(coalesce(f.returned_orders, 0))                 AS returned_orders,
+      toFloat64(coalesce(o.refunded_orders, 0))                 AS refunded_orders,
+      toFloat64(coalesce(f.adjustment_orders, 0))               AS revenue_adjustment_orders,
+      toFloat64(coalesce(f.voided_class_orders, 0))             AS voided_orders,
+      toFloat64(coalesce(f.amazon_orders, 0))                   AS amazon_orders,
+      toFloat64(coalesce(o.cod_orders, 0))                      AS cod_orders,
+      toFloat64(coalesce(o.prepaid_orders, 0))                  AS prepaid_orders,
+      -- Amazon revenue slices
+      toFloat64(coalesce(f.amazon_gross_revenue, 0))            AS amazon_gross_revenue,
+      toFloat64(coalesce(f.amazon_refunds, 0))                  AS amazon_refunds
+    FROM gold.int_finance_daily_rollups AS f
+    LEFT JOIN li_costs  AS c ON c.brand_id = f.brand_id AND c.report_date = f.report_date
+    LEFT JOIN spend     AS s ON s.brand_id = f.brand_id AND s.report_date = f.report_date
+    LEFT JOIN ordermix  AS o ON o.brand_id = f.brand_id AND o.report_date = f.report_date
+
+  measures:
+  # ---- Revenue ----
+  - name: gross_revenue
+    sql: gross_revenue
+    type: sum
+    format: currency
+    description: >
+      Shopify-only placement catalog gross incl GST (all placed orders, incl
+      cancelled/voided). For the company-wide Total Sales card use total_sales_incl_tax.
+  - name: total_sales_incl_tax
+    sql: total_sales_incl_tax
+    type: sum
+    format: currency
+    description: >
+      Total Sales card — Shopify placement value incl GST + Amazon gross revenue
+      (matches historical dashboard Total Sales). No longer an alias of
+      gross_revenue, which stays Shopify-only.
+  - name: gross_sales_excl_tax
+    sql: gross_sales_excl_tax
+    type: sum
+    format: currency
+    description: >
+      Gross Sales card — Shopify placement gross ex-GST (before discounts, incl
+      cancelled/voided) + Amazon gross revenue (matches historical dashboard).
+  - name: total_discounts_excl_tax
+    sql: total_discounts_excl_tax
+    type: sum
+    format: currency
+    description: Discounts ex-GST (proportional GST strip, matches Shopify Admin).
+  - name: net_revenue_excl_tax
+    sql: net_revenue_excl_tax
+    type: sum
+    format: currency
+    description: >
+      Headline Net Sales ex-GST after discounts, event-date returns/cancels and
+      revenue adjustments, INCLUDING Amazon net revenue (gross + refunds).
+      Company-wide P&L revenue base for profit/margin/ROAS — same scope as
+      net_cogs and total_ad_spend. Split: shopify_net_revenue_excl_tax /
+      amazon_net_revenue.
+  - name: shopify_net_revenue_excl_tax
+    sql: shopify_net_revenue_excl_tax
+    type: sum
+    format: currency
+    description: Shopify-only slice of net_revenue_excl_tax (mgmt net sales with adjustments).
+  - name: amazon_net_revenue
+    sql: amazon_net_revenue
+    type: sum
+    format: currency
+    description: Amazon slice of net_revenue_excl_tax = amazon_gross_revenue + amazon_refunds (refunds negative).
+  - name: net_sales_excl_tax
+    sql: net_revenue_excl_tax
+    type: sum
+    format: currency
+    description: Alias of net_revenue_excl_tax.
+  - name: total_sales_ex_gst
+    sql: net_revenue_excl_tax
+    type: sum
+    format: currency
+    description: Chart alias of net_revenue_excl_tax (dashboard "total_sales_ex_gst").
+  - name: net_revenue
+    sql: net_revenue_excl_tax
+    type: sum
+    format: currency
+    description: >
+      Alias of net_revenue_excl_tax (ex-GST). Incl-GST net revenue is not tracked at
+      this daily grain — use commerce_orders for incl-GST order revenue.
+  - name: total_tax_collected
+    sql: total_tax_collected
+    type: sum
+    format: currency
+    description: Output GST collected on placed orders (from fct_orders).
+  - name: shipping_charged_to_customers
+    sql: shipping_charged_to_customers
+    type: sum
+    format: currency
+    description: Shipping revenue charged to customers (not courier cost).
+  - name: returns_excl_tax
+    sql: returns_excl_tax
+    type: sum
+    format: currency
+    description: Returned revenue ex-GST on the return event date.
+  - name: returned_revenue_incl_gst
+    sql: returned_revenue_incl_gst
+    type: sum
+    format: currency
+  - name: total_refund_amount
+    sql: returned_revenue_incl_gst
+    type: sum
+    format: currency
+    description: Alias of returned_revenue_incl_gst (event-date returns incl GST).
+  - name: cancelled_revenue
+    sql: cancelled_revenue
+    type: sum
+    format: currency
+    description: Cancelled revenue incl GST (event-date cancellations, incl voided).
+  - name: cancelled_revenue_excl_tax
+    sql: cancelled_revenue_excl_tax
+    type: sum
+    format: currency
+  - name: statutory_net_sales_excl_gst
+    sql: statutory_net_sales_excl_gst
+    type: sum
+    format: currency
+    description: Ind AS 115 delivery-recognised net sales ex-GST (statutory axis).
+  - name: deferred_revenue_excl_gst
+    sql: deferred_revenue_excl_gst
+    type: sum
+    format: currency
+    description: Paid but not yet delivered — deferred revenue ex-GST.
+
+  # ---- COGS ----
+  - name: product_cost
+    sql: product_cost
+    type: sum
+    format: currency
+    description: >
+      Product COGS only (Shopify ACTIVE-line total_cost + Amazon cogs_product).
+      Return/cancel arms carry no product (goods came back). NOT total COGS.
+  - name: packaging_cost
+    sql: packaging_cost
+    type: sum
+    format: currency
+    description: Packaging cost (Shopify) — placement + return arms.
+  - name: shipping_cost
+    sql: shipping_cost
+    type: sum
+    format: currency
+    description: Courier/shipping cost allocated to lines (Shopify) — placement + return arms.
+  - name: payment_gateway_fees
+    sql: payment_gateway_fees
+    type: sum
+    format: currency
+    description: Online payment gateway fees (Shopify) — placement + cancel + return arms.
+  - name: rto_cost
+    sql: rto_cost
+    type: sum
+    format: currency
+    description: Return-to-origin (return-leg) shipping cost (Shopify return arm).
+  - name: amazon_product_cost
+    sql: amazon_product_cost
+    type: sum
+    format: currency
+  - name: amazon_platform_fees
+    sql: amazon_platform_fees
+    type: sum
+    format: currency
+    description: Amazon commission + closing + shipping + other + TCS/TDS withheld.
+  - name: gross_cogs
+    sql: gross_cogs
+    type: sum
+    format: currency
+    description: >
+      Gross COGS (lifecycle by axis) — full product retained on cancel/return arms
+      plus RTO. Historical dashboard Gross COGS.
+  - name: net_cogs
+    sql: net_cogs
+    type: sum
+    format: currency
+    description: >
+      Net COGS (lifecycle by axis) — product on active only; cancel = gateway only;
+      return = ship + pack + gateway + RTO (no product); incl Amazon. Headline COGS.
+      Equals product + packaging + shipping + gateway + rto + amazon fees.
+  - name: total_cogs
+    sql: net_cogs
+    type: sum
+    format: currency
+    description: Alias of net_cogs — Total Operating Cost / headline COGS.
+  - name: total_operating_cost
+    sql: net_cogs
+    type: sum
+    format: currency
+    description: P&L Total Operating Cost = Net COGS (§13).
+  - name: operating_cost_after_contribution
+    sql: net_cogs - product_cost
+    type: sum
+    format: currency
+    description: Packaging + shipping + gateway + RTO + Amazon fees (Net COGS − product cost).
+  - name: product_cost_coverage_pct
+    sql: 100.0 * sum({CUBE}.cogs_lines_costed) / nullIf(sum({CUBE}.cogs_lines), 0)
+    type: number
+    format: percent
+    description: Share of active line items with a cost set (COGS coverage).
+
+  # ---- Ad spend ----
+  - name: meta_spend
+    sql: meta_spend
+    type: sum
+    format: currency
+  - name: google_spend
+    sql: google_spend
+    type: sum
+    format: currency
+  - name: amazon_spend
+    sql: amazon_spend
+    type: sum
+    format: currency
+    description: Amazon Ads cost (fct_amazon_ads_campaigns_daily).
+  - name: total_ad_spend
+    sql: meta_spend + google_spend + amazon_spend
+    type: sum
+    format: currency
+  - name: meta_impressions
+    sql: meta_impressions
+    type: sum
+    format: number
+  - name: meta_clicks
+    sql: meta_clicks
+    type: sum
+    format: number
+  - name: google_impressions
+    sql: google_impressions
+    type: sum
+    format: number
+  - name: google_clicks
+    sql: google_clicks
+    type: sum
+    format: number
+  - name: total_impressions
+    sql: meta_impressions + google_impressions
+    type: sum
+    format: number
+  - name: total_clicks
+    sql: meta_clicks + google_clicks
+    type: sum
+    format: number
+  - name: meta_purchases_reported
+    sql: meta_purchases_reported
+    type: sum
+    format: number
+    description: Platform-reported Meta purchases — NOT attributed order count. Do not use as revenue.
+  - name: meta_purchase_value_reported
+    sql: meta_purchase_value_reported
+    type: sum
+    format: currency
+    description: Platform-reported Meta conversion value — NOT attributed revenue.
+  - name: google_conversions
+    sql: google_conversions
+    type: sum
+    format: number
+    description: Platform-reported Google conversions — NOT attributed order count.
+  - name: google_conversion_value
+    sql: google_conversion_value
+    type: sum
+    format: currency
+    description: Platform-reported Google conversion value — NOT attributed revenue.
+
+  # ---- Profit / margin / ROAS ----
+  - name: gross_profit
+    sql: sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.net_cogs)
+    type: number
+    format: currency
+    description: Contribution before marketing = Net Sales ex-GST − Net COGS.
+  - name: gross_margin_pct
+    sql: 100.0 * ({gross_profit}) / nullIf(sum({CUBE}.net_revenue_excl_tax), 0)
+    type: number
+    format: percent
+  - name: contribution_margin
+    sql: sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.product_cost) - {total_ad_spend}
+    type: number
+    format: currency
+    description: Net Sales ex-GST − product cost − ad spend (before other operating costs).
+  - name: simplified_net_profit
+    sql: sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.product_cost) - {total_ad_spend}
+    type: number
+    format: currency
+    description: Alias of contribution_margin.
+  - name: contribution_margin_pct
+    sql: 100.0 * ({contribution_margin}) / nullIf(sum({CUBE}.net_revenue_excl_tax), 0)
+    type: number
+    format: percent
+  - name: net_profit
+    sql: sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.net_cogs) - {total_ad_spend}
+    type: number
+    format: currency
+    description: >
+      Full bottom line = Net Sales ex-GST − Net COGS − total ad spend
+      (Shopify + Amazon). Reconciles with historical dashboard Net Profit.
+  - name: net_margin_pct
+    sql: 100.0 * ({net_profit}) / nullIf(sum({CUBE}.net_revenue_excl_tax), 0)
+    type: number
+    format: percent
+  - name: mer
+    sql: sum({CUBE}.net_revenue_excl_tax) / nullIf({total_ad_spend}, 0)
+    type: number
+    description: Marketing efficiency ratio = Net Sales ex-GST / total ad spend.
+  - name: gross_roas
+    sql: sum({CUBE}.gross_sales_excl_tax) / nullIf({total_ad_spend}, 0)
+    type: number
+    description: Gross Sales ex-GST / total ad spend.
+  - name: net_roas
+    sql: ({gross_profit}) / nullIf({total_ad_spend}, 0)
+    type: number
+    description: (Net Sales − Net COGS) / total ad spend — contribution per ad ₹.
+  - name: be_roas
+    sql: (sum({CUBE}.net_cogs) + {total_ad_spend}) / nullIf({total_ad_spend}, 0)
+    type: number
+    description: Break-even ROAS (dashboard total-cost form) = (Net COGS + ad spend) / ad spend.
+  - name: blended_roas
+    sql: sum({CUBE}.net_revenue_excl_tax) / nullIf({total_ad_spend}, 0)
+    type: number
+    description: Blended ROAS = Net Sales ex-GST / total ad spend (= MER).
+  - name: meta_roas
+    sql: sum({CUBE}.meta_purchase_value_reported) / nullIf(sum({CUBE}.meta_spend), 0)
+    type: number
+    description: Platform-reported Meta ROAS (pixel value / spend) — not Shopify truth.
+  - name: google_roas
+    sql: sum({CUBE}.google_conversion_value) / nullIf(sum({CUBE}.google_spend), 0)
+    type: number
+    description: Platform-reported Google ROAS (conversion value / cost) — not Shopify truth.
+
+  # ---- Orders ----
+  - name: orders_created
+    sql: total_orders
+    type: sum
+    format: number
+    description: >
+      Shopify placed orders (GMV cohort, incl cancelled/voided) on placement date.
+      Excludes Amazon — kept Shopify-only as the CAC denominator used by the
+      orchestrator. For the dashboard Total Orders card use total_orders.
+  - name: total_orders
+    sql: total_orders + amazon_orders
+    type: sum
+    format: number
+    description: >
+      Total Orders card — Shopify placed orders (GMV cohort, incl cancelled/voided)
+      + Amazon active orders (matches historical dashboard).
+  - name: active_orders
+    sql: active_orders
+    type: sum
+    format: number
+    description: Clean GMV orders (excl cancelled/voided/adjustment).
+  - name: realized_orders
+    sql: realized_orders
+    type: sum
+    format: number
+    description: Realized orders (excludes payment-pending) per FINANCE_DEFINITIONS.
+  - name: delivered_orders
+    sql: delivered_orders
+    type: sum
+    format: number
+  - name: cancelled_orders
+    sql: cancelled_orders
+    type: sum
+    format: number
+  - name: returned_orders
+    sql: returned_orders
+    type: sum
+    format: number
+    description: Distinct orders with a return event in range (event date).
+  - name: refunded_orders
+    sql: refunded_orders
+    type: sum
+    format: number
+    description: Orders with a refund on placement cohort (fct_orders.refunded_date).
+  - name: revenue_adjustment_orders
+    sql: revenue_adjustment_orders
+    type: sum
+    format: number
+  - name: voided_orders
+    sql: voided_orders
+    type: sum
+    format: number
+    description: Voided orders (reclassified as cancellations).
+  - name: amazon_orders
+    sql: amazon_orders
+    type: sum
+    format: number
+  - name: cod_orders
+    sql: cod_orders
+    type: sum
+    format: number
+  - name: prepaid_orders
+    sql: prepaid_orders
+    type: sum
+    format: number
+  - name: avg_order_value_excl_tax
+    sql: sum({CUBE}.net_revenue_excl_tax) / nullIf(sum({CUBE}.active_orders), 0)
+    type: number
+    format: currency
+  - name: avg_order_value
+    sql: sum({CUBE}.total_sales_incl_tax) / nullIf(sum({CUBE}.total_orders) + sum({CUBE}.amazon_orders), 0)
+    type: number
+    format: currency
+    description: >
+      Gross AOV incl GST = total sales (Shopify + Amazon) / total placed orders
+      (Shopify + Amazon) — numerator and denominator on the same company-wide scope.
+  - name: prepaid_pct
+    sql: 100.0 * sum({CUBE}.prepaid_orders) / nullIf(sum({CUBE}.active_orders), 0)
+    type: number
+    format: percent
+  - name: cod_pct
+    sql: 100.0 * sum({CUBE}.cod_orders) / nullIf(sum({CUBE}.active_orders), 0)
+    type: number
+    format: percent
+
+  # ---- Amazon revenue slices ----
+  - name: amazon_gross_revenue
+    sql: amazon_gross_revenue
+    type: sum
+    format: currency
+  - name: amazon_refunds
+    sql: amazon_refunds
+    type: sum
+    format: currency
+
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    title: Brand ID
+  - name: report_date
+    sql: report_date
+    type: time
+    title: Report Date (IST)
+    description: IST calendar day. Placement axis for sales/orders; event axis for returns/cancels/COGS.
+  - name: pnl_key
+    sql: pnl_key
+    type: string
+    primary_key: true

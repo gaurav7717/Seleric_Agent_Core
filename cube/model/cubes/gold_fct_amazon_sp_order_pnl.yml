@@ -1,0 +1,131 @@
+# gold.fct_amazon_sp_order_pnl — Amazon SP order-level P&L (order grain).
+# Effective columns are settlement-authoritative; fall back to estimated. Fee
+# columns are stored NEGATIVE — sum components with abs(). Analytics Platform
+# Reference §4, §17.2, §18, §20.5.
+cubes:
+- name: gold_fct_amazon_sp_order_pnl
+  sql_table: gold.fct_amazon_sp_order_pnl
+  title: Amazon SP Order P&L (Gold)
+  description: >
+    Amazon Seller-Partner P&L at brand × amazon_order_id grain from settlement +
+    estimated data. gross_revenue/net_payout/refunds resolve effective ?? estimated.
+    amazon_fees is the component sum (|commission|+|closing|+|shipping|+|other|+
+    |TCS/TDS|) so tax-withheld is always included. Pending refunds / label fees
+    (accrual) live in amazon_return_reconciliation. Serve view: amazon_sp_order_pnl.
+    Currency: INR.
+  measures:
+  - name: order_count
+    sql: amazon_order_id
+    type: count_distinct
+    format: number
+  - name: gross_revenue
+    sql: coalesce(effective_gross_revenue, estimated_gross_revenue, 0)
+    type: sum
+    format: currency
+    description: >
+      Gross Sales card = SUM(effective_gross_revenue ?? estimated_gross_revenue).
+      Raw gross_revenue omitted (0 for ESTIMATED orders).
+  - name: net_payout
+    sql: coalesce(effective_net_payout, estimated_net_payout, 0)
+    type: sum
+    format: currency
+    description: Settlement net payout after fees and refunds (effective ?? estimated ?? 0).
+  - name: refunds
+    sql: coalesce(effective_refunds, estimated_refunds, 0)
+    type: sum
+    format: currency
+    description: Settled refund deduction (negative in CH). effective ?? estimated ?? 0.
+  - name: settled_refunds
+    sql: abs(coalesce(effective_refunds, estimated_refunds, 0))
+    type: sum
+    format: currency
+    description: "abs(refunds) — refunds already in settlement, shown positive."
+  - name: amazon_fees
+    sql: >
+      abs(coalesce(effective_commission, 0)) + abs(coalesce(effective_closing, 0))
+      + abs(coalesce(effective_shipping, 0)) + abs(coalesce(effective_other_service_fees, 0))
+      + abs(coalesce(effective_tax_withheld, 0))
+    type: sum
+    format: currency
+    description: >
+      Component-based fee sum (commission + closing + shipping + other + TCS/TDS).
+      Primary formula — always includes tax withheld. Never Math.abs(SUM(total_amazon_fees)).
+  - name: tax_withheld
+    sql: abs(coalesce(effective_tax_withheld, 0))
+    type: sum
+    format: currency
+    description: TCS/TDS withheld by Amazon (inside amazon_fees, not customer GST).
+  - name: product_cost
+    sql: cogs_product
+    type: sum
+    format: currency
+    description: Product COGS = cogs_product (seller unit cost × qty). NOT the total_cogs column.
+  - name: total_cogs
+    sql: >
+      abs(coalesce(effective_commission, 0)) + abs(coalesce(effective_closing, 0))
+      + abs(coalesce(effective_shipping, 0)) + abs(coalesce(effective_other_service_fees, 0))
+      + abs(coalesce(effective_tax_withheld, 0)) + coalesce(cogs_product, 0)
+    type: sum
+    format: currency
+    description: Total cost of selling on Amazon = amazon_fees + product_cost.
+  - name: gross_profit
+    sql: coalesce(effective_net_payout, estimated_net_payout, 0) - coalesce(cogs_product, 0)
+    type: sum
+    format: currency
+    description: net_payout − product_cost (deduct cogs_product, not total_cogs).
+  - name: items_settled
+    sql: items_settled
+    type: sum
+    format: number
+  - name: items_fully_refunded
+    sql: items_fully_refunded
+    type: sum
+    format: number
+  - name: cogs_items_matched
+    sql: cogs_items_matched
+    type: sum
+    format: number
+  - name: cogs_items_unmatched
+    sql: cogs_items_unmatched
+    type: sum
+    format: number
+  - name: cogs_coverage_pct
+    sql: 100.0 * sum({CUBE}.cogs_items_matched) / nullIf(sum({CUBE}.cogs_items_matched) + sum({CUBE}.cogs_items_unmatched), 0)
+    type: number
+    format: percent
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+    title: Brand ID
+  - name: amazon_order_id
+    sql: amazon_order_id
+    type: string
+    primary_key: true
+  - name: company_id
+    sql: company_id
+    type: string
+  - name: purchase_date
+    sql: purchase_date
+    type: time
+    title: Purchase Date
+  - name: order_status
+    sql: order_status
+    type: string
+  - name: pnl_status
+    sql: pnl_status
+    type: string
+    description: Settlement P&L status (settled / estimated / none).
+  - name: payout_basis
+    sql: payout_basis
+    type: string
+    description: NONE / ESTIMATED / settled basis for effective vs estimated resolution.
+  - name: fulfillment_channel
+    sql: fulfillment_channel
+    type: string
+  - name: marketplace_id
+    sql: marketplace_id
+    type: string
+  - name: settlement_currency_code
+    sql: settlement_currency_code
+    type: string

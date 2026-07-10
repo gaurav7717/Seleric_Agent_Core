@@ -1,0 +1,77 @@
+# Customer LTV by acquisition channel/campaign — gold.dim_customers + first-order attribution.
+cubes:
+- name: gold_customer_acquisition_ltv
+  title: Customer Acquisition LTV (Gold)
+  description: >
+    Cohort LTV grouped by first-order month and acquisition channel/campaign from first order attribution.
+  sql: |
+    WITH first_orders AS (
+      SELECT
+        brand_id,
+        customer_id,
+        argMin(order_id, order_date) AS first_order_id,
+        min(order_date) AS first_order_date
+      FROM gold.fct_orders
+      WHERE is_test = 0 AND customer_id IS NOT NULL
+      GROUP BY brand_id, customer_id
+    ),
+    acquisition AS (
+      SELECT
+        fo.brand_id AS brand_id,
+        fo.customer_id AS customer_id,
+        fo.first_order_date AS first_order_date,
+        a.lt_platform AS acquisition_platform,
+        a.lt_channel AS acquisition_channel,
+        a.lt_campaign_name AS acquisition_campaign
+      FROM first_orders fo
+      LEFT JOIN gold.fct_order_attribution a
+        ON a.brand_id = fo.brand_id AND a.order_id = fo.first_order_id
+    )
+    SELECT
+      c.brand_id AS brand_id,
+      c.customer_id AS customer_id,
+      toStartOfMonth(ac.first_order_date) AS first_order_cohort_month,
+      coalesce(ac.acquisition_channel, 'unknown') AS acquisition_channel,
+      coalesce(ac.acquisition_campaign, 'unknown') AS acquisition_campaign,
+      coalesce(ac.acquisition_platform, 'unknown') AS acquisition_platform,
+      c.lifetime_gross_revenue AS lifetime_gross_revenue,
+      c.lifetime_order_count AS lifetime_order_count
+    FROM gold.dim_customers c
+    INNER JOIN acquisition ac
+      ON ac.brand_id = c.brand_id AND ac.customer_id = c.customer_id
+  measures:
+  - name: customers
+    type: count
+    format: number
+  - name: lifetime_gross_revenue
+    sql: lifetime_gross_revenue
+    type: sum
+    format: currency
+  - name: lifetime_order_count
+    sql: lifetime_order_count
+    type: sum
+    format: number
+  - name: avg_ltv
+    sql: sum(lifetime_gross_revenue) / nullIf(count(*), 0)
+    type: number
+    format: currency
+  - name: avg_ltv_ex_gst
+    sql: sum(lifetime_gross_revenue / 1.18) / nullIf(count(*), 0)
+    type: number
+    format: currency
+  dimensions:
+  - name: brand_id
+    sql: brand_id
+    type: string
+  - name: first_order_cohort_month
+    sql: first_order_cohort_month
+    type: time
+  - name: acquisition_channel
+    sql: acquisition_channel
+    type: string
+  - name: acquisition_campaign
+    sql: acquisition_campaign
+    type: string
+  - name: acquisition_platform
+    sql: acquisition_platform
+    type: string

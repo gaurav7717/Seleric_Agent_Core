@@ -1,0 +1,29 @@
+id: net_profit
+display_name: Net Profit
+category: financial
+status: approved
+description: >
+  Company net profit across Shopify + Amazon. Percentage companion: net_margin_pct.
+formula:
+  human_readable: "Net Revenue (ex-GST) - Net COGS - Total Ad Spend"
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.net_profit
+  measure_pct: canonical_pnl.net_margin_pct
+aggregation: additive
+unit: currency_and_percent
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Finance Analytics"
+access_policy:
+  roles_allowed: [exec, finance]
+  scopes: [metrics:read]
+examples:
+  - question: "Net profit last 30 days vs prior period"
+    request: {measures: [net_profit], time_range: {preset: last_30d}, compare_period: previous_period}
+validation_tests:
+  - "net_profit <= net_revenue for any completed period"
+deprecated_aliases: [daily_pnl.net_profit, daily_pnl.simplified_net_profit]
