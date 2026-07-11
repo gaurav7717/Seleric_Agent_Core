@@ -1,6 +1,7 @@
 # gold.dim_adset — cross-platform adset/adgroup dimension.
 cubes:
 - name: gold_dim_adset
+  public: false
   sql_table: gold.dim_adset
   title: Gold Adset Dimension
   description: Unified Meta adsets and Google ad groups.

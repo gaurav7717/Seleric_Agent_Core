@@ -1,6 +1,7 @@
 # gold.dim_ad — cross-platform ad dimension.
 cubes:
 - name: gold_dim_ad
+  public: false
   sql_table: gold.dim_ad
   title: Gold Ad Dimension
   description: Unified Meta and Google ads with creative metadata.

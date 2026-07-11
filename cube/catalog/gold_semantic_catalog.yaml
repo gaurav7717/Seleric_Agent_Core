@@ -1,14 +1,15 @@
 catalog_name: seleric_gold_semantic_catalog
 version: 2.0.0
-generated_at: '2026-07-10T10:00:37.766304+00:00'
+generated_at: '2026-07-11T10:56:22.777858+00:00'
 scope: clickhouse_gold_only
 timezone: Asia/Kolkata
 entity_count: 26
 views:
 - name: canonical_pnl
   title: Canonical Company P&L (Gold)
-  description: 'Company net profit, MER, and full operating waterfall from gold.fct_daily_pnl.
-    MCP tool: cube_canonical_pnl. Sum daily rows for period rollups (IST report_date).'
+  description: 'Company net profit, MER, ROAS and full operating waterfall (rebuilt
+    on int_finance_daily_rollups + line-item cost split + ad spend). MCP tool: cube_canonical_pnl.
+    Sum daily rows for period rollups (IST report_date).'
   mcp_tools:
   - cube_canonical_pnl
   - cube_pnl_today_yesterday
@@ -102,16 +103,38 @@ views:
     ads fan out spend across tags. MCP tool cube_meta_neurohack.
   mcp_tools:
   - cube_meta_neurohack
+- name: order_records
+  title: Order Records (Gold)
+  description: 'Order-grain record view (2026-07-11): one row per order, joining commerce
+    order economics (gold_fct_orders) with last-touch attribution (gold_fct_order_attribution,
+    one_to_one — no fan-out) and customer repeat flag (gold_dim_customers, many_to_one).
+    Built for record-level drill-down (campaign -> order -> city) — see CANONICAL_DATA_MODEL.md
+    §3.1. Do NOT join order_items onto this view (would fan out order-level revenue
+    by line-item count) — use order_item_records for item-level detail. MCP: cube_query.'
+  mcp_tools:
+  - cube_query
+- name: order_item_records
+  title: Order Item Records (Gold)
+  description: 'Line-item-grain record view (2026-07-11): one row per order line item,
+    joining SKU/product/cost/margin (gold_fct_order_items) with parent order economics
+    (gold_fct_orders, many_to_one — safe, no fan-out) and last-touch attribution
+    (gold_fct_order_attribution, via the order''s one_to_one join). Drill-down target
+    for product_performance and campaign_product_performance — see CANONICAL_DATA_MODEL.md
+    §3.2. MCP: cube_query.'
+  mcp_tools:
+  - cube_query
+- name: meta_campaign_attribution
+  title: Meta Campaign Attribution (Gold)
+  description: Campaign-level attributed revenue, COGS, and spend from gold only (gold_meta_campaign_attribution).
+    Not for company total ad spend — use canonical_pnl.total_ad_spend. Modern-named
+    promotion of the legacy dw_meta_ads_attribution chart view (2026-07-11).
+  mcp_tools:
+  - cube_query
 - name: campaign_product_performance
   title: Campaign Product Performance (Gold)
   description: Daily attributed revenue and COGS by campaign and SKU.
   mcp_tools:
   - cube_campaign_product
-- name: customer_acquisition_ltv
-  title: Customer Acquisition LTV (Gold)
-  description: Cohort LTV by acquisition channel/campaign.
-  mcp_tools:
-  - cube_customer_acquisition_ltv
 - name: meta_neurotag_analysis
   title: Meta Ad Neurohack Tag Analysis (Gold)
   description: Ad × tag daily with performance + last-touch attribution. Use spend_sc
@@ -144,10 +167,12 @@ views:
   description: IST hourly orders and revenue from gold.fct_orders_hourly.
   mcp_tools:
   - cube_hourly_commerce
-- name: amazon_sp_orders
-  title: Amazon SP Orders (Gold)
-  description: 'Amazon Seller-Partner orders. Date axis purchase_date. Filter order_attribution_tag
-    = ''ORGANIC'' for organic-only. MCP: cube_query.'
+- name: orders_amazon
+  title: Amazon Orders (Gold)
+  description: 'Amazon Seller-Partner orders — platform-specific counterpart to
+    commerce_orders (Shopify). Date axis purchase_date. Filter order_attribution_tag
+    = ''ORGANIC'' for organic-only. Renamed from amazon_sp_orders (2026-07-11) for
+    unambiguous blended-vs-platform naming. MCP: cube_query.'
   mcp_tools:
   - cube_query
 - name: amazon_sp_order_pnl
@@ -175,13 +200,23 @@ views:
     Operational drill-down. MCP: cube_query.'
   mcp_tools:
   - cube_query
+- name: customer_purchase_sequence
+  title: Customer Purchase Sequence (Gold)
+  description: Per-order sequence position and gap-from-previous-order for each customer,
+    derived from gold.fct_orders — no new source data. Powers purchase frequency,
+    days-to-second-purchase, and repeat-order analysis. UNVERIFIED AGAINST LIVE CLICKHOUSE
+    (2026-07-11) — first cube in this model using window functions (row_number()/lagInFrame());
+    smoke-test against a live/staging Cube instance before relying on it in production.
+    See CUBE_SEMANTIC_AUDIT.md §3.
+  mcp_tools:
+  - cube_query
 - name: daily_pnl
   title: Daily P&L (Gold)
   description: 'Canonical company P&L (rebuilt: int_finance_daily_rollups + line-item
     cost split + platform ad spend; reconciles with historical + P&L dashboards).
     total_cogs = net_cogs (lifecycle net COGS incl Amazon). gross_profit = total_sales_ex_gst
-    − net_cogs (contribution before marketing). net_profit = total_sales_ex_gst −
-    net_cogs − total_ad_spend. MCP: cube_daily_pnl, cube_pnl_waterfall, cube_pnl_today_yesterday.'
+    − net_cogs (contribution before marketing). net_profit = total_sales_ex_gst
+    − net_cogs − total_ad_spend. MCP: cube_daily_pnl, cube_pnl_waterfall, cube_pnl_today_yesterday.'
   mcp_tools:
   - cube_daily_pnl
   - cube_pnl_waterfall
@@ -193,20 +228,25 @@ views:
   mcp_tools:
   - cube_channel_pnl
 - name: marketing_performance
-  title: Meta Marketing Performance (Gold)
-  description: 'Meta ads daily from gold.fct_meta_ads_daily. MCP: cube_meta_ads.'
+  title: Meta Marketing Performance (Gold) [deprecated]
+  description: 'DEPRECATED (2026-07-11) — use meta_ad_performance, which wraps the
+    same cube (gold.fct_meta_ads_daily) with the full field set and canonical naming.
+    Kept for existing dashboard compatibility. MCP: cube_meta_ads.'
   mcp_tools:
   - cube_meta_ads
 - name: ad_performance
-  title: Meta Ad Hourly Performance (Gold)
-  description: Hour-of-day spend and delivery from gold.fct_meta_ads_hourly. Only
-    cube with hourly_window. Purchases/ROAS use marketing_performance (daily).
+  title: Meta Ad Hourly Performance (Gold) [deprecated]
+  description: DEPRECATED (2026-07-11) — use meta_ad_hourly, which wraps the same
+    cube (gold.fct_meta_ads_hourly) with canonical naming. Kept for existing dashboard
+    compatibility. Hour-of-day spend and delivery; only cube with hourly_window. Purchases/ROAS
+    use meta_ad_performance (daily).
   mcp_tools:
   - cube_query
 - name: dw_meta_ads_attribution
-  title: Meta Campaign Attribution (Gold)
-  description: Campaign-level attributed revenue + COGS + spend. Not for company total
-    ad spend.
+  title: Meta Campaign Attribution (Gold) [deprecated]
+  description: DEPRECATED (2026-07-11) — use meta_campaign_attribution (serve_views.yml),
+    a modern-named view over the same cube (gold_meta_campaign_attribution). Campaign-level
+    attributed revenue + COGS + spend. Not for company total ad spend.
   mcp_tools:
   - cube_query
 - name: shopify_orders
@@ -215,16 +255,13 @@ views:
     MCP: cube_commerce_orders.'
   mcp_tools:
   - cube_commerce_orders
-- name: shopify_order_line_items
-  title: Shopify Order Line Items (Gold)
-  description: Line-item discounts, units, and margin from gold.fct_order_items.
-  mcp_tools:
-  - cube_line_economics
 - name: product_performance
   title: Product / SKU Performance (Gold)
-  description: SKU revenue, COGS, returns from gold.fct_order_items. MCP tool cube_product_performance.
+  description: SKU revenue, COGS, returns, and line-item discounts/margin from gold.fct_order_items
+    (merged with the former shopify_order_line_items view 2026-07-11). MCP tool cube_product_performance.
   mcp_tools:
   - cube_product_performance
+  - cube_line_economics
 - name: gold__ad_neurohack_enriched
   title: Gold ad_neurohack_enriched (all columns)
   description: 'Full exposure of gold.ad_neurohack_enriched — every synced column
@@ -251,8 +288,8 @@ views:
   - cube_query
 - name: gold__daily_performance
   title: Gold daily_performance (all columns)
-  description: 'Full exposure of gold.daily_performance — every synced column as a
-    queryable member. MCP: cube_query with view prefix gold__daily_performance.'
+  description: 'Full exposure of gold.daily_performance — every synced column as
+    a queryable member. MCP: cube_query with view prefix gold__daily_performance.'
   mcp_tools:
   - cube_query
 - name: gold__dim_ad
@@ -263,8 +300,8 @@ views:
   - cube_query
 - name: gold__dim_ad_neurohack_map
   title: Gold dim_ad_neurohack_map (all columns)
-  description: 'Full exposure of gold.dim_ad_neurohack_map — every synced column as
-    a queryable member. MCP: cube_query with view prefix gold__dim_ad_neurohack_map.'
+  description: 'Full exposure of gold.dim_ad_neurohack_map — every synced column
+    as a queryable member. MCP: cube_query with view prefix gold__dim_ad_neurohack_map.'
   mcp_tools:
   - cube_query
 - name: gold__dim_adset
@@ -299,8 +336,8 @@ views:
   - cube_query
 - name: gold__fct_google_ads_daily
   title: Gold fct_google_ads_daily (all columns)
-  description: 'Full exposure of gold.fct_google_ads_daily — every synced column as
-    a queryable member. MCP: cube_query with view prefix gold__fct_google_ads_daily.'
+  description: 'Full exposure of gold.fct_google_ads_daily — every synced column
+    as a queryable member. MCP: cube_query with view prefix gold__fct_google_ads_daily.'
   mcp_tools:
   - cube_query
 - name: gold__fct_google_ads_status_history
@@ -311,8 +348,8 @@ views:
   - cube_query
 - name: gold__fct_google_campaigns_hourly
   title: Gold fct_google_campaigns_hourly (all columns)
-  description: 'Full exposure of gold.fct_google_campaigns_hourly — every synced column
-    as a queryable member. MCP: cube_query with view prefix gold__fct_google_campaigns_hourly.'
+  description: 'Full exposure of gold.fct_google_campaigns_hourly — every synced
+    column as a queryable member. MCP: cube_query with view prefix gold__fct_google_campaigns_hourly.'
   mcp_tools:
   - cube_query
 - name: gold__fct_meta_ads_breakdown_daily
@@ -329,14 +366,14 @@ views:
   - cube_query
 - name: gold__fct_meta_ads_hourly
   title: Gold fct_meta_ads_hourly (all columns)
-  description: 'Full exposure of gold.fct_meta_ads_hourly — every synced column as
-    a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_hourly.'
+  description: 'Full exposure of gold.fct_meta_ads_hourly — every synced column
+    as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_hourly.'
   mcp_tools:
   - cube_query
 - name: gold__fct_meta_ads_status_history
   title: Gold fct_meta_ads_status_history (all columns)
-  description: 'Full exposure of gold.fct_meta_ads_status_history — every synced column
-    as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_status_history.'
+  description: 'Full exposure of gold.fct_meta_ads_status_history — every synced
+    column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_status_history.'
   mcp_tools:
   - cube_query
 - name: gold__fct_order_attribution
@@ -347,8 +384,8 @@ views:
   - cube_query
 - name: gold__fct_order_items
   title: Gold fct_order_items (all columns)
-  description: 'Full exposure of gold.fct_order_items — every synced column as a queryable
-    member. MCP: cube_query with view prefix gold__fct_order_items.'
+  description: 'Full exposure of gold.fct_order_items — every synced column as a
+    queryable member. MCP: cube_query with view prefix gold__fct_order_items.'
   mcp_tools:
   - cube_query
 - name: gold__fct_orders
@@ -383,14 +420,14 @@ views:
   - cube_query
 - name: gold__hourly_commerce
   title: Gold hourly_commerce (all columns)
-  description: 'Full exposure of gold.hourly_commerce — every synced column as a queryable
-    member. MCP: cube_query with view prefix gold__hourly_commerce.'
+  description: 'Full exposure of gold.hourly_commerce — every synced column as a
+    queryable member. MCP: cube_query with view prefix gold__hourly_commerce.'
   mcp_tools:
   - cube_query
 - name: gold__mart_meta_ad_neurotag_daily
   title: Gold mart_meta_ad_neurotag_daily (all columns)
-  description: 'Full exposure of gold.mart_meta_ad_neurotag_daily — every synced column
-    as a queryable member. MCP: cube_query with view prefix gold__mart_meta_ad_neurotag_daily.'
+  description: 'Full exposure of gold.mart_meta_ad_neurotag_daily — every synced
+    column as a queryable member. MCP: cube_query with view prefix gold__mart_meta_ad_neurotag_daily.'
   mcp_tools:
   - cube_query
 - name: gold__meta_campaign_attribution
@@ -401,8 +438,8 @@ views:
   - cube_query
 - name: gold__meta_neurohack_daily
   title: Gold meta_neurohack_daily (all columns)
-  description: 'Full exposure of gold.meta_neurohack_daily — every synced column as
-    a queryable member. MCP: cube_query with view prefix gold__meta_neurohack_daily.'
+  description: 'Full exposure of gold.meta_neurohack_daily — every synced column
+    as a queryable member. MCP: cube_query with view prefix gold__meta_neurohack_daily.'
   mcp_tools:
   - cube_query
 - name: gold__neurohack_attribution
@@ -549,8 +586,8 @@ entities:
   - tag_position
   timezone: Asia/Kolkata
   description: Maps Meta ads to Neurohack tag codes extracted from ad names. Grain
-    brand_id × ad_key × tag_code × tag_position. One ad may have multiple tags — join
-    to meta ads fans out spend across tags.
+    brand_id × ad_key × tag_code × tag_position. One ad may have multiple tags
+    — join to meta ads fans out spend across tags.
   measures:
   - name: tag_mappings
     type: count
@@ -609,7 +646,7 @@ entities:
   mcp_tools:
   - cube_query
   anti_patterns:
-  - One ad may map to multiple tag_codes — spend fans out on join to meta ads.
+  - One ad may map to multiple tag_codes � spend fans out on join to meta ads.
   - Do not sum spend by tag without understanding multi-tag ad duplication.
 - id: gold.dim_adset
   cube: gold_dim_adset
@@ -833,10 +870,10 @@ entities:
   description: Customer dimension with LTV and consent. Use customer_ltv view.
   measures:
   - name: customers
-    type: count
+    type: count_distinct
     format: number
     description: null
-    sql: null
+    sql: '{CUBE}.customer_id'
   - name: lifetime_gross_revenue
     type: sum
     format: currency
@@ -1637,7 +1674,7 @@ entities:
     title: null
     description: null
   views:
-  - amazon_sp_orders
+  - orders_amazon
   mcp_tools:
   - cube_query
   anti_patterns: []
@@ -2192,8 +2229,8 @@ entities:
   - ad_id
   timezone: Asia/Kolkata
   description: Meta ad performance by breakdown segment. Grain includes breakdown_type
-    — always filter to exactly one breakdown_type before aggregating spend. For account/campaign/ad
-    totals use gold.fct_meta_ads_daily (meta_ad_performance).
+    — always filter to exactly one breakdown_type before aggregating spend. For
+    account/campaign/ad totals use gold.fct_meta_ads_daily (meta_ad_performance).
   measures:
   - name: spend
     type: sum
@@ -2632,11 +2669,11 @@ entities:
   - cube_meta_ads_breakdown
   - cube_query
   anti_patterns:
-  - Always filter to exactly ONE breakdown_type before summing spend — mixing types
-    multi-counts the same ad spend (~8×).
+  - Always filter to exactly ONE breakdown_type before summing spend � mixing types
+    multi-counts the same ad spend (~8�).
   - For total Meta spend, impressions, or ROAS use fct_meta_ads_daily / meta_ad_performance
-    — not this table.
-  - Typed columns (gender, publisher_platform, country, etc.) are sparse — only populated
+    � not this table.
+  - Typed columns (gender, publisher_platform, country, etc.) are sparse � only populated
     for their breakdown_type.
 - id: gold.fct_meta_ads_daily
   cube: gold_fct_meta_ads_daily
@@ -4024,7 +4061,7 @@ entities:
   - cube_order_attribution
   - cube_query
   anti_patterns:
-  - Not for company net profit totals — use fct_daily_pnl / canonical_pnl.
+  - Not for company net profit totals � use fct_daily_pnl / canonical_pnl.
 - id: gold.fct_order_items
   cube: gold_fct_order_items
   domain: shopify
@@ -4037,10 +4074,10 @@ entities:
     Filter is_test via parent order join or order_status for P&L-aligned metrics.
   measures:
   - name: line_item_count
-    type: count
+    type: count_distinct
     format: number
     description: null
-    sql: null
+    sql: '{CUBE}.line_item_id'
   - name: net_revenue
     type: sum
     format: currency
@@ -4557,8 +4594,8 @@ entities:
   - name: returned_at_ist
     type: time
     title: Return Date (IST)
-    description: Parent order return lifecycle date — use with return_status for return
-      tracking.
+    description: Parent order return lifecycle date — use with return_status for
+      return tracking.
   - name: shopify_return_status
     type: string
     title: null
@@ -4616,7 +4653,7 @@ entities:
     title: Ship Country
     description: null
   views:
-  - shopify_order_line_items
+  - order_item_records
   - product_performance
   - gold__fct_order_items
   mcp_tools:
@@ -4635,10 +4672,10 @@ entities:
     for KPIs. Use commerce_orders view. For company P&L use canonical_pnl / gold_fct_daily_pnl.
   measures:
   - name: orders
-    type: count
+    type: count_distinct
     format: number
     description: null
-    sql: null
+    sql: CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.order_id END
   - name: gross_revenue
     type: sum
     format: currency
@@ -4710,8 +4747,8 @@ entities:
   - name: returned_orders
     type: count_distinct
     format: number
-    description: RETURNED + IN_PROGRESS only — time-axis returned_at_ist; do not use
-      IS NOT NULL on return_status.
+    description: RETURNED + IN_PROGRESS only — time-axis returned_at_ist; do not
+      use IS NOT NULL on return_status.
     sql: CASE WHEN {CUBE}.return_status IN ('RETURNED', 'IN_PROGRESS') AND {CUBE}.is_test
       = 0 AND {CUBE}.returned_at IS NOT NULL THEN {CUBE}.order_id END
   - name: net_orders
@@ -5075,6 +5112,7 @@ entities:
     description: null
   views:
   - commerce_orders
+  - order_records
   - shopify_orders
   - gold__fct_orders
   mcp_tools:
@@ -5569,14 +5607,14 @@ entities:
   - session_id
   timezone: Asia/Kolkata
   description: Session-level Snowplow funnel from gold.fct_session_funnel. Use session_funnel
-    view. Count sessions and conversion rates only — do NOT sum purchase_revenue for
-    P&L (use fct_order_attribution).
+    view. Count sessions and conversion rates only — do NOT sum purchase_revenue
+    for P&L (use fct_order_attribution).
   measures:
   - name: sessions
-    type: count
+    type: count_distinct
     format: number
     description: null
-    sql: null
+    sql: '{CUBE}.session_id'
   - name: converted_sessions
     type: count_distinct
     format: number
@@ -5892,7 +5930,7 @@ entities:
   - cube_query
   - cube_session_funnel
   anti_patterns:
-  - Do not sum purchase_revenue for P&L — use fct_order_attribution.
+  - Do not sum purchase_revenue for P&L � use fct_order_attribution.
   - Session grain may double-count orders reached by multiple sessions.
 - id: gold.int_amazon_return_reconciliation
   cube: gold_int_amazon_return_reconciliation
@@ -6635,8 +6673,8 @@ entities:
   - cube_meta_neurotag
   - cube_query
   anti_patterns:
-  - Use spend_sc / net_revenue_sc for tag-level rollups — spend_fc duplicates across
+  - Use spend_sc / net_revenue_sc for tag-level rollups � spend_fc duplicates across
     tags on multi-tag ads.
   - Use spend_fc only when filtering to a single tag_code per ad or grouping by ad_id.
   - Untagged ads appear as tag_code = __untagged__.
-glossary_ref: mage-ai/docs/FINANCE_DEFINITIONS.md
+glossary_ref: null

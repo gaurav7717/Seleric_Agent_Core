@@ -20,6 +20,7 @@
 # Formulas: mage-ai/docs/FINANCE_DEFINITIONS.md; Analytics Platform Reference §11–14.
 cubes:
 - name: gold_fct_daily_pnl
+  public: false
   title: Canonical Company P&L (Gold)
   data_source: default
   description: >

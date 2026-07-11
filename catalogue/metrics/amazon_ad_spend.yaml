@@ -1,0 +1,30 @@
+id: amazon_ad_spend
+display_name: Amazon Ads Spend
+category: marketing
+status: approved
+description: >
+  Amazon Ads (SP/SB/SD) spend from gold.fct_amazon_ads_campaigns_daily.
+  spend = coalesce(spend, cost). For blended totals across platforms use
+  total_ad_spend.
+formula:
+  human_readable: "Sum of Amazon Ads daily spend"
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_ad_performance
+  measure: amazon_ad_performance.spend
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date, campaign_id, campaign_name, campaign_type, campaign_status]
+supported_filters: [date_range, brand_id, campaign_id, campaign_name, campaign_type, campaign_status]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Amazon Ads spend by campaign type last 7 days"
+    request: {measures: [amazon_ad_spend], dimensions: [campaign_type], time_range: {preset: last_7d}}
+validation_tests:
+  - "amazon_ad_performance spend for a period ~= canonical_pnl.amazon_spend for the same period"
+deprecated_aliases: []

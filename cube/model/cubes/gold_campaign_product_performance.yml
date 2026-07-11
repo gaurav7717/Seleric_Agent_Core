@@ -1,6 +1,7 @@
 # Campaign × product daily performance — gold.fct_order_attribution + fct_order_items.
 cubes:
 - name: gold_campaign_product_performance
+  public: false
   title: Campaign Product Performance (Gold)
   description: >
     Daily attributed revenue and COGS by last-touch campaign and SKU.
@@ -94,6 +95,10 @@ cubes:
     type: sum
     format: number
   dimensions:
+  - name: campaign_product_performance_key
+    sql: "concat(toString(brand_id),'|',toString(report_date),'|',lt_platform,'|',lt_campaign_name,'|',sku)"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

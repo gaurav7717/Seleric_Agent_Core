@@ -1,6 +1,7 @@
 # gold.dim_neurohack — creative taxonomy / behavioral hack tag catalog (550 tags).
 cubes:
 - name: gold_dim_neurohack
+  public: false
   sql_table: gold.dim_neurohack
   title: Neurohack Tag Catalog
   description: 'Master catalog of Neurohack creative tags (tag_code → category, hack_name).

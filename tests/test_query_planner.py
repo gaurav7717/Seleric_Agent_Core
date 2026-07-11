@@ -68,20 +68,43 @@ async def test_unknown_metric_rejected_with_suggestions(planner):
     assert exc.value.suggestions
 
 
-async def test_multi_view_rejected(planner):
+async def test_multi_view_composed(planner, fake_cube):
+    """Metrics on different views run as parallel single-view parts (no join)."""
+    fake_cube.by_prefix["canonical_pnl"] = [{"canonical_pnl.net_revenue_excl_tax": "100"}]
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "7"}]
     req = QueryRequest(measures=["net_revenue", "orders"], time_range=TimeRange(preset="last_7d"))
-    with pytest.raises(PlanError, match="span multiple views"):
-        await planner.run(req)
+    out = await planner.run(req)
+    assert out["composed"] is True
+    assert out["composition"] == "multi_view"
+    assert len(out["parts"]) == 2
+    views = {p["provenance"]["cube_view"] for p in out["parts"]}
+    assert views == {"canonical_pnl", "commerce_orders"}
+    assert len(fake_cube.queries) == 2
+    assert all(p["query_id"].startswith("q_") for p in out["parts"])
+    assert out["query_id"].startswith("q_")
 
 
-async def test_unsupported_dimension_rejected(planner):
+async def test_multi_view_dimension_must_work_on_each_part(planner):
+    """A dimension invalid for one of the views still fails (no silent drop)."""
     req = QueryRequest(
-        measures=["net_revenue"],
-        dimensions=["payment_method"],  # commerce dim, not on canonical_pnl
+        measures=["net_revenue", "orders"],
+        dimensions=["payment_method"],  # commerce only
         time_range=TimeRange(preset="last_7d"),
     )
     with pytest.raises(PlanError, match="not supported"):
         await planner.run(req)
+
+
+async def test_unsupported_dimension_suggests_alternate_metrics(planner):
+    req = QueryRequest(
+        measures=["net_revenue"],
+        dimensions=["shipping_city"],
+        time_range=TimeRange(preset="last_7d"),
+    )
+    with pytest.raises(PlanError) as exc:
+        await planner.run(req)
+    assert "commerce_net_revenue" in (exc.value.suggestions or [])
+    assert "commerce_net_revenue" in str(exc.value)
 
 
 async def test_filter_dimension_must_be_on_view(planner):

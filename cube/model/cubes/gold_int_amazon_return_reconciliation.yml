@@ -3,6 +3,7 @@
 # refunds & label fees not yet in settlement. Analytics Platform Reference §17.2.
 cubes:
 - name: gold_int_amazon_return_reconciliation
+  public: false
   sql_table: gold.int_amazon_return_reconciliation
   title: Amazon Return Reconciliation (Gold)
   description: >

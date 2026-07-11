@@ -1,6 +1,7 @@
 # gold.fct_google_ads_status_history — entity change audit.
 cubes:
 - name: gold_fct_google_ads_status_history
+  public: false
   sql_table: gold.fct_google_ads_status_history
   title: Gold Google Ads Status History
   description: Google campaign/adgroup/ad status and budget change events. Use ad_status_changes

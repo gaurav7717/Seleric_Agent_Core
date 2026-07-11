@@ -1,0 +1,108 @@
+# gold.fct_orders, windowed per customer (order_date, customer_id — both
+# already exist, no new source data). Powers purchase-frequency /
+# days-to-second-purchase / repeat-order queries
+# (mcp_query_capability_catalogue.md §8 Q226-228, Q235, Q241).
+#
+# CAVEAT (2026-07-11): this is the first cube in this model using ClickHouse
+# window functions (row_number()/lagInFrame()). Every other inline-SQL cube in
+# this model was verified by reading its SQL against known table columns; this
+# one additionally depends on ClickHouse's window-function support being
+# enabled on the target instance, which cannot be confirmed without a live
+# query (no live ClickHouse access was available while writing this). Smoke-test
+# against a real/staging Cube instance before treating as production-ready —
+# see CUBE_SEMANTIC_AUDIT.md §3 on inline-SQL cubes carrying no Cube-engine
+# correctness guarantee, unlike declarative joins.
+cubes:
+- name: gold_customer_order_sequence
+  public: false
+  title: Customer Order Sequence (Gold)
+  description: >
+    Per-order sequence number and days-since-previous-order for each customer,
+    windowed over gold.fct_orders. Grain: brand x customer x order (one row
+    per non-cancelled, non-test order). order_sequence_number = 1 is each
+    customer's first order; days_since_previous_order is NULL on that row.
+  sql: |
+    SELECT
+      brand_id,
+      customer_id,
+      order_id,
+      order_date,
+      row_number() OVER (
+        PARTITION BY brand_id, customer_id ORDER BY order_date, order_id
+      ) AS order_sequence_number,
+      dateDiff(
+        'day',
+        lagInFrame(order_date) OVER (
+          PARTITION BY brand_id, customer_id ORDER BY order_date, order_id
+        ),
+        order_date
+      ) AS days_since_previous_order
+    FROM gold.fct_orders
+    WHERE is_test = 0 AND customer_id IS NOT NULL AND order_status != 'cancelled'
+  measures:
+  - name: orders
+    type: count
+    format: number
+  - name: distinct_customers
+    sql: customer_id
+    type: count_distinct
+    format: number
+  - name: repeat_orders
+    sql: CASE WHEN {CUBE}.order_sequence_number > 1 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+  - name: second_purchase_orders
+    sql: CASE WHEN {CUBE}.order_sequence_number = 2 THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+    description: Orders that are each customer's second order — filter to this to measure days-to-second-purchase specifically.
+  - name: days_since_previous_order_sum
+    sql: days_since_previous_order
+    type: sum
+    format: number
+    description: Sum of gap-in-days to the immediately preceding order. Divide by orders_with_previous_order for the average (never use on its own).
+  - name: orders_with_previous_order
+    sql: CASE WHEN {CUBE}.days_since_previous_order IS NOT NULL THEN {CUBE}.order_id END
+    type: count_distinct
+    format: number
+    description: Denominator for avg_days_between_orders — excludes each customer's first order (no prior order to measure a gap from).
+  - name: avg_days_between_orders
+    sql: sum({CUBE}.days_since_previous_order) / nullIf(countDistinct(CASE WHEN {CUBE}.days_since_previous_order
+      IS NOT NULL THEN {CUBE}.order_id END), 0)
+    type: number
+    format: number
+  - name: repeat_order_rate
+    sql: 100.0 * countDistinct(CASE WHEN {CUBE}.order_sequence_number > 1 THEN {CUBE}.order_id END)
+      / nullIf(count({CUBE}.order_id), 0)
+    type: number
+    format: percent
+  dimensions:
+  - name: order_sequence_key
+    sql: "concat(toString(brand_id),'|',toString(customer_id),'|',order_id)"
+    type: string
+    primary_key: true
+  - name: brand_id
+    sql: brand_id
+    type: string
+  - name: customer_id
+    sql: customer_id
+    type: string
+  - name: order_id
+    sql: order_id
+    type: string
+  - name: order_date
+    sql: order_date
+    type: time
+  - name: order_sequence_number
+    sql: order_sequence_number
+    type: number
+    description: 1 = first order, 2 = second order, etc.
+  - name: is_first_order
+    sql: order_sequence_number = 1
+    type: boolean
+  - name: is_repeat_order
+    sql: order_sequence_number > 1
+    type: boolean
+  - name: days_since_previous_order
+    sql: days_since_previous_order
+    type: number

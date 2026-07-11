@@ -1,6 +1,7 @@
 # Daily P&L split by payment method (COD vs prepaid).
 cubes:
 - name: gold_payment_method_pnl
+  public: false
   title: Payment Method P&L (Gold)
   description: >
     Daily order revenue, COGS, and operating costs by normalized payment method.
@@ -62,6 +63,10 @@ cubes:
     type: sum
     format: currency
   dimensions:
+  - name: payment_method_pnl_key
+    sql: "concat(toString(brand_id),'|',toString(report_date),'|',payment_method)"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

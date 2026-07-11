@@ -1,6 +1,7 @@
 # gold.fct_order_items — brand × order × line_item grain.
 cubes:
 - name: gold_fct_order_items
+  public: false
   sql_table: gold.fct_order_items
   title: Gold Order Line Items
   description: 'Line-item fact with point-in-time COGS. Use product_performance view.
@@ -18,7 +19,8 @@ cubes:
     relationship: many_to_one
   measures:
   - name: line_item_count
-    type: count
+    sql: "{CUBE}.line_item_id"
+    type: count_distinct
     format: number
   - name: net_revenue
     sql: net_revenue

@@ -97,13 +97,16 @@ views:
           - channel_net_profit
           - channel_roas
           - brand_id
+          - report_date
           - date_start
           - platform
 
   - name: marketing_performance
-    title: Meta Marketing Performance (Gold)
+    title: Meta Marketing Performance (Gold) [deprecated]
     description: >
-      Meta ads daily from gold.fct_meta_ads_daily. MCP: cube_meta_ads.
+      DEPRECATED (2026-07-11) — use meta_ad_performance, which wraps the same
+      cube (gold.fct_meta_ads_daily) with the full field set and canonical
+      naming. Kept for existing dashboard compatibility. MCP: cube_meta_ads.
     cubes:
       - join_path: gold_fct_meta_ads_daily
         includes:
@@ -133,10 +136,12 @@ views:
           - ad_name
 
   - name: ad_performance
-    title: Meta Ad Hourly Performance (Gold)
+    title: Meta Ad Hourly Performance (Gold) [deprecated]
     description: >
-      Hour-of-day spend and delivery from gold.fct_meta_ads_hourly.
-      Only cube with hourly_window. Purchases/ROAS use marketing_performance (daily).
+      DEPRECATED (2026-07-11) — use meta_ad_hourly, which wraps the same cube
+      (gold.fct_meta_ads_hourly) with canonical naming. Kept for existing
+      dashboard compatibility. Hour-of-day spend and delivery; only cube with
+      hourly_window. Purchases/ROAS use meta_ad_performance (daily).
     cubes:
       - join_path: gold_fct_meta_ads_hourly
         includes:
@@ -157,8 +162,10 @@ views:
           - ad_name
 
   - name: dw_meta_ads_attribution
-    title: Meta Campaign Attribution (Gold)
+    title: Meta Campaign Attribution (Gold) [deprecated]
     description: >
+      DEPRECATED (2026-07-11) — use meta_campaign_attribution (serve_views.yml),
+      a modern-named view over the same cube (gold_meta_campaign_attribution).
       Campaign-level attributed revenue + COGS + spend. Not for company total ad spend.
     cubes:
       - join_path: gold_meta_campaign_attribution
@@ -206,32 +213,18 @@ views:
           - utm_medium
           - utm_campaign
 
-  - name: shopify_order_line_items
-    title: Shopify Order Line Items (Gold)
-    description: Line-item discounts, units, and margin from gold.fct_order_items.
-    cubes:
-      - join_path: gold_fct_order_items
-        includes:
-          - total_line_discounts
-          - net_line_revenue_ex_gst
-          - gross_profit_ex_gst
-          - total_cogs
-          - avg_unit_price
-          - avg_discounted_unit_price
-          - units_per_order
-          - unique_products
-          - line_item_count
-          - brand_id
-          - created_at_ist
-          - sku
-          - product_title
-          - return_status
+  # shopify_order_line_items view REMOVED (2026-07-11): both this view and
+  # product_performance wrapped gold_fct_order_items with overlapping field
+  # subsets. Merged into product_performance (added units_per_order,
+  # unique_products, line_item_count). MCP tool cube_line_economics now
+  # resolves against product_performance. See CUBE_AUDIT_REPORT.md §7 Q1.
 
   - name: product_performance
     title: Product / SKU Performance (Gold)
     description: >
-      SKU revenue, COGS, returns from gold.fct_order_items.
-      MCP tool cube_product_performance.
+      SKU revenue, COGS, returns, and line-item discounts/margin from
+      gold.fct_order_items (merged with the former shopify_order_line_items
+      view 2026-07-11). MCP tool cube_product_performance.
     cubes:
       - join_path: gold_fct_order_items
         includes:
@@ -245,6 +238,9 @@ views:
           - total_line_discounts
           - avg_unit_price
           - avg_discounted_unit_price
+          - units_per_order
+          - unique_products
+          - line_item_count
           - brand_id
           - created_at_ist
           - sku

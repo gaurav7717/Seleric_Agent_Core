@@ -3,6 +3,7 @@
 # Analytics Platform Reference §4.
 cubes:
 - name: gold_fct_amazon_sp_orders
+  public: false
   sql_table: gold.fct_amazon_sp_orders
   title: Amazon SP Orders (Gold)
   description: >

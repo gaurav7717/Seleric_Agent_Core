@@ -1,0 +1,31 @@
+id: meta_cpc
+display_name: Meta CPC
+category: marketing
+status: approved
+description: >
+  Meta platform cost per click. A ratio — recompute from spend/clicks.
+formula:
+  human_readable: "Meta spend / Meta clicks"
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_performance
+  measure: meta_ad_performance.cpc
+aggregation: ratio
+ratio_components:
+  numerator: meta_ad_performance.spend
+  denominator: meta_ad_performance.clicks
+unit: currency
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+supported_filters: [date_range, brand_id, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Meta CPC by campaign last 7 days"
+    request: {measures: [meta_cpc], dimensions: [campaign_name], time_range: {preset: last_7d}}
+validation_tests:
+  - "period CPC equals sum(spend)/sum(clicks) for the same slice"
+deprecated_aliases: []

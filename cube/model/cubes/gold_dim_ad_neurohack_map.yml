@@ -1,6 +1,7 @@
 # gold.dim_ad_neurohack_map — brand × ad × tag_code (parsed from ad naming convention).
 cubes:
 - name: gold_dim_ad_neurohack_map
+  public: false
   sql_table: gold.dim_ad_neurohack_map
   title: Ad Neurohack Tag Map
   description: 'Maps Meta ads to Neurohack tag codes extracted from ad names. Grain

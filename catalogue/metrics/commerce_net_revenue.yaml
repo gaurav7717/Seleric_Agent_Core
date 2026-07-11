@@ -1,0 +1,49 @@
+id: commerce_net_revenue
+display_name: Commerce Net Revenue (ex-GST)
+category: commerce
+status: approved
+description: >
+  Order-grain net revenue (ex-GST) from gold.fct_orders via commerce_orders.
+  Use this when breaking revenue down by shipping city/region/country, payment
+  method, or UTM — dimensions that do not exist on canonical_pnl. For
+  company-level P&L revenue (brand × day, with ad spend / margin) prefer
+  net_revenue on canonical_pnl.
+formula:
+  human_readable: "Sum of order net revenue excluding tax (commerce order grain)"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.net_revenue_excl_tax
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order
+supported_dimensions:
+  - brand_id
+  - order_date
+  - payment_method
+  - utm_source
+  - shipping_country
+  - shipping_region
+  - shipping_city
+supported_filters:
+  - date_range
+  - brand_id
+  - payment_method
+  - utm_source
+  - shipping_country
+  - shipping_region
+  - shipping_city
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Net revenue by city last 30 days"
+    request:
+      measures: [commerce_net_revenue]
+      dimensions: [shipping_city]
+      time_range: {preset: last_30d}
+validation_tests:
+  - "period total is within tolerance of Shopify order net revenue for the same window"
+deprecated_aliases: []

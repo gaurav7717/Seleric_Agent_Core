@@ -1,6 +1,7 @@
 # Refund events from line items — cash-at-risk and refund timing analysis.
 cubes:
 - name: gold_refund_events
+  public: false
   title: Refund Events (Gold)
   description: >
     Per-refund-event line items with refund processed date. Grain brand_id × refund_line_item_id.
@@ -40,6 +41,21 @@ cubes:
   - name: brand_id
     sql: brand_id
     type: string
+    primary_key: true
+  - name: order_id
+    sql: order_id
+    type: string
+    primary_key: true
+  - name: line_item_id
+    sql: line_item_id
+    type: string
+    primary_key: true
+    description: >
+      Was selected in this cube's SQL but never exposed as a dimension nor
+      part of a declared key (found 2026-07-11 via a full primary-key sweep
+      across every cube — see CUBE_SEMANTIC_AUDIT.md §2). Natural composite
+      key brand_id x order_id x line_item_id, matching the same grain the
+      cube's own header comment always claimed but never enforced.
   - name: refund_processed_date
     sql: refund_date
     type: time
@@ -52,7 +68,4 @@ cubes:
     type: string
   - name: product_title
     sql: product_title
-    type: string
-  - name: order_id
-    sql: order_id
     type: string

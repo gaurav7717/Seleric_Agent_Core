@@ -1,0 +1,27 @@
+id: product_gross_profit
+display_name: Product Gross Profit (ex-GST)
+category: commerce
+status: approved
+description: >
+  Line-item gross profit ex-GST from product_performance.
+formula:
+  human_readable: "Sum of gross profit ex-GST at line grain"
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.gross_profit_ex_gst
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order_item
+supported_dimensions: [brand_id, order_date, product_title, sku, shipping_city, shipping_country]
+supported_filters: [date_range, brand_id, product_title, sku]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Top products by gross profit last 30 days"
+    request: {measures: [product_gross_profit], dimensions: [product_title], time_range: {preset: last_30d}, limit: 10}
+validation_tests: []
+deprecated_aliases: []

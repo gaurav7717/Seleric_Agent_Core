@@ -1,7 +1,7 @@
 {
   "catalog_name": "seleric_gold_semantic_catalog",
   "version": "2.0.0",
-  "generated_at": "2026-07-10T10:00:37.766304+00:00",
+  "generated_at": "2026-07-11T10:56:22.777858+00:00",
   "scope": "clickhouse_gold_only",
   "timezone": "Asia/Kolkata",
   "entity_count": 26,
@@ -9,7 +9,7 @@
     {
       "name": "canonical_pnl",
       "title": "Canonical Company P&L (Gold)",
-      "description": "Company net profit, MER, and full operating waterfall from gold.fct_daily_pnl. MCP tool: cube_canonical_pnl. Sum daily rows for period rollups (IST report_date).",
+      "description": "Company net profit, MER, ROAS and full operating waterfall (rebuilt on int_finance_daily_rollups + line-item cost split + ad spend). MCP tool: cube_canonical_pnl. Sum daily rows for period rollups (IST report_date).",
       "mcp_tools": [
         "cube_canonical_pnl",
         "cube_pnl_today_yesterday"
@@ -50,7 +50,7 @@
     {
       "name": "meta_ad_breakdown",
       "title": "Meta Ads Breakdown (Gold)",
-      "description": "Meta ad performance by breakdown segment. REQUIRED filter breakdown_type \u2014 each type is a separate slice of the same spend; summing across types multi-counts. For total Meta spend/ROAS use meta_ad_performance (fct_meta_ads_daily).",
+      "description": "Meta ad performance by breakdown segment. REQUIRED filter breakdown_type \u00e2\u20ac\u201d each type is a separate slice of the same spend; summing across types multi-counts. For total Meta spend/ROAS use meta_ad_performance (fct_meta_ads_daily).",
       "mcp_tools": [
         "cube_meta_ads_breakdown"
       ]
@@ -106,7 +106,7 @@
     {
       "name": "session_funnel",
       "title": "Session Funnel (Gold)",
-      "description": "Snowplow session funnel from gold.fct_session_funnel. Count sessions and rates only \u2014 do NOT sum purchase_revenue for P&L. MCP tool: cube_session_funnel.",
+      "description": "Snowplow session funnel from gold.fct_session_funnel. Count sessions and rates only \u00e2\u20ac\u201d do NOT sum purchase_revenue for P&L. MCP tool: cube_session_funnel.",
       "mcp_tools": [
         "cube_session_funnel"
       ]
@@ -122,7 +122,7 @@
     {
       "name": "neurohack_catalog",
       "title": "Neurohack Tag Catalog (Gold)",
-      "description": "Creative taxonomy tags from gold.dim_neurohack \u2014 category, hack name, tag_code. MCP tool cube_neurohack_catalog.",
+      "description": "Creative taxonomy tags from gold.dim_neurohack \u00e2\u20ac\u201d category, hack name, tag_code. MCP tool cube_neurohack_catalog.",
       "mcp_tools": [
         "cube_neurohack_catalog"
       ]
@@ -130,7 +130,7 @@
     {
       "name": "ad_neurohack_map",
       "title": "Ad Neurohack Tag Map (Gold)",
-      "description": "Ad-to-tag mappings with category/hack names from gold.dim_ad_neurohack_map \u00d7 dim_neurohack. MCP tool cube_ad_neurohack.",
+      "description": "Ad-to-tag mappings with category/hack names from gold.dim_ad_neurohack_map \u00c3\u2014 dim_neurohack. MCP tool cube_ad_neurohack.",
       "mcp_tools": [
         "cube_ad_neurohack"
       ]
@@ -138,9 +138,33 @@
     {
       "name": "meta_neurohack_performance",
       "title": "Meta Ads by Neurohack Tag (Gold) [deprecated]",
-      "description": "DEPRECATED \u2014 use meta_neurotag_analysis for full-credit/split-credit metrics. Legacy SQL bridge from fct_meta_ads_daily \u00d7 dim_ad_neurohack_map. Multi-tag ads fan out spend across tags. MCP tool cube_meta_neurohack.",
+      "description": "DEPRECATED \u00e2\u20ac\u201d use meta_neurotag_analysis for full-credit/split-credit metrics. Legacy SQL bridge from fct_meta_ads_daily \u00c3\u2014 dim_ad_neurohack_map. Multi-tag ads fan out spend across tags. MCP tool cube_meta_neurohack.",
       "mcp_tools": [
         "cube_meta_neurohack"
+      ]
+    },
+    {
+      "name": "order_records",
+      "title": "Order Records (Gold)",
+      "description": "Order-grain record view (2026-07-11): one row per order, joining commerce order economics (gold_fct_orders) with last-touch attribution (gold_fct_order_attribution, one_to_one \u00e2\u20ac\u201d no fan-out) and customer repeat flag (gold_dim_customers, many_to_one). Built for record-level drill-down (campaign -> order -> city) \u00e2\u20ac\u201d see CANONICAL_DATA_MODEL.md \u00c2\u00a73.1. Do NOT join order_items onto this view (would fan out order-level revenue by line-item count) \u00e2\u20ac\u201d use order_item_records for item-level detail. MCP: cube_query.",
+      "mcp_tools": [
+        "cube_query"
+      ]
+    },
+    {
+      "name": "order_item_records",
+      "title": "Order Item Records (Gold)",
+      "description": "Line-item-grain record view (2026-07-11): one row per order line item, joining SKU/product/cost/margin (gold_fct_order_items) with parent order economics (gold_fct_orders, many_to_one \u00e2\u20ac\u201d safe, no fan-out) and last-touch attribution (gold_fct_order_attribution, via the order's one_to_one join). Drill-down target for product_performance and campaign_product_performance \u00e2\u20ac\u201d see CANONICAL_DATA_MODEL.md \u00c2\u00a73.2. MCP: cube_query.",
+      "mcp_tools": [
+        "cube_query"
+      ]
+    },
+    {
+      "name": "meta_campaign_attribution",
+      "title": "Meta Campaign Attribution (Gold)",
+      "description": "Campaign-level attributed revenue, COGS, and spend from gold only (gold_meta_campaign_attribution). Not for company total ad spend \u00e2\u20ac\u201d use canonical_pnl.total_ad_spend. Modern-named promotion of the legacy dw_meta_ads_attribution chart view (2026-07-11).",
+      "mcp_tools": [
+        "cube_query"
       ]
     },
     {
@@ -152,17 +176,9 @@
       ]
     },
     {
-      "name": "customer_acquisition_ltv",
-      "title": "Customer Acquisition LTV (Gold)",
-      "description": "Cohort LTV by acquisition channel/campaign.",
-      "mcp_tools": [
-        "cube_customer_acquisition_ltv"
-      ]
-    },
-    {
       "name": "meta_neurotag_analysis",
       "title": "Meta Ad Neurohack Tag Analysis (Gold)",
-      "description": "Ad \u00d7 tag daily with performance + last-touch attribution. Use spend_sc / net_revenue_sc for tag rollups; spend_fc when filtering one tag per ad. MCP tool cube_meta_neurotag.",
+      "description": "Ad \u00c3\u2014 tag daily with performance + last-touch attribution. Use spend_sc / net_revenue_sc for tag rollups; spend_fc when filtering one tag per ad. MCP tool cube_meta_neurotag.",
       "mcp_tools": [
         "cube_meta_neurotag"
       ]
@@ -208,9 +224,9 @@
       ]
     },
     {
-      "name": "amazon_sp_orders",
-      "title": "Amazon SP Orders (Gold)",
-      "description": "Amazon Seller-Partner orders. Date axis purchase_date. Filter order_attribution_tag = 'ORGANIC' for organic-only. MCP: cube_query.",
+      "name": "orders_amazon",
+      "title": "Amazon Orders (Gold)",
+      "description": "Amazon Seller-Partner orders \u00e2\u20ac\u201d platform-specific counterpart to commerce_orders (Shopify). Date axis purchase_date. Filter order_attribution_tag = 'ORGANIC' for organic-only. Renamed from amazon_sp_orders (2026-07-11) for unambiguous blended-vs-platform naming. MCP: cube_query.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -234,7 +250,7 @@
     {
       "name": "amazon_ad_performance",
       "title": "Amazon Ads Performance (Gold)",
-      "description": "Amazon Ads campaign \u00d7 day. Date axis report_date. Ratios recomputed from aggregates. sales/orders are platform-attributed, not Shopify truth. MCP: cube_query.",
+      "description": "Amazon Ads campaign \u00c3\u2014 day. Date axis report_date. Ratios recomputed from aggregates. sales/orders are platform-attributed, not Shopify truth. MCP: cube_query.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -248,9 +264,17 @@
       ]
     },
     {
+      "name": "customer_purchase_sequence",
+      "title": "Customer Purchase Sequence (Gold)",
+      "description": "Per-order sequence position and gap-from-previous-order for each customer, derived from gold.fct_orders \u00e2\u20ac\u201d no new source data. Powers purchase frequency, days-to-second-purchase, and repeat-order analysis. UNVERIFIED AGAINST LIVE CLICKHOUSE (2026-07-11) \u00e2\u20ac\u201d first cube in this model using window functions (row_number()/lagInFrame()); smoke-test against a live/staging Cube instance before relying on it in production. See CUBE_SEMANTIC_AUDIT.md \u00c2\u00a73.",
+      "mcp_tools": [
+        "cube_query"
+      ]
+    },
+    {
       "name": "daily_pnl",
       "title": "Daily P&L (Gold)",
-      "description": "Canonical company P&L (rebuilt: int_finance_daily_rollups + line-item cost split + platform ad spend; reconciles with historical + P&L dashboards). total_cogs = net_cogs (lifecycle net COGS incl Amazon). gross_profit = total_sales_ex_gst \u2212 net_cogs (contribution before marketing). net_profit = total_sales_ex_gst \u2212 net_cogs \u2212 total_ad_spend. MCP: cube_daily_pnl, cube_pnl_waterfall, cube_pnl_today_yesterday.",
+      "description": "Canonical company P&L (rebuilt: int_finance_daily_rollups + line-item cost split + platform ad spend; reconciles with historical + P&L dashboards). total_cogs = net_cogs (lifecycle net COGS incl Amazon). gross_profit = total_sales_ex_gst \u00e2\u02c6\u2019 net_cogs (contribution before marketing). net_profit = total_sales_ex_gst \u00e2\u02c6\u2019 net_cogs \u00e2\u02c6\u2019 total_ad_spend. MCP: cube_daily_pnl, cube_pnl_waterfall, cube_pnl_today_yesterday.",
       "mcp_tools": [
         "cube_daily_pnl",
         "cube_pnl_waterfall",
@@ -267,24 +291,24 @@
     },
     {
       "name": "marketing_performance",
-      "title": "Meta Marketing Performance (Gold)",
-      "description": "Meta ads daily from gold.fct_meta_ads_daily. MCP: cube_meta_ads.",
+      "title": "Meta Marketing Performance (Gold) [deprecated]",
+      "description": "DEPRECATED (2026-07-11) \u00e2\u20ac\u201d use meta_ad_performance, which wraps the same cube (gold.fct_meta_ads_daily) with the full field set and canonical naming. Kept for existing dashboard compatibility. MCP: cube_meta_ads.",
       "mcp_tools": [
         "cube_meta_ads"
       ]
     },
     {
       "name": "ad_performance",
-      "title": "Meta Ad Hourly Performance (Gold)",
-      "description": "Hour-of-day spend and delivery from gold.fct_meta_ads_hourly. Only cube with hourly_window. Purchases/ROAS use marketing_performance (daily).",
+      "title": "Meta Ad Hourly Performance (Gold) [deprecated]",
+      "description": "DEPRECATED (2026-07-11) \u00e2\u20ac\u201d use meta_ad_hourly, which wraps the same cube (gold.fct_meta_ads_hourly) with canonical naming. Kept for existing dashboard compatibility. Hour-of-day spend and delivery; only cube with hourly_window. Purchases/ROAS use meta_ad_performance (daily).",
       "mcp_tools": [
         "cube_query"
       ]
     },
     {
       "name": "dw_meta_ads_attribution",
-      "title": "Meta Campaign Attribution (Gold)",
-      "description": "Campaign-level attributed revenue + COGS + spend. Not for company total ad spend.",
+      "title": "Meta Campaign Attribution (Gold) [deprecated]",
+      "description": "DEPRECATED (2026-07-11) \u00e2\u20ac\u201d use meta_campaign_attribution (serve_views.yml), a modern-named view over the same cube (gold_meta_campaign_attribution). Campaign-level attributed revenue + COGS + spend. Not for company total ad spend.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -298,25 +322,18 @@
       ]
     },
     {
-      "name": "shopify_order_line_items",
-      "title": "Shopify Order Line Items (Gold)",
-      "description": "Line-item discounts, units, and margin from gold.fct_order_items.",
-      "mcp_tools": [
-        "cube_line_economics"
-      ]
-    },
-    {
       "name": "product_performance",
       "title": "Product / SKU Performance (Gold)",
-      "description": "SKU revenue, COGS, returns from gold.fct_order_items. MCP tool cube_product_performance.",
+      "description": "SKU revenue, COGS, returns, and line-item discounts/margin from gold.fct_order_items (merged with the former shopify_order_line_items view 2026-07-11). MCP tool cube_product_performance.",
       "mcp_tools": [
-        "cube_product_performance"
+        "cube_product_performance",
+        "cube_line_economics"
       ]
     },
     {
       "name": "gold__ad_neurohack_enriched",
       "title": "Gold ad_neurohack_enriched (all columns)",
-      "description": "Full exposure of gold.ad_neurohack_enriched \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__ad_neurohack_enriched.",
+      "description": "Full exposure of gold.ad_neurohack_enriched \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__ad_neurohack_enriched.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -324,7 +341,7 @@
     {
       "name": "gold__campaign_product_performance",
       "title": "Gold campaign_product_performance (all columns)",
-      "description": "Full exposure of gold.campaign_product_performance \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__campaign_product_performance.",
+      "description": "Full exposure of gold.campaign_product_performance \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__campaign_product_performance.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -332,7 +349,7 @@
     {
       "name": "gold__channel_pnl",
       "title": "Gold channel_pnl (all columns)",
-      "description": "Full exposure of gold.channel_pnl \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__channel_pnl.",
+      "description": "Full exposure of gold.channel_pnl \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__channel_pnl.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -340,7 +357,7 @@
     {
       "name": "gold__customer_acquisition_ltv",
       "title": "Gold customer_acquisition_ltv (all columns)",
-      "description": "Full exposure of gold.customer_acquisition_ltv \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__customer_acquisition_ltv.",
+      "description": "Full exposure of gold.customer_acquisition_ltv \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__customer_acquisition_ltv.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -348,7 +365,7 @@
     {
       "name": "gold__daily_performance",
       "title": "Gold daily_performance (all columns)",
-      "description": "Full exposure of gold.daily_performance \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__daily_performance.",
+      "description": "Full exposure of gold.daily_performance \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__daily_performance.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -356,7 +373,7 @@
     {
       "name": "gold__dim_ad",
       "title": "Gold dim_ad (all columns)",
-      "description": "Full exposure of gold.dim_ad \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_ad.",
+      "description": "Full exposure of gold.dim_ad \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_ad.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -364,7 +381,7 @@
     {
       "name": "gold__dim_ad_neurohack_map",
       "title": "Gold dim_ad_neurohack_map (all columns)",
-      "description": "Full exposure of gold.dim_ad_neurohack_map \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_ad_neurohack_map.",
+      "description": "Full exposure of gold.dim_ad_neurohack_map \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_ad_neurohack_map.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -372,7 +389,7 @@
     {
       "name": "gold__dim_adset",
       "title": "Gold dim_adset (all columns)",
-      "description": "Full exposure of gold.dim_adset \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_adset.",
+      "description": "Full exposure of gold.dim_adset \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_adset.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -380,7 +397,7 @@
     {
       "name": "gold__dim_campaign",
       "title": "Gold dim_campaign (all columns)",
-      "description": "Full exposure of gold.dim_campaign \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_campaign.",
+      "description": "Full exposure of gold.dim_campaign \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_campaign.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -388,7 +405,7 @@
     {
       "name": "gold__dim_customers",
       "title": "Gold dim_customers (all columns)",
-      "description": "Full exposure of gold.dim_customers \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_customers.",
+      "description": "Full exposure of gold.dim_customers \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_customers.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -396,7 +413,7 @@
     {
       "name": "gold__dim_neurohack",
       "title": "Gold dim_neurohack (all columns)",
-      "description": "Full exposure of gold.dim_neurohack \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_neurohack.",
+      "description": "Full exposure of gold.dim_neurohack \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__dim_neurohack.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -412,7 +429,7 @@
     {
       "name": "gold__fct_google_ads_daily",
       "title": "Gold fct_google_ads_daily (all columns)",
-      "description": "Full exposure of gold.fct_google_ads_daily \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_google_ads_daily.",
+      "description": "Full exposure of gold.fct_google_ads_daily \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_google_ads_daily.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -420,7 +437,7 @@
     {
       "name": "gold__fct_google_ads_status_history",
       "title": "Gold fct_google_ads_status_history (all columns)",
-      "description": "Full exposure of gold.fct_google_ads_status_history \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_google_ads_status_history.",
+      "description": "Full exposure of gold.fct_google_ads_status_history \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_google_ads_status_history.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -428,7 +445,7 @@
     {
       "name": "gold__fct_google_campaigns_hourly",
       "title": "Gold fct_google_campaigns_hourly (all columns)",
-      "description": "Full exposure of gold.fct_google_campaigns_hourly \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_google_campaigns_hourly.",
+      "description": "Full exposure of gold.fct_google_campaigns_hourly \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_google_campaigns_hourly.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -436,7 +453,7 @@
     {
       "name": "gold__fct_meta_ads_breakdown_daily",
       "title": "Gold fct_meta_ads_breakdown_daily (all columns)",
-      "description": "Full exposure of gold.fct_meta_ads_breakdown_daily \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_breakdown_daily.",
+      "description": "Full exposure of gold.fct_meta_ads_breakdown_daily \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_breakdown_daily.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -444,7 +461,7 @@
     {
       "name": "gold__fct_meta_ads_daily",
       "title": "Gold fct_meta_ads_daily (all columns)",
-      "description": "Full exposure of gold.fct_meta_ads_daily \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_daily.",
+      "description": "Full exposure of gold.fct_meta_ads_daily \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_daily.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -452,7 +469,7 @@
     {
       "name": "gold__fct_meta_ads_hourly",
       "title": "Gold fct_meta_ads_hourly (all columns)",
-      "description": "Full exposure of gold.fct_meta_ads_hourly \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_hourly.",
+      "description": "Full exposure of gold.fct_meta_ads_hourly \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_hourly.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -460,7 +477,7 @@
     {
       "name": "gold__fct_meta_ads_status_history",
       "title": "Gold fct_meta_ads_status_history (all columns)",
-      "description": "Full exposure of gold.fct_meta_ads_status_history \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_status_history.",
+      "description": "Full exposure of gold.fct_meta_ads_status_history \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_meta_ads_status_history.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -468,7 +485,7 @@
     {
       "name": "gold__fct_order_attribution",
       "title": "Gold fct_order_attribution (all columns)",
-      "description": "Full exposure of gold.fct_order_attribution \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_order_attribution.",
+      "description": "Full exposure of gold.fct_order_attribution \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_order_attribution.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -476,7 +493,7 @@
     {
       "name": "gold__fct_order_items",
       "title": "Gold fct_order_items (all columns)",
-      "description": "Full exposure of gold.fct_order_items \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_order_items.",
+      "description": "Full exposure of gold.fct_order_items \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_order_items.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -484,7 +501,7 @@
     {
       "name": "gold__fct_orders",
       "title": "Gold fct_orders (all columns)",
-      "description": "Full exposure of gold.fct_orders \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_orders.",
+      "description": "Full exposure of gold.fct_orders \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_orders.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -492,7 +509,7 @@
     {
       "name": "gold__fct_payments",
       "title": "Gold fct_payments (all columns)",
-      "description": "Full exposure of gold.fct_payments \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_payments.",
+      "description": "Full exposure of gold.fct_payments \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_payments.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -500,7 +517,7 @@
     {
       "name": "gold__fct_product_variant_cost",
       "title": "Gold fct_product_variant_cost (all columns)",
-      "description": "Full exposure of gold.fct_product_variant_cost \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_product_variant_cost.",
+      "description": "Full exposure of gold.fct_product_variant_cost \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_product_variant_cost.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -508,7 +525,7 @@
     {
       "name": "gold__fct_product_variant_cost_history",
       "title": "Gold fct_product_variant_cost_history (all columns)",
-      "description": "Full exposure of gold.fct_product_variant_cost_history \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_product_variant_cost_history.",
+      "description": "Full exposure of gold.fct_product_variant_cost_history \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_product_variant_cost_history.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -516,7 +533,7 @@
     {
       "name": "gold__fct_session_funnel",
       "title": "Gold fct_session_funnel (all columns)",
-      "description": "Full exposure of gold.fct_session_funnel \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_session_funnel.",
+      "description": "Full exposure of gold.fct_session_funnel \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__fct_session_funnel.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -524,7 +541,7 @@
     {
       "name": "gold__hourly_commerce",
       "title": "Gold hourly_commerce (all columns)",
-      "description": "Full exposure of gold.hourly_commerce \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__hourly_commerce.",
+      "description": "Full exposure of gold.hourly_commerce \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__hourly_commerce.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -532,7 +549,7 @@
     {
       "name": "gold__mart_meta_ad_neurotag_daily",
       "title": "Gold mart_meta_ad_neurotag_daily (all columns)",
-      "description": "Full exposure of gold.mart_meta_ad_neurotag_daily \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__mart_meta_ad_neurotag_daily.",
+      "description": "Full exposure of gold.mart_meta_ad_neurotag_daily \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__mart_meta_ad_neurotag_daily.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -540,7 +557,7 @@
     {
       "name": "gold__meta_campaign_attribution",
       "title": "Gold meta_campaign_attribution (all columns)",
-      "description": "Full exposure of gold.meta_campaign_attribution \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__meta_campaign_attribution.",
+      "description": "Full exposure of gold.meta_campaign_attribution \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__meta_campaign_attribution.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -548,7 +565,7 @@
     {
       "name": "gold__meta_neurohack_daily",
       "title": "Gold meta_neurohack_daily (all columns)",
-      "description": "Full exposure of gold.meta_neurohack_daily \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__meta_neurohack_daily.",
+      "description": "Full exposure of gold.meta_neurohack_daily \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__meta_neurohack_daily.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -556,7 +573,7 @@
     {
       "name": "gold__neurohack_attribution",
       "title": "Gold neurohack_attribution (all columns)",
-      "description": "Full exposure of gold.neurohack_attribution \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__neurohack_attribution.",
+      "description": "Full exposure of gold.neurohack_attribution \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__neurohack_attribution.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -564,7 +581,7 @@
     {
       "name": "gold__payment_method_pnl",
       "title": "Gold payment_method_pnl (all columns)",
-      "description": "Full exposure of gold.payment_method_pnl \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__payment_method_pnl.",
+      "description": "Full exposure of gold.payment_method_pnl \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__payment_method_pnl.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -572,7 +589,7 @@
     {
       "name": "gold__refund_events",
       "title": "Gold refund_events (all columns)",
-      "description": "Full exposure of gold.refund_events \u2014 every synced column as a queryable member. MCP: cube_query with view prefix gold__refund_events.",
+      "description": "Full exposure of gold.refund_events \u00e2\u20ac\u201d every synced column as a queryable member. MCP: cube_query with view prefix gold__refund_events.",
       "mcp_tools": [
         "cube_query"
       ]
@@ -760,7 +777,7 @@
         "tag_position"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Maps Meta ads to Neurohack tag codes extracted from ad names. Grain brand_id \u00d7 ad_key \u00d7 tag_code \u00d7 tag_position. One ad may have multiple tags \u2014 join to meta ads fans out spend across tags.",
+      "description": "Maps Meta ads to Neurohack tag codes extracted from ad names. Grain brand_id \u00c3\u2014 ad_key \u00c3\u2014 tag_code \u00c3\u2014 tag_position. One ad may have multiple tags \u00e2\u20ac\u201d join to meta ads fans out spend across tags.",
       "measures": [
         {
           "name": "tag_mappings",
@@ -1175,10 +1192,10 @@
       "measures": [
         {
           "name": "customers",
-          "type": "count",
+          "type": "count_distinct",
           "format": "number",
           "description": null,
-          "sql": null
+          "sql": "{CUBE}.customer_id"
         },
         {
           "name": "lifetime_gross_revenue",
@@ -1581,7 +1598,7 @@
         "tag_code"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Master catalog of Neurohack creative tags (tag_code \u2192 category, hack_name). Grain tag_code. Join to dim_ad_neurohack_map on tag_code for ad-level analysis.",
+      "description": "Master catalog of Neurohack creative tags (tag_code \u00e2\u2020\u2019 category, hack_name). Grain tag_code. Join to dim_ad_neurohack_map on tag_code for ad-level analysis.",
       "measures": [
         {
           "name": "tags",
@@ -1667,7 +1684,7 @@
         "brand_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Amazon Ads (SP/SB/SD) performance at brand \u00d7 campaign \u00d7 report_date. Date axis is report_date. spend = coalesce(spend, cost). sales/orders are Amazon-attributed (platform-reported), not Shopify truth. Ratios recomputed from numerator/ denominator. Serve view: amazon_ad_performance.",
+      "description": "Amazon Ads (SP/SB/SD) performance at brand \u00c3\u2014 campaign \u00c3\u2014 report_date. Date axis is report_date. spend = coalesce(spend, cost). sales/orders are Amazon-attributed (platform-reported), not Shopify truth. Ratios recomputed from numerator/ denominator. Serve view: amazon_ad_performance.",
       "measures": [
         {
           "name": "spend",
@@ -1701,7 +1718,7 @@
           "name": "attributed_sales",
           "type": "sum",
           "format": "currency",
-          "description": "Amazon-attributed sales (platform-reported) \u2014 not Shopify truth.",
+          "description": "Amazon-attributed sales (platform-reported) \u00e2\u20ac\u201d not Shopify truth.",
           "sql": "sales"
         },
         {
@@ -1815,7 +1832,7 @@
         "brand_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Amazon line items at brand \u00d7 amazon_order_id \u00d7 order_item_id grain. SKU/ASIN revenue, quantity and matched product COGS. Drill-down only \u2014 order-level P&L (fees, payout) is in amazon_sp_order_pnl. Serve view: amazon_order_items.",
+      "description": "Amazon line items at brand \u00c3\u2014 amazon_order_id \u00c3\u2014 order_item_id grain. SKU/ASIN revenue, quantity and matched product COGS. Drill-down only \u00e2\u20ac\u201d order-level P&L (fees, payout) is in amazon_sp_order_pnl. Serve view: amazon_order_items.",
       "measures": [
         {
           "name": "line_item_count",
@@ -1842,7 +1859,7 @@
           "name": "item_revenue",
           "type": "sum",
           "format": "currency",
-          "description": "SUM(item_price_amount) \u2014 item price incl customer GST.",
+          "description": "SUM(item_price_amount) \u00e2\u20ac\u201d item price incl customer GST.",
           "sql": "item_price_amount"
         },
         {
@@ -1863,7 +1880,7 @@
           "name": "product_cost",
           "type": "sum",
           "format": "currency",
-          "description": "Matched product COGS (cost_per_item \u00d7 quantity).",
+          "description": "Matched product COGS (cost_per_item \u00c3\u2014 quantity).",
           "sql": "total_cogs"
         },
         {
@@ -1964,7 +1981,7 @@
         "brand_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Amazon Seller-Partner P&L at brand \u00d7 amazon_order_id grain from settlement + estimated data. gross_revenue/net_payout/refunds resolve effective ?? estimated. amazon_fees is the component sum (|commission|+|closing|+|shipping|+|other|+ |TCS/TDS|) so tax-withheld is always included. Pending refunds / label fees (accrual) live in amazon_return_reconciliation. Serve view: amazon_sp_order_pnl. Currency: INR.",
+      "description": "Amazon Seller-Partner P&L at brand \u00c3\u2014 amazon_order_id grain from settlement + estimated data. gross_revenue/net_payout/refunds resolve effective ?? estimated. amazon_fees is the component sum (|commission|+|closing|+|shipping|+|other|+ |TCS/TDS|) so tax-withheld is always included. Pending refunds / label fees (accrual) live in amazon_return_reconciliation. Serve view: amazon_sp_order_pnl. Currency: INR.",
       "measures": [
         {
           "name": "order_count",
@@ -1998,14 +2015,14 @@
           "name": "settled_refunds",
           "type": "sum",
           "format": "currency",
-          "description": "abs(refunds) \u2014 refunds already in settlement, shown positive.",
+          "description": "abs(refunds) \u00e2\u20ac\u201d refunds already in settlement, shown positive.",
           "sql": "abs(coalesce(effective_refunds, estimated_refunds, 0))"
         },
         {
           "name": "amazon_fees",
           "type": "sum",
           "format": "currency",
-          "description": "Component-based fee sum (commission + closing + shipping + other + TCS/TDS). Primary formula \u2014 always includes tax withheld. Never Math.abs(SUM(total_amazon_fees)).",
+          "description": "Component-based fee sum (commission + closing + shipping + other + TCS/TDS). Primary formula \u00e2\u20ac\u201d always includes tax withheld. Never Math.abs(SUM(total_amazon_fees)).",
           "sql": "abs(coalesce(effective_commission, 0)) + abs(coalesce(effective_closing, 0)) + abs(coalesce(effective_shipping, 0)) + abs(coalesce(effective_other_service_fees, 0)) + abs(coalesce(effective_tax_withheld, 0))\n"
         },
         {
@@ -2019,7 +2036,7 @@
           "name": "product_cost",
           "type": "sum",
           "format": "currency",
-          "description": "Product COGS = cogs_product (seller unit cost \u00d7 qty). NOT the total_cogs column.",
+          "description": "Product COGS = cogs_product (seller unit cost \u00c3\u2014 qty). NOT the total_cogs column.",
           "sql": "cogs_product"
         },
         {
@@ -2033,7 +2050,7 @@
           "name": "gross_profit",
           "type": "sum",
           "format": "currency",
-          "description": "net_payout \u2212 product_cost (deduct cogs_product, not total_cogs).",
+          "description": "net_payout \u00e2\u02c6\u2019 product_cost (deduct cogs_product, not total_cogs).",
           "sql": "coalesce(effective_net_payout, estimated_net_payout, 0) - coalesce(cogs_product, 0)"
         },
         {
@@ -2150,7 +2167,7 @@
         "brand_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Amazon Seller-Partner orders at brand \u00d7 amazon_order_id grain. Date axis is purchase_date. Filter order_attribution_tag = 'ORGANIC' for organic-only orders. Order-level P&L (payout, fees, COGS) lives in amazon_sp_order_pnl. Serve view: amazon_sp_orders. Data owner: Amazon SP ingestion. Currency: INR.",
+      "description": "Amazon Seller-Partner orders at brand \u00c3\u2014 amazon_order_id grain. Date axis is purchase_date. Filter order_attribution_tag = 'ORGANIC' for organic-only orders. Order-level P&L (payout, fees, COGS) lives in amazon_sp_order_pnl. Serve view: amazon_sp_orders. Data owner: Amazon SP ingestion. Currency: INR.",
       "measures": [
         {
           "name": "order_count",
@@ -2163,7 +2180,7 @@
           "name": "total_order_total",
           "type": "sum",
           "format": "currency",
-          "description": "SUM(order_total) \u2014 order header value incl customer GST.",
+          "description": "SUM(order_total) \u00e2\u20ac\u201d order header value incl customer GST.",
           "sql": "order_total"
         },
         {
@@ -2302,7 +2319,7 @@
         }
       ],
       "views": [
-        "amazon_sp_orders"
+        "orders_amazon"
       ],
       "mcp_tools": [
         "cube_query"
@@ -3094,7 +3111,7 @@
         "ad_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Meta ad performance by breakdown segment. Grain includes breakdown_type \u2014 always filter to exactly one breakdown_type before aggregating spend. For account/campaign/ad totals use gold.fct_meta_ads_daily (meta_ad_performance).",
+      "description": "Meta ad performance by breakdown segment. Grain includes breakdown_type \u00e2\u20ac\u201d always filter to exactly one breakdown_type before aggregating spend. For account/campaign/ad totals use gold.fct_meta_ads_daily (meta_ad_performance).",
       "measures": [
         {
           "name": "spend",
@@ -4872,7 +4889,7 @@
         {
           "name": "hourly_window",
           "type": "number",
-          "title": "Hour of Day (0\u201323)",
+          "title": "Hour of Day (0\u00e2\u20ac\u201c23)",
           "description": null
         },
         {
@@ -5715,10 +5732,10 @@
       "measures": [
         {
           "name": "line_item_count",
-          "type": "count",
+          "type": "count_distinct",
           "format": "number",
           "description": null,
-          "sql": null
+          "sql": "{CUBE}.line_item_id"
         },
         {
           "name": "net_revenue",
@@ -5738,7 +5755,7 @@
           "name": "gross_line_revenue_ex_gst",
           "type": "sum",
           "format": "currency",
-          "description": "Pre-discount, pre-refund line revenue ex-GST. Uses per-line GST columns (net_pre_refund_excl_gst + discount_excl_gst), NOT a flat /1.18 \u2014 brands have mixed 5/12/18/28% rates.",
+          "description": "Pre-discount, pre-refund line revenue ex-GST. Uses per-line GST columns (net_pre_refund_excl_gst + discount_excl_gst), NOT a flat /1.18 \u00e2\u20ac\u201d brands have mixed 5/12/18/28% rates.",
           "sql": "net_pre_refund_excl_gst + discount_excl_gst"
         },
         {
@@ -5773,7 +5790,7 @@
           "name": "returned_units",
           "type": "sum",
           "format": "number",
-          "description": "Pre-filtered to RETURNED + IN_PROGRESS \u2014 do not add extra return_status filter.",
+          "description": "Pre-filtered to RETURNED + IN_PROGRESS \u00e2\u20ac\u201d do not add extra return_status filter.",
           "sql": "CASE WHEN {CUBE}.return_status IN ('RETURNED', 'IN_PROGRESS') THEN {CUBE}.quantity ELSE 0 END"
         },
         {
@@ -5815,7 +5832,7 @@
           "name": "gross_profit_ex_gst",
           "type": "number",
           "format": "currency",
-          "description": "Net line revenue ex-GST \u2212 net product cost (per-line GST columns, not flat /1.18).",
+          "description": "Net line revenue ex-GST \u00e2\u02c6\u2019 net product cost (per-line GST columns, not flat /1.18).",
           "sql": "sum(CASE WHEN {CUBE}.return_status NOT IN ('RETURNED', 'IN_PROGRESS') THEN {CUBE}.net_excl_gst ELSE 0 END) - sum({CUBE}.net_cost)"
         },
         {
@@ -5920,7 +5937,7 @@
           "name": "gross_margin",
           "type": "number",
           "format": "currency",
-          "description": "Net line revenue ex-GST \u2212 net product cost (per-line GST columns, not flat /1.18).",
+          "description": "Net line revenue ex-GST \u00e2\u02c6\u2019 net product cost (per-line GST columns, not flat /1.18).",
           "sql": "sum({CUBE}.net_excl_gst) - sum({CUBE}.net_cost)"
         },
         {
@@ -6437,7 +6454,7 @@
           "name": "returned_at_ist",
           "type": "time",
           "title": "Return Date (IST)",
-          "description": "Parent order return lifecycle date \u2014 use with return_status for return tracking."
+          "description": "Parent order return lifecycle date \u00e2\u20ac\u201d use with return_status for return tracking."
         },
         {
           "name": "shopify_return_status",
@@ -6525,7 +6542,7 @@
         }
       ],
       "views": [
-        "shopify_order_line_items",
+        "order_item_records",
         "product_performance",
         "gold__fct_order_items"
       ],
@@ -6549,10 +6566,10 @@
       "measures": [
         {
           "name": "orders",
-          "type": "count",
+          "type": "count_distinct",
           "format": "number",
           "description": null,
-          "sql": null
+          "sql": "CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.order_id END"
         },
         {
           "name": "gross_revenue",
@@ -6649,7 +6666,7 @@
           "name": "returned_orders",
           "type": "count_distinct",
           "format": "number",
-          "description": "RETURNED + IN_PROGRESS only \u2014 time-axis returned_at_ist; do not use IS NOT NULL on return_status.",
+          "description": "RETURNED + IN_PROGRESS only \u00e2\u20ac\u201d time-axis returned_at_ist; do not use IS NOT NULL on return_status.",
           "sql": "CASE WHEN {CUBE}.return_status IN ('RETURNED', 'IN_PROGRESS') AND {CUBE}.is_test = 0 AND {CUBE}.returned_at IS NOT NULL THEN {CUBE}.order_id END"
         },
         {
@@ -6802,7 +6819,7 @@
           "name": "created_at_ist",
           "type": "time",
           "title": "Order Date (IST)",
-          "description": "Alias for order_date \u2014 always use IST, never UTC created_at."
+          "description": "Alias for order_date \u00e2\u20ac\u201d always use IST, never UTC created_at."
         },
         {
           "name": "customer_id",
@@ -7042,7 +7059,7 @@
           "name": "returned_at_ist",
           "type": "time",
           "title": "Return Date (IST)",
-          "description": "Use for return-status time series \u2014 not order_date or updated_at."
+          "description": "Use for return-status time series \u00e2\u20ac\u201d not order_date or updated_at."
         },
         {
           "name": "primary_return_status",
@@ -7167,6 +7184,7 @@
       ],
       "views": [
         "commerce_orders",
+        "order_records",
         "shopify_orders",
         "gold__fct_orders"
       ],
@@ -7871,14 +7889,14 @@
         "session_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Session-level Snowplow funnel from gold.fct_session_funnel. Use session_funnel view. Count sessions and conversion rates only \u2014 do NOT sum purchase_revenue for P&L (use fct_order_attribution).",
+      "description": "Session-level Snowplow funnel from gold.fct_session_funnel. Use session_funnel view. Count sessions and conversion rates only \u00e2\u20ac\u201d do NOT sum purchase_revenue for P&L (use fct_order_attribution).",
       "measures": [
         {
           "name": "sessions",
-          "type": "count",
+          "type": "count_distinct",
           "format": "number",
           "description": null,
-          "sql": null
+          "sql": "{CUBE}.session_id"
         },
         {
           "name": "converted_sessions",
@@ -8332,7 +8350,7 @@
         "brand_id"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Amazon return/refund reconciliation at record_id grain. Source of accrual pending_refunds (REPORT_REFUND_PENDING_FINANCE) and pending_label_fees (REPORT_REFUND_PENDING_FINANCE + LABEL_PENDING_FINANCE) deducted from Amazon net profit. Operational / drill-down \u2014 not a revenue table. Serve view: amazon_return_reconciliation.",
+      "description": "Amazon return/refund reconciliation at record_id grain. Source of accrual pending_refunds (REPORT_REFUND_PENDING_FINANCE) and pending_label_fees (REPORT_REFUND_PENDING_FINANCE + LABEL_PENDING_FINANCE) deducted from Amazon net profit. Operational / drill-down \u00e2\u20ac\u201d not a revenue table. Serve view: amazon_return_reconciliation.",
       "measures": [
         {
           "name": "record_count",
@@ -8419,7 +8437,7 @@
           "name": "reconciliation_status",
           "type": "string",
           "title": null,
-          "description": "Drives P&L treatment \u2014 REPORT_REFUND_PENDING_FINANCE, LABEL_PENDING_FINANCE, SETTLED, OPEN, REJECTED_*, etc. (Reference \u00a717.2)."
+          "description": "Drives P&L treatment \u00e2\u20ac\u201d REPORT_REFUND_PENDING_FINANCE, LABEL_PENDING_FINANCE, SETTLED, OPEN, REJECTED_*, etc. (Reference \u00c2\u00a717.2)."
         },
         {
           "name": "return_request_status",
@@ -8465,7 +8483,7 @@
         "tag_code"
       ],
       "timezone": "Asia/Kolkata",
-      "description": "Ad \u00d7 Neurohack tag daily analytical surface with performance + attribution. Full-credit (*_fc) preserves ad-level totals; split-credit (*_sc) divides by tag_count. Use spend_sc / net_revenue_sc for tag-level rollups; spend_fc only when filtering to one tag per ad.",
+      "description": "Ad \u00c3\u2014 Neurohack tag daily analytical surface with performance + attribution. Full-credit (*_fc) preserves ad-level totals; split-credit (*_sc) divides by tag_count. Use spend_sc / net_revenue_sc for tag-level rollups; spend_fc only when filtering to one tag per ad.",
       "measures": [
         {
           "name": "spend_fc",
@@ -9367,5 +9385,5 @@
       ]
     }
   ],
-  "glossary_ref": "mage-ai/docs/FINANCE_DEFINITIONS.md"
+  "glossary_ref": null
 }

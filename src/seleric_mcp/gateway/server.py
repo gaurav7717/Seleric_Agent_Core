@@ -17,7 +17,7 @@ from ..actions.broker import ActionBroker
 from ..actions.executors.pipeboard import PipeboardExecutor
 from ..actions.stores import ActionStore, IdempotencyStore
 from ..app.insight_engine import explain as insight_explain
-from ..app.models import FilterSpec, PlanError, QueryRequest, TimeRange
+from ..app.models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from ..app.query_planner import QueryPlanner
 from ..app.result_store import ResultStore
 from ..catalogue_service.loader import load_catalogue
@@ -108,6 +108,40 @@ def build_server(settings: Settings) -> FastMCP:
         logger.info("tool_call", tool=tool, trace_id=trace_id, **fields)
         return trace_id
 
+    def _check_metric_scopes(metric_ids: list[str]) -> dict | None:
+        """Enforce access_policy.scopes (declared on every catalogue metric)
+        against the caller's granted scopes — mirrors the existing check for
+        actions (actions/broker.py: scopes_required <= caller_scopes), which
+        previously had no metrics_query/metrics_drilldown equivalent despite
+        every metric declaring a scopes list. Returns an access-denied payload
+        if any requested metric requires a scope the caller doesn't have;
+        None if authorized. Unknown metric ids are skipped here — QueryPlanner
+        raises its own clear PlanError for those.
+
+        NOTE: access_policy.roles_allowed (e.g. net_profit: [exec, finance])
+        is NOT enforced here — this deployment is a single shared
+        service-token actor (see AppContext.actor) with no per-caller role
+        identity to check it against. roles_allowed stays informational/
+        documentation-only until this service authenticates individual users
+        rather than one shared token; only the scopes-based check below is a
+        real enforcement point today.
+        """
+        denied: dict[str, list[str]] = {}
+        for mid in metric_ids:
+            m = ctx.catalogue.get_metric(mid)
+            if m is None:
+                continue
+            missing = sorted(set(m.access_policy.scopes) - ctx.settings.caller_scopes)
+            if missing:
+                denied[mid] = missing
+        if not denied:
+            return None
+        return {
+            "error": "Caller lacks required scopes for one or more requested metrics.",
+            "missing_scopes_by_metric": denied,
+            "caller_scopes": sorted(ctx.settings.caller_scopes),
+        }
+
     # ---------------- catalogue tools ----------------
 
     @mcp.tool()
@@ -174,6 +208,7 @@ def build_server(settings: Settings) -> FastMCP:
         filters: list[dict] | None = None,
         granularity: str = "none",
         compare_period: str | None = None,
+        sort: list[dict] | None = None,
         limit: int = 500,
     ) -> dict:
         """THE only path to numeric data. measures = catalogue metric ids
@@ -182,10 +217,20 @@ def build_server(settings: Settings) -> FastMCP:
         this_month|last_month) or {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}.
         filters entries: {"dimension": <id>, "operator": "equals", "values":
         [...]}. granularity: day|week|month|none. compare_period:
-        previous_period|previous_year. All metrics must live on one view.
-        Returns rows plus a provenance block — quote its freshness when
-        presenting numbers."""
+        previous_period|previous_year. sort entries: {"field": <metric_id or
+        dimension_id used in this query>, "direction": "asc"|"desc"} — for
+        "top N" / "bottom N" questions, sort by the relevant metric desc/asc
+        and set limit=N; without sort, row order is unspecified except when a
+        time granularity is set (defaults to ascending by date). Metrics on
+        different views are run as parallel single-view queries and returned
+        with composed=true and a parts[] array — narrate each part separately
+        (do not join across views). Same-view metrics return the usual rows +
+        provenance. Quote provenance freshness when presenting numbers."""
         trace_id = _log_call("metrics_query", measures=measures)
+        denial = _check_metric_scopes(measures)
+        if denial:
+            logger.warning("metrics_query_denied", trace_id=trace_id, measures=measures)
+            return denial
         try:
             request = QueryRequest(
                 measures=measures,
@@ -194,6 +239,7 @@ def build_server(settings: Settings) -> FastMCP:
                 time_range=TimeRange.model_validate(time_range),
                 granularity=granularity,  # type: ignore[arg-type]
                 compare_period=compare_period,  # type: ignore[arg-type]
+                sort=[SortSpec.model_validate(s) for s in (sort or [])],
                 limit=limit,
             )
             return await ctx.planner.run(request)
@@ -214,6 +260,16 @@ def build_server(settings: Settings) -> FastMCP:
         compare mode and filters, regrouped by target_dimensions. Additional
         filters can only narrow the parent scope, never widen it."""
         trace_id = _log_call("metrics_drilldown", parent_query_id=parent_query_id)
+        stored = ctx.result_store.get(parent_query_id)
+        if stored is not None:
+            try:
+                parent_measures = QueryRequest.model_validate_json(stored.request_json).measures
+                denial = _check_metric_scopes(parent_measures)
+                if denial:
+                    logger.warning("metrics_drilldown_denied", trace_id=trace_id, measures=parent_measures)
+                    return denial
+            except Exception:
+                pass  # malformed/legacy stored request — let drilldown() surface its own error
         try:
             return await ctx.planner.drilldown(
                 parent_query_id,

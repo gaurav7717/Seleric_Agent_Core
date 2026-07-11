@@ -1,6 +1,7 @@
 # gold.fct_meta_ads_hourly — brand × date × hour × account × campaign × adset × ad.
 cubes:
 - name: gold_fct_meta_ads_hourly
+  public: false
   sql_table: gold.fct_meta_ads_hourly
   title: Gold Meta Ads Hourly
   description: Meta ad hourly performance from gold.fct_meta_ads_hourly. Use meta_ad_hourly

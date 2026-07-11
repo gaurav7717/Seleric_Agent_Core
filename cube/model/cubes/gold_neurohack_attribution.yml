@@ -1,6 +1,7 @@
 # Neurohack tag × attributed revenue + Meta spend — dim_ad_neurohack_map + fct_order_attribution.
 cubes:
 - name: gold_neurohack_attribution
+  public: false
   title: Neurohack Attribution (Gold)
   description: >
     Attributed revenue and Meta ad spend by Neurohack tag. Multi-tag ads fan out spend
@@ -70,6 +71,10 @@ cubes:
     type: count_distinct
     format: number
   dimensions:
+  - name: neurohack_attribution_key
+    sql: "concat(toString(brand_id),'|',toString(report_date),'|',tag_code,'|',coalesce(ad_id,''))"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

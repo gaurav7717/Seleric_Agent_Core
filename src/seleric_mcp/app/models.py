@@ -40,6 +40,11 @@ class FilterSpec(BaseModel):
     values: list[str] = Field(default_factory=list)
 
 
+class SortSpec(BaseModel):
+    field: str  # a requested metric id, or a dimension id valid on the query's view
+    direction: Literal["asc", "desc"] = "desc"
+
+
 class QueryRequest(BaseModel):
     measures: list[str] = Field(min_length=1)  # catalogue metric ids
     dimensions: list[str] = Field(default_factory=list)
@@ -47,6 +52,9 @@ class QueryRequest(BaseModel):
     time_range: TimeRange
     granularity: Granularity = "none"
     compare_period: ComparePeriod | None = None
+    sort: list[SortSpec] = Field(default_factory=list)  # e.g. top-N: sort by a
+    # metric desc + limit=N. Empty means Cube's default order (date ascending
+    # when a time dimension with granularity is present, else unordered).
     limit: int = Field(default=500, ge=1, le=5000)
 
 

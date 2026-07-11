@@ -1,6 +1,7 @@
 # gold.fct_product_variant_cost — current COGS snapshot per variant.
 cubes:
 - name: gold_fct_product_variant_cost
+  public: false
   sql_table: gold.fct_product_variant_cost
   title: Gold Variant Cost (Current)
   description: Current product cost snapshot. Use variant_economics view.

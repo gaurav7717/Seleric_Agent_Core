@@ -1,6 +1,7 @@
 # Daily session funnel + company P&L on same report_date.
 cubes:
 - name: gold_daily_performance
+  public: false
   title: Daily Performance Bridge (Gold)
   description: >
     Joins daily session-funnel counts with company P&L on report_date. P&L sourced
@@ -84,6 +85,10 @@ cubes:
     type: sum
     format: currency
   dimensions:
+  - name: daily_performance_key
+    sql: "concat(toString(brand_id),'|',toString(report_date))"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

@@ -1,12 +1,14 @@
 # gold.dim_customers — brand × customer grain.
 cubes:
 - name: gold_dim_customers
+  public: false
   sql_table: gold.dim_customers
   title: Gold Customers
   description: Customer dimension with LTV and consent. Use customer_ltv view.
   measures:
   - name: customers
-    type: count
+    sql: "{CUBE}.customer_id"
+    type: count_distinct
     format: number
   - name: lifetime_gross_revenue
     sql: lifetime_gross_revenue

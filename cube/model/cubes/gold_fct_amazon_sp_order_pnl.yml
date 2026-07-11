@@ -4,6 +4,7 @@
 # Reference §4, §17.2, §18, §20.5.
 cubes:
 - name: gold_fct_amazon_sp_order_pnl
+  public: false
   sql_table: gold.fct_amazon_sp_order_pnl
   title: Amazon SP Order P&L (Gold)
   description: >

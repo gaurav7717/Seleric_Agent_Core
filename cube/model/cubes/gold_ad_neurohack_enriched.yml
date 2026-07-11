@@ -1,6 +1,7 @@
 # Enriched ad×tag map with neurohack catalog fields (SQL join).
 cubes:
 - name: gold_ad_neurohack_enriched
+  public: false
   sql: "SELECT\n  toString(m.brand_id) AS brand_id,\n  m.ad_id AS ad_id,\n  m.ad_key\
     \ AS ad_key,\n  m.ad_name AS ad_name,\n  m.tag_code AS tag_code,\n  m.tag_position\
     \ AS tag_position,\n  n.category_code AS category_code,\n  n.category_name AS\

@@ -1,0 +1,26 @@
+id: cancelled_orders
+display_name: Cancelled Orders
+category: commerce
+status: approved
+description: Orders with order_status = cancelled, excluding test orders.
+formula:
+  human_readable: "Count of orders where order_status = cancelled (is_test = false)"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.cancelled_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Cancelled orders by shipping region last 30 days"
+    request: {measures: [cancelled_orders], dimensions: [shipping_region], time_range: {preset: last_30d}}
+validation_tests:
+  - "cancelled_orders <= orders for any slice"
+deprecated_aliases: []

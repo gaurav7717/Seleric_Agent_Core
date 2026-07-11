@@ -1,6 +1,7 @@
 # gold.fct_orders — brand × order grain (IST order_date).
 cubes:
 - name: gold_fct_orders
+  public: false
   sql_table: gold.fct_orders
   title: Gold Shopify Orders
   description: 'Canonical order fact from dbt gold.fct_orders. Filter is_test = false
@@ -21,11 +22,12 @@ cubes:
       = {gold_dim_customers.customer_id}'
     relationship: many_to_one
   measures:
+  # count_distinct on order_id — plain type:count on composite string PKs makes
+  # Cube emit CAST(..., 'STRING') which ClickHouse rejects (wants String).
   - name: orders
-    type: count
+    sql: CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.order_id END
+    type: count_distinct
     format: number
-    filters:
-    - sql: '{CUBE}.is_test = 0'
   - name: gross_revenue
     sql: gross_revenue
     type: sum

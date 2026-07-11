@@ -5,6 +5,8 @@ status: approved
 description: >
   Net sales excluding GST — the P&L revenue base. Revenue after discounts,
   returns/RTO impact, and cancellations, recognized at the order level.
+  Brand × day only (canonical_pnl). For city / region / payment-method /
+  UTM breakdowns use commerce_net_revenue on commerce_orders instead.
 formula:
   human_readable: "Net sales excluding GST (after discounts, returns, cancellations)"
   authoritative_source: cube

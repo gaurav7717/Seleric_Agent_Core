@@ -1,6 +1,7 @@
 # Customer LTV by acquisition channel/campaign — gold.dim_customers + first-order attribution.
 cubes:
 - name: gold_customer_acquisition_ltv
+  public: false
   title: Customer Acquisition LTV (Gold)
   description: >
     Cohort LTV grouped by first-order month and acquisition channel/campaign from first order attribution.
@@ -60,6 +61,10 @@ cubes:
     type: number
     format: currency
   dimensions:
+  - name: customer_acquisition_ltv_key
+    sql: "concat(toString(brand_id),'|',toString(first_order_cohort_month),'|',acquisition_channel,'|',acquisition_campaign,'|',acquisition_platform)"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

@@ -1,6 +1,7 @@
 # gold.fct_session_funnel — brand × session grain. Do NOT sum purchase_revenue for P&L.
 cubes:
 - name: gold_fct_session_funnel
+  public: false
   sql_table: gold.fct_session_funnel
   title: Gold Session Funnel
   description: 'Session-level Snowplow funnel from gold.fct_session_funnel. Use session_funnel
@@ -9,8 +10,11 @@ cubes:
 
     '
   measures:
+  # count_distinct on session_id — plain type:count on composite string PKs makes
+  # Cube emit CAST(..., 'STRING') which ClickHouse rejects (wants String).
   - name: sessions
-    type: count
+    sql: "{CUBE}.session_id"
+    type: count_distinct
     format: number
   - name: converted_sessions
     sql: CASE WHEN {CUBE}.converted = 1 THEN {CUBE}.session_id END

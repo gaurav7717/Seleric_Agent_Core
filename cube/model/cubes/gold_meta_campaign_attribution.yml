@@ -2,6 +2,7 @@
 # Replaces legacy dw_meta_ads_attribution. Use dw_meta_ads_attribution view.
 cubes:
 - name: gold_meta_campaign_attribution
+  public: false
   title: Meta Campaign Attribution (Gold)
   description: 'Campaign-level attributed revenue, COGS, and spend from gold only.
     Do NOT use ad_spend here for company totals — use daily_pnl.total_ad_spend.
@@ -62,6 +63,10 @@ cubes:
     sql: sum(attributed_revenue) / nullIf(sum(ad_spend), 0)
     type: number
   dimensions:
+  - name: meta_campaign_attribution_key
+    sql: "concat(toString(brand_id),'|',toString(report_date),'|',campaign_id)"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

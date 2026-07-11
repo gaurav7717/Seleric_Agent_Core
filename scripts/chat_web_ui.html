@@ -1,109 +1,142 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>seleric-mcp · test chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
 <style>
-  :root {
-    --bg: #0d1117; --panel: #161b22; --panel2: #1c2129; --border: #2d333b;
-    --text: #e6edf3; --dim: #8b949e; --accent: #4da3ff; --green: #3fb950;
-    --amber: #d29922; --red: #f85149; --user-bg: #1f3a5f;
-    font-size: 15px;
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--text); height: 100vh;
-    display: flex; flex-direction: column;
-    font-family: "Segoe UI", system-ui, sans-serif;
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
   }
-  header {
-    display: flex; align-items: center; gap: 12px; padding: 10px 16px;
-    background: var(--panel); border-bottom: 1px solid var(--border);
+  /* Custom scrollbar styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-  header .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--dim); }
-  header .dot.ok { background: var(--green); }
-  header h1 { font-size: 14px; margin: 0; font-weight: 600; }
-  header .meta { color: var(--dim); font-size: 12px; font-family: Consolas, monospace; }
-  header .spacer { flex: 1; }
-  button {
-    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
-    border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer;
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
   }
-  button:hover { border-color: var(--accent); }
-  #log { flex: 1; overflow-y: auto; padding: 18px 0 8px; }
-  .row { max-width: 900px; margin: 0 auto 10px; padding: 0 16px; }
-  .msg { padding: 10px 14px; border-radius: 10px; white-space: pre-wrap; line-height: 1.45; }
-  .user .msg { background: var(--user-bg); border: 1px solid #2c4f7c; margin-left: 15%; }
-  .agent .msg { background: var(--panel); border: 1px solid var(--border); margin-right: 8%; }
-  .who { font-size: 11px; color: var(--dim); margin: 0 4px 3px; text-transform: uppercase; letter-spacing: .06em; }
-  .user .who { text-align: right; }
-  details.tool {
-    margin: 4px 0 4px 24px; font-family: Consolas, "Cascadia Mono", monospace; font-size: 12px;
-    border-left: 2px solid var(--border); padding-left: 10px;
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 3px;
   }
-  details.tool summary { cursor: pointer; color: var(--dim); list-style: none; }
-  details.tool summary::before { content: "→ "; color: var(--accent); }
-  details.tool.done summary::before { content: "← "; color: var(--green); }
-  details.tool pre {
-    background: var(--panel2); border: 1px solid var(--border); border-radius: 6px;
-    padding: 8px 10px; overflow-x: auto; max-height: 320px; overflow-y: auto;
-    margin: 6px 0 2px; white-space: pre-wrap; word-break: break-word;
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
   }
-  .error .msg { background: #3d1d1f; border: 1px solid var(--red); }
-  .thinking { color: var(--dim); font-size: 12px; margin-left: 24px; font-family: Consolas, monospace; }
-  .thinking::after { content: ""; animation: dots 1.2s steps(4) infinite; }
-  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
-  footer {
-    background: var(--panel); border-top: 1px solid var(--border); padding: 12px 16px;
-  }
-  .inputwrap { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; }
-  textarea {
-    flex: 1; resize: none; background: var(--bg); color: var(--text);
-    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
-    font: inherit; min-height: 44px; max-height: 140px;
-  }
-  textarea:focus { outline: none; border-color: var(--accent); }
-  #send { padding: 0 22px; font-size: 14px; }
-  #send:disabled { opacity: .45; cursor: default; }
-  #pad {
-    position: fixed; right: 0; top: 0; bottom: 0; width: 340px; background: var(--panel);
-    border-left: 1px solid var(--border); padding: 16px; overflow-y: auto;
-    transform: translateX(100%); transition: transform .18s ease; z-index: 10;
-  }
-  #pad.open { transform: none; }
-  #pad h2 { font-size: 13px; margin: 0 0 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
-  #pad .kv { font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid var(--border); padding: 6px 0; }
-  #pad .kv b { color: var(--accent); display: block; }
-  #pad .empty { color: var(--dim); font-size: 12px; }
 </style>
 </head>
-<body>
-<header>
-  <div class="dot" id="statusdot"></div>
-  <h1>seleric-mcp · test chat</h1>
-  <span class="meta" id="meta">connecting…</span>
-  <div class="spacer"></div>
-  <button id="padbtn">Scratchpad</button>
-  <button id="resetbtn">Reset</button>
+<body class="h-full flex flex-col bg-[#09090b] text-zinc-100 antialiased font-sans overflow-hidden">
+
+<!-- Header -->
+<header class="flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/60 px-6 py-4 sticky top-0 z-40 h-[69px]">
+  <div class="flex items-center gap-3">
+    <div class="bg-red-500/10 p-2 rounded-lg border border-red-500/20 shrink-0">
+      <i data-lucide="flame" class="w-4 h-4 text-red-500"></i>
+    </div>
+    <div class="flex flex-col min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-zinc-100 tracking-tight text-sm">SpacePeppers Base Agent</span>
+        <div id="statusdot" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/50 gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Connecting
+        </div>
+      </div>
+      <span class="text-xs text-zinc-500 font-mono truncate max-w-[200px] sm:max-w-md" id="meta">connecting…</span>
+    </div>
+  </div>
+  
+  <div class="flex items-center gap-2">
+    <button id="padbtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/80 text-zinc-300 font-medium rounded-lg text-xs transition-colors shrink-0">
+      <i data-lucide="layout-sidebar" class="w-3.5 h-3.5"></i>
+      <span>Scratchpad</span>
+    </button>
+    <button id="resetbtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/80 text-zinc-300 font-medium rounded-lg text-xs transition-colors shrink-0">
+      <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+      <span>Reset</span>
+    </button>
+  </div>
 </header>
 
-<div id="log"></div>
+<!-- Main Container -->
+<div class="flex-1 flex flex-row overflow-hidden relative h-[calc(100vh-69px)]">
+  
+  <!-- Left Side: Chat log & input -->
+  <main class="flex-1 flex flex-col min-w-0 bg-[#09090b]">
+    <!-- Chat Log -->
+    <div id="log" class="flex-1 overflow-y-auto px-6 py-6 space-y-6 max-w-3xl mx-auto w-full scrollbar-thin">
+      <!-- Welcome Message -->
+      <div class="flex justify-start w-full animate-fade-in">
+        <div class="max-w-[85%] flex flex-col items-start gap-1">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500 ml-1.5">Agent</span>
+          <div class="bg-zinc-900/50 text-zinc-200 border border-zinc-800/80 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap select-text">
+            Welcome to the Seleric Chat Interface! Ask any question or query about metrics, and I'll resolve them using the seleric-mcp.
+          </div>
+        </div>
+      </div>
+    </div>
 
-<footer>
-  <div class="inputwrap">
-    <textarea id="input" placeholder="e.g. what was net profit last 7 days vs prior?  (Enter to send, Shift+Enter for newline)"></textarea>
-    <button id="send">Send</button>
-  </div>
-</footer>
+    <!-- Input Footer -->
+    <div class="border-t border-zinc-800 bg-zinc-950/80 backdrop-blur p-4">
+      <div class="max-w-3xl mx-auto relative flex items-end gap-2.5 bg-zinc-900/50 border border-zinc-800 rounded-xl p-2 pl-3 focus-within:border-zinc-700 focus-within:ring-1 focus-within:ring-zinc-700 transition-all">
+        <textarea id="input" rows="1" placeholder="e.g. what is today's net profit?  (Enter to send, Shift+Enter for newline)" class="flex-1 bg-transparent border-0 text-sm text-zinc-100 focus:outline-none focus:ring-0 resize-none py-1.5 max-h-40 placeholder-zinc-500 font-sans"></textarea>
+        <button id="send" class="h-9 w-9 flex items-center justify-center rounded-lg bg-zinc-100 text-zinc-900 hover:bg-zinc-200 transition-colors disabled:opacity-45 disabled:hover:bg-zinc-100 shrink-0">
+          <i data-lucide="arrow-up" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </main>
 
-<aside id="pad"><h2>Scratchpad</h2><div id="padbody" class="empty">empty</div></aside>
+  <!-- Right Side: Scratchpad Panel -->
+  <aside id="pad" class="w-96 border-l border-zinc-800 bg-zinc-950 flex flex-col h-full transform translate-x-full transition-transform duration-300 ease-in-out fixed right-0 top-0 bottom-0 z-30 lg:translate-x-0 lg:static">
+    <div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/20 h-[60px] shrink-0">
+      <div class="flex items-center gap-2">
+        <i data-lucide="clipboard-list" class="w-4 h-4 text-zinc-400"></i>
+        <h2 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Scratchpad</h2>
+      </div>
+      <button id="closepad" class="lg:hidden text-zinc-500 hover:text-zinc-300 p-1 rounded-md hover:bg-zinc-900">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div id="padbody" class="flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin flex flex-col">
+      <!-- Dynamically filled -->
+      <div class="flex-1 flex flex-col items-center justify-center text-zinc-500 p-8 text-center">
+        <i data-lucide="folder-open" class="w-8 h-8 text-zinc-600 mb-2"></i>
+        <p class="text-xs">No notes or variables stored in scratchpad yet.</p>
+      </div>
+    </div>
+  </aside>
+</div>
 
 <script>
 const log = document.getElementById("log");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const pad = document.getElementById("pad");
+const padbtn = document.getElementById("padbtn");
+const closepad = document.getElementById("closepad");
+
+// Initialize Lucide Icons
+lucide.createIcons();
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -111,62 +144,173 @@ function el(tag, cls, text) {
   if (text !== undefined) e.textContent = text;
   return e;
 }
+
+function togglePad() {
+  pad.classList.toggle("translate-x-full");
+}
+
+padbtn.onclick = togglePad;
+closepad.onclick = togglePad;
+
+// Textarea auto-grow
+input.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+});
+
 function addMessage(kind, who, text) {
-  const row = el("div", "row " + kind);
-  row.appendChild(el("div", "who", who));
-  row.appendChild(el("div", "msg", text));
-  log.appendChild(row);
+  const isUser = kind.includes("user");
+  const isError = kind.includes("error");
+  
+  const container = el("div", "flex w-full animate-fade-in " + (isUser ? "justify-end" : "justify-start"));
+  const wrapper = el("div", "max-w-[85%] flex flex-col gap-1 " + (isUser ? "items-end" : "items-start"));
+  
+  const whoEl = el("span", "text-[10px] font-mono uppercase tracking-wider text-zinc-500 " + (isUser ? "mr-1.5" : "ml-1.5"), who);
+  wrapper.appendChild(whoEl);
+  
+  let bubbleClass = "text-sm leading-relaxed px-4 py-2.5 whitespace-pre-wrap select-text rounded-2xl ";
+  if (isUser) {
+    bubbleClass += "bg-zinc-800 text-zinc-100 border border-zinc-700/50 rounded-tr-sm";
+  } else if (isError) {
+    bubbleClass += "bg-red-950/40 text-red-200 border border-red-900/50 rounded-tl-sm";
+  } else {
+    bubbleClass += "bg-zinc-900/50 text-zinc-200 border border-zinc-800/80 rounded-tl-sm";
+  }
+  
+  const bubble = el("div", bubbleClass, text);
+  wrapper.appendChild(bubble);
+  container.appendChild(wrapper);
+  
+  log.appendChild(container);
   log.scrollTop = log.scrollHeight;
-  return row;
+  return container;
 }
+
 function addTool(name, args) {
-  const row = el("div", "row");
-  const d = el("details", "tool");
-  const s = el("summary", null, name + "(" + JSON.stringify(args) + ")");
-  d.appendChild(s);
-  row.appendChild(d);
-  log.appendChild(row);
+  const details = el("details", "group border border-zinc-800 bg-zinc-900/20 rounded-lg overflow-hidden transition-all duration-200 my-3 ml-4");
+  details.setAttribute("open", "");
+  
+  const summary = el("summary", "flex items-center justify-between p-2.5 text-xs font-mono text-zinc-400 cursor-pointer hover:bg-zinc-900/50 hover:text-zinc-200 select-none list-none [&::-webkit-details-marker]:hidden");
+  
+  const left = el("span", "flex items-center gap-2 truncate pr-2");
+  left.innerHTML = `<i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i><span class="font-semibold text-zinc-300">${name}</span>`;
+  
+  const argsSpan = el("span", "text-zinc-500 font-normal truncate max-w-[150px] sm:max-w-md", JSON.stringify(args));
+  left.appendChild(argsSpan);
+  summary.appendChild(left);
+  
+  const right = el("span", "flex items-center gap-2 select-none shrink-0");
+  right.innerHTML = `
+    <span class="status-badge flex items-center gap-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded text-[10px] font-medium leading-none">
+      <span class="w-1 h-1 rounded-full bg-blue-400 animate-pulse"></span>
+      Running
+    </span>
+    <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 group-open:rotate-180"></i>
+  `;
+  summary.appendChild(right);
+  details.appendChild(summary);
+  
+  const contentDiv = el("div", "border-t border-zinc-800 bg-zinc-950 p-3.5 font-mono text-xs overflow-auto max-h-80 scrollbar-thin");
+  const pre = el("pre", "text-zinc-400 whitespace-pre-wrap break-all leading-relaxed");
+  contentDiv.appendChild(pre);
+  details.appendChild(contentDiv);
+  
+  log.appendChild(details);
   log.scrollTop = log.scrollHeight;
-  return d;
+  
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+  
+  return details;
 }
+
 function finishTool(d, preview, truncated) {
   d.classList.add("done");
-  const pre = el("pre", null, preview + (truncated ? "\n… (truncated)" : ""));
-  d.appendChild(pre);
+  const badge = d.querySelector(".status-badge");
+  if (badge) {
+    badge.className = "status-badge flex items-center gap-1 bg-green-500/10 text-green-400 border border-green-500/20 px-1.5 py-0.5 rounded text-[10px] font-medium leading-none";
+    badge.innerHTML = "Success";
+  }
+  
+  const pre = d.querySelector("pre");
+  if (pre) {
+    pre.textContent = preview + (truncated ? "\n… (truncated)" : "");
+  }
+  
   log.scrollTop = log.scrollHeight;
 }
+
 function renderPad(notes) {
   const body = document.getElementById("padbody");
   body.innerHTML = "";
   const keys = Object.keys(notes || {});
-  if (!keys.length) { body.className = "empty"; body.textContent = "empty"; return; }
-  body.className = "";
+  if (!keys.length) {
+    body.className = "flex-1 flex flex-col items-center justify-center text-zinc-500 p-8 text-center";
+    body.innerHTML = `
+      <i data-lucide="folder-open" class="w-8 h-8 text-zinc-600 mb-2"></i>
+      <p class="text-xs">No notes or variables stored in scratchpad yet.</p>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+  body.className = "flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin";
   for (const k of keys) {
-    const kv = el("div", "kv");
-    kv.appendChild(el("b", null, k));
-    kv.appendChild(document.createTextNode(notes[k]));
+    const kv = el("div", "bg-zinc-900/30 border border-zinc-800/80 rounded-lg p-3 space-y-1.5 hover:border-zinc-800 transition-colors");
+    
+    const header = el("div", "flex items-center gap-1.5");
+    header.innerHTML = `<i data-lucide="key-round" class="w-3.5 h-3.5 text-zinc-500 shrink-0"></i><span class="text-xs font-mono font-semibold text-zinc-300">${k}</span>`;
+    kv.appendChild(header);
+    
+    const val = el("div", "text-xs font-mono text-zinc-400 break-words leading-relaxed whitespace-pre-wrap pl-5 bg-zinc-950/40 p-2 rounded border border-zinc-900/80", notes[k]);
+    kv.appendChild(val);
+    
     body.appendChild(kv);
   }
+  if (window.lucide) lucide.createIcons();
 }
 
 async function refreshState() {
   try {
     const s = await (await fetch("/state")).json();
     document.getElementById("meta").textContent = s.model + " · " + s.tools.length + " tools";
-    document.getElementById("statusdot").classList.add("ok");
+    
+    const dot = document.getElementById("statusdot");
+    dot.className = "inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/20 gap-1";
+    dot.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Active`;
+    
     renderPad(s.scratchpad);
-  } catch { document.getElementById("meta").textContent = "backend unreachable"; }
+  } catch {
+    document.getElementById("meta").textContent = "backend unreachable";
+    const dot = document.getElementById("statusdot");
+    dot.className = "inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/20 gap-1";
+    dot.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Disconnected`;
+  }
 }
 
 async function sendMessage() {
   const text = input.value.trim();
   if (!text || send.disabled) return;
   input.value = "";
+  input.style.height = "auto";
   send.disabled = true;
   addMessage("user", "you", text);
-  const thinking = el("div", "row");
-  thinking.appendChild(el("div", "thinking", "working"));
+  
+  const thinking = el("div", "flex justify-start w-full animate-fade-in");
+  thinking.innerHTML = `
+    <div class="max-w-[85%] flex flex-col items-start gap-1">
+      <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500 ml-1.5">Agent</span>
+      <div class="flex items-center gap-2 bg-zinc-900/30 text-zinc-400 border border-zinc-800 rounded-2xl px-4 py-2.5 text-sm select-none">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-zinc-500"></span>
+        </span>
+        <span class="font-mono text-xs">thinking...</span>
+      </div>
+    </div>
+  `;
   log.appendChild(thinking);
+  log.scrollTop = log.scrollHeight;
 
   let openTool = null;
   try {
@@ -187,17 +331,34 @@ async function sendMessage() {
         const chunk = buf.slice(0, idx); buf = buf.slice(idx + 2);
         if (!chunk.startsWith("data: ")) continue;
         const ev = JSON.parse(chunk.slice(6));
-        if (ev.type === "tool_call") openTool = addTool(ev.tool, ev.args);
-        else if (ev.type === "tool_result" && openTool) { finishTool(openTool, ev.preview, ev.truncated); openTool = null; }
-        else if (ev.type === "assistant") addMessage("agent", "agent", ev.text);
-        else if (ev.type === "error") addMessage("agent error", "error", ev.text);
-        else if (ev.type === "done") renderPad(ev.scratchpad);
+        if (ev.type === "tool_call") {
+          if (thinking.parentNode) thinking.remove();
+          openTool = addTool(ev.tool, ev.args);
+        }
+        else if (ev.type === "tool_result" && openTool) { 
+          finishTool(openTool, ev.preview, ev.truncated); 
+          openTool = null; 
+          log.appendChild(thinking);
+          log.scrollTop = log.scrollHeight;
+        }
+        else if (ev.type === "assistant") {
+          if (thinking.parentNode) thinking.remove();
+          addMessage("agent", "agent", ev.text);
+        }
+        else if (ev.type === "error") {
+          if (thinking.parentNode) thinking.remove();
+          addMessage("agent error", "error", ev.text);
+        }
+        else if (ev.type === "done") {
+          renderPad(ev.scratchpad);
+        }
       }
     }
   } catch (e) {
+    if (thinking.parentNode) thinking.remove();
     addMessage("agent error", "error", "request failed: " + e);
   } finally {
-    thinking.remove();
+    if (thinking.parentNode) thinking.remove();
     send.disabled = false;
     input.focus();
   }
@@ -207,13 +368,13 @@ send.onclick = sendMessage;
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
+
 document.getElementById("resetbtn").onclick = async () => {
   await fetch("/reset", { method: "POST" });
   log.innerHTML = "";
   renderPad({});
   addMessage("agent", "agent", "Conversation reset.");
 };
-document.getElementById("padbtn").onclick = () => pad.classList.toggle("open");
 
 refreshState();
 input.focus();

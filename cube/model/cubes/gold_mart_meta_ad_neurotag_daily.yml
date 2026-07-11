@@ -1,6 +1,7 @@
 # gold.mart_meta_ad_neurotag_daily — ad × tag daily with full-credit and split-credit metrics.
 cubes:
 - name: gold_mart_meta_ad_neurotag_daily
+  public: false
   sql_table: gold.mart_meta_ad_neurotag_daily
   title: Meta Ad Neurohack Tag Analysis (Daily)
   description: 'Ad × Neurohack tag daily analytical surface with performance + attribution.

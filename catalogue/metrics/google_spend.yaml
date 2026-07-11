@@ -1,0 +1,29 @@
+id: google_spend
+display_name: Google Ads Spend
+category: marketing
+status: approved
+description: >
+  Google Ads spend from gold.fct_google_ads_daily, breakable by campaign / ad
+  set / ad. For blended totals across platforms use total_ad_spend.
+formula:
+  human_readable: "Sum of Google daily spend"
+  authoritative_source: cube
+cube_mapping:
+  view: google_ad_performance
+  measure: google_ad_performance.spend
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+supported_filters: [date_range, brand_id, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Google Ads spend by campaign last 7 days"
+    request: {measures: [google_spend], dimensions: [campaign_name], time_range: {preset: last_7d}}
+validation_tests:
+  - "google_ad_performance spend for a period ~= canonical_pnl.google_spend for the same period"
+deprecated_aliases: []

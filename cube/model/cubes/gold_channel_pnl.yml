@@ -2,6 +2,7 @@
 # Replaces legacy channel_attribution_daily (serve.mart_*). Use channel_pnl view.
 cubes:
 - name: gold_channel_pnl
+  public: false
   title: Channel P&L (Gold)
   description: 'Meta / Google / Organic daily attribution with COGS and ad spend from
     gold only. COGS uses fct_order_items.net_cost (placement minus refund reversals).
@@ -199,6 +200,10 @@ cubes:
     sql: sum(attributed_net_revenue_ex_gst) / nullIf(sum(spend), 0)
     type: number
   dimensions:
+  - name: channel_pnl_key
+    sql: "concat(toString(brand_id),'|',toString(report_date),'|',platform)"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

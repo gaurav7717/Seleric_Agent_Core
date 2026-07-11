@@ -1,0 +1,33 @@
+id: amazon_ads_roas
+display_name: Amazon Ads ROAS (platform-reported)
+category: marketing
+status: approved
+description: >
+  Return on ad spend as reported by Amazon Ads (attributed sales / spend,
+  platform-attributed — NOT Shopify/Amazon-order truth). Ratios recomputed
+  from aggregates, never summed. For Amazon order-level profitability use
+  amazon_sp_order_pnl instead.
+formula:
+  human_readable: "Amazon-attributed sales / Amazon Ads spend"
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_ad_performance
+  measure: amazon_ad_performance.ads_roas
+aggregation: ratio
+ratio_components:
+  numerator: amazon_ad_performance.attributed_sales
+  denominator: amazon_ad_performance.spend
+unit: ratio
+grain: day
+supported_dimensions: [brand_id, report_date, campaign_id, campaign_name, campaign_type, campaign_status]
+supported_filters: [date_range, brand_id, campaign_id, campaign_name, campaign_type, campaign_status]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Amazon Ads ROAS by campaign last 7 days"
+    request: {measures: [amazon_ads_roas, amazon_ad_spend], dimensions: [campaign_name], time_range: {preset: last_7d}}
+validation_tests:
+  - "period ROAS equals sum(attributed_sales)/sum(spend) for the same slice"
+deprecated_aliases: []

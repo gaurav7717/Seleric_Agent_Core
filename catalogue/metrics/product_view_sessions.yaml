@@ -1,0 +1,26 @@
+id: product_view_sessions
+display_name: Product View Sessions
+category: marketing
+status: approved
+description: >
+  Sessions that reached product-view stage in the Snowplow funnel.
+formula:
+  human_readable: "Count of sessions with a product view"
+  authoritative_source: cube
+cube_mapping:
+  view: session_funnel
+  measure: session_funnel.product_view_sessions
+aggregation: additive
+unit: count
+grain: session
+supported_dimensions: [brand_id, session_date, channel, campaign_name, utm_source, utm_medium, landing_page]
+supported_filters: [date_range, brand_id, channel, campaign_name]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Product view sessions last 30 days"
+    request: {measures: [product_view_sessions, sessions], time_range: {preset: last_30d}}
+validation_tests: []
+deprecated_aliases: []

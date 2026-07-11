@@ -1,0 +1,26 @@
+id: cod_orders
+display_name: Cash-on-Delivery Orders
+category: commerce
+status: approved
+description: Non-test orders where is_cod = true, regardless of order_status.
+formula:
+  human_readable: "Count of orders where is_cod = true (is_test = false)"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.cod_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "COD orders by shipping region last 7 days"
+    request: {measures: [cod_orders], dimensions: [shipping_region], time_range: {preset: last_7d}}
+validation_tests:
+  - "cod_orders <= orders for any slice"
+deprecated_aliases: []

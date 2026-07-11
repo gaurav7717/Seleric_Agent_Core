@@ -1,0 +1,32 @@
+id: order_item_record_count
+display_name: Order Line Item Count (Record-Level)
+category: commerce
+status: approved
+description: >
+  Line-item count from the record-grain order_item_records view — one row per
+  order line item, joined to parent order economics and last-touch
+  attribution. Use for SKU/product drill-down questions that also need
+  campaign or shipping detail (e.g. "which orders contain SKU X, from which
+  campaign"). For SKU-level revenue/margin rollups without record listing, use
+  product_performance instead.
+formula:
+  human_readable: "Count of order line items, at order_item_records grain"
+  authoritative_source: cube
+cube_mapping:
+  view: order_item_records
+  measure: order_item_records.line_item_count
+aggregation: additive
+unit: count
+grain: order_item
+supported_dimensions: [brand_id, order_date, order_id, order_name, sku, product_title, return_status, payment_method, is_new_customer, shipping_city, shipping_region, lt_platform, lt_campaign_name, lt_adset_name, lt_ad_name, attribution_method]
+supported_filters: [date_range, brand_id, order_id, sku, return_status, shipping_city, shipping_region, lt_campaign_name, lt_adset_name, lt_ad_name]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Orders containing SKU ABC123, with shipping city and campaign"
+    request: {measures: [order_item_record_count], dimensions: [sku, shipping_city, lt_campaign_name], time_range: {preset: last_30d}}
+validation_tests:
+  - "sum over a period reconciles with line_item_count on product_performance for the same brand/period"
+deprecated_aliases: []

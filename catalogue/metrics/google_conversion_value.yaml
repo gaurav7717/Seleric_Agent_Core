@@ -1,0 +1,27 @@
+id: google_conversion_value
+display_name: Google Conversion Value (platform-reported)
+category: marketing
+status: approved
+description: >
+  Google Ads platform-reported conversion value — NOT Shopify net revenue.
+formula:
+  human_readable: "Sum of Google-reported conversion value"
+  authoritative_source: cube
+cube_mapping:
+  view: google_ad_performance
+  measure: google_ad_performance.conversion_value
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: day
+supported_dimensions: [brand_id, report_date, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+supported_filters: [date_range, brand_id, campaign_id, campaign_name]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Google conversion value by campaign last 30 days"
+    request: {measures: [google_conversion_value, google_spend], dimensions: [campaign_name], time_range: {preset: last_30d}}
+validation_tests: []
+deprecated_aliases: []

@@ -4,6 +4,7 @@
 # Analytics Platform Reference §5.
 cubes:
 - name: gold_fct_amazon_ads_campaigns_daily
+  public: false
   sql_table: gold.fct_amazon_ads_campaigns_daily
   title: Amazon Ads Campaigns Daily (Gold)
   description: >

@@ -1,6 +1,7 @@
 # gold.fct_order_attribution — brand × order last-touch attribution.
 cubes:
 - name: gold_fct_order_attribution
+  public: false
   sql_table: gold.fct_order_attribution
   title: Gold Order Attribution
   description: 'Last-touch order attribution from gold.fct_order_attribution. Use

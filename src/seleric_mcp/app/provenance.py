@@ -28,6 +28,8 @@ def build_provenance(
     freshness: dict | None,
     cube_last_refresh: str | None,
     catalogue_version: str,
+    warnings: list[str] | None = None,
+    currency: str | list[str] | None = None,
 ) -> dict:
     return {
         "query_id": query_id,
@@ -36,6 +38,8 @@ def build_provenance(
         "cube_view": view,
         "cube_query": cube_query,
         "filters_applied": filters_applied,
+        "warnings": warnings or [],
+        "currency": currency,
         "time_range": {
             "start": time_range[0].isoformat(),
             "end": time_range[1].isoformat(),

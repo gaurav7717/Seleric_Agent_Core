@@ -1,0 +1,26 @@
+id: units_sold
+display_name: Units Sold
+category: commerce
+status: approved
+description: >
+  Total quantity sold from product_performance (gold.fct_order_items).
+formula:
+  human_readable: "Sum of line item quantity"
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.total_quantity
+aggregation: additive
+unit: count
+grain: order_item
+supported_dimensions: [brand_id, order_date, product_title, sku]
+supported_filters: [date_range, brand_id, product_title, sku]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Units sold by SKU last 30 days"
+    request: {measures: [units_sold], dimensions: [sku], time_range: {preset: last_30d}}
+validation_tests: []
+deprecated_aliases: []

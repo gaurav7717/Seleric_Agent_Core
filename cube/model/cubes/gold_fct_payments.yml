@@ -1,6 +1,7 @@
 # gold.fct_payments — brand × transaction grain.
 cubes:
 - name: gold_fct_payments
+  public: false
   sql_table: gold.fct_payments
   title: Gold Payments
   description: Payment transactions. Use payment_cashflow view. Filter is_test = false.

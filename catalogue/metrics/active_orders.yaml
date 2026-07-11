@@ -1,0 +1,30 @@
+id: active_orders
+display_name: Active Orders
+category: commerce
+status: approved
+description: >
+  Orders in active/payment_pending status, excluding cancelled/revenue-adjustment
+  orders and test orders. The "clean" order count used as the denominator for
+  AOV and revenue-per-order metrics. Companion to orders (total placed,
+  including cancelled/voided) on the same view.
+formula:
+  human_readable: "Count of orders with order_status IN (active, payment_pending), excl. revenue adjustments and test orders"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.active_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Active orders this month by payment method"
+    request: {measures: [active_orders], dimensions: [payment_method], time_range: {preset: this_month}}
+validation_tests:
+  - "active_orders <= orders for any slice"
+deprecated_aliases: []

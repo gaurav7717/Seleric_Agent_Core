@@ -7,6 +7,12 @@ terms:
     canonical_id: net_revenue
   - term: revenue
     canonical_id: net_revenue
+  - term: commerce net revenue
+    canonical_id: commerce_net_revenue
+  - term: revenue by city
+    canonical_id: commerce_net_revenue
+  - term: net revenue by city
+    canonical_id: commerce_net_revenue
   - term: bottom line
     canonical_id: net_profit
   - term: profit
@@ -65,3 +71,37 @@ terms:
       Return to Origin — an order returned before/at delivery, reversed out of
       net revenue. RTO cost is a COGS component (canonical_pnl.rto_cost); not a
       standalone catalogued metric yet.
+  - term: meta impressions
+    canonical_id: meta_impressions
+  - term: meta clicks
+    canonical_id: meta_clicks
+  - term: meta CTR
+    canonical_id: meta_ctr
+  - term: meta CPC
+    canonical_id: meta_cpc
+  - term: meta purchases
+    canonical_id: meta_purchases
+  - term: meta CPA
+    canonical_id: meta_cpa
+  - term: meta purchase value
+    canonical_id: meta_purchase_value
+  - term: product views
+    canonical_id: product_view_sessions
+  - term: add to carts
+    canonical_id: add_to_cart_sessions
+  - term: add-to-carts
+    canonical_id: add_to_cart_sessions
+  - term: checkouts
+    canonical_id: checkout_sessions
+  - term: funnel purchases
+    canonical_id: funnel_purchases
+  - term: cart abandonment
+    canonical_id: cart_abandonment_rate
+  - term: checkout abandonment
+    canonical_id: checkout_abandonment_rate
+  - term: google conversions
+    canonical_id: google_conversions
+  - term: google conversion value
+    canonical_id: google_conversion_value
+  - term: google CPA
+    canonical_id: google_cpa

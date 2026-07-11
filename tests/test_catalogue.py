@@ -7,9 +7,13 @@ from seleric_mcp.catalogue_service.service import (
 
 
 def test_loads_seed(catalogue):
-    assert len(catalogue.cat.metrics) == 16
+    # Grows over time as catalogue/metrics/*.yaml gains files — pin to "at
+    # least the known baseline" rather than an exact count so this doesn't
+    # need editing on every metric addition.
+    assert len(catalogue.cat.metrics) >= 29
     assert "net_revenue" in catalogue.cat.metrics
     assert "attributed_revenue" in catalogue.cat.metrics
+    assert "order_record_count" in catalogue.cat.metrics
     assert catalogue.version
 
 

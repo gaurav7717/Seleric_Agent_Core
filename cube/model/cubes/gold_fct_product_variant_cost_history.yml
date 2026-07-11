@@ -1,6 +1,7 @@
 # gold.fct_product_variant_cost_history — SCD2 cost history.
 cubes:
 - name: gold_fct_product_variant_cost_history
+  public: false
   sql_table: gold.fct_product_variant_cost_history
   title: Gold Variant Cost History (SCD2)
   description: Point-in-time COGS history. Append-on-change sync preserves backfills.

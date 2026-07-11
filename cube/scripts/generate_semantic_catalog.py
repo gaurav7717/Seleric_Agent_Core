@@ -97,14 +97,18 @@ DOMAIN_MAP = {
 VIEW_TOOLS = {
     "daily_pnl": ["cube_daily_pnl", "cube_pnl_waterfall", "cube_pnl_today_yesterday"],
     "channel_pnl": ["cube_channel_pnl"],
+    # marketing_performance / ad_performance / dw_meta_ads_attribution: deprecated
+    # 2026-07-11 in favor of meta_ad_performance / meta_ad_hourly /
+    # meta_campaign_attribution, but kept functional — see catalogue/deprecations.yaml.
     "marketing_performance": ["cube_meta_ads"],
     "ad_performance": ["cube_query"],
     "dw_meta_ads_attribution": ["cube_query"],
+    "meta_campaign_attribution": ["cube_query"],
     "shopify_orders": ["cube_commerce_orders"],
-    "shopify_order_line_items": ["cube_line_economics"],
+    # shopify_order_line_items REMOVED 2026-07-11 — merged into product_performance.
     "canonical_pnl": ["cube_canonical_pnl", "cube_pnl_today_yesterday"],
     "commerce_orders": ["cube_commerce_orders"],
-    "product_performance": ["cube_product_performance"],
+    "product_performance": ["cube_product_performance", "cube_line_economics"],
     "customer_ltv": ["cube_customer_ltv"],
     "payment_cashflow": ["cube_payment_cashflow"],
     "meta_ad_performance": ["cube_meta_ads"],
@@ -122,17 +126,21 @@ VIEW_TOOLS = {
     "meta_neurohack_performance": ["cube_meta_neurohack"],
     "meta_neurotag_analysis": ["cube_meta_neurotag"],
     "campaign_product_performance": ["cube_campaign_product"],
-    "customer_acquisition_ltv": ["cube_customer_acquisition_ltv"],
+    # customer_acquisition_ltv REMOVED 2026-07-11 — use customer_ltv grouped by
+    # its acquisition_channel/acquisition_campaign/acquisition_platform/
+    # first_order_cohort_month dimensions. gold__customer_acquisition_ltv (raw,
+    # debug-only) is still generated below via BRIDGE_VIEWS/GOLD_GRAINS.
     "neurohack_attribution": ["cube_neurohack_attribution"],
     "daily_performance": ["cube_daily_performance"],
     "refund_events": ["cube_refund_events"],
     "payment_method_pnl": ["cube_payment_method_pnl"],
     "hourly_commerce": ["cube_hourly_commerce"],
+    "orders_amazon": ["cube_query"],  # renamed from amazon_sp_orders 2026-07-11
 }
 
 BRIDGE_VIEWS = [
     "campaign_product_performance",
-    "customer_acquisition_ltv",
+    "customer_acquisition_ltv",  # curated view removed, but raw gold__ debug view stays
     "neurohack_attribution",
     "daily_performance",
     "refund_events",

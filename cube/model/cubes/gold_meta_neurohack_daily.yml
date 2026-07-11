@@ -1,6 +1,7 @@
 # Meta ads daily × neurohack tags (fan-out join for creative taxonomy analysis).
 cubes:
 - name: gold_meta_neurohack_daily
+  public: false
   sql: "SELECT\n  toString(a.brand_id) AS brand_id,\n  a.report_date AS report_date,\n\
     \  a.ad_id AS ad_id,\n  a.ad_name AS ad_name,\n  a.campaign_name AS campaign_name,\n\
     \  a.campaign_id AS campaign_id,\n  m.tag_code AS tag_code,\n  m.tag_position\

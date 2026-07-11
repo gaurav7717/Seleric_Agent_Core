@@ -1,0 +1,31 @@
+id: repeat_order_count
+display_name: Repeat Order Count
+category: customer
+status: approved
+description: >
+  Count of orders that are a repeat order (order_sequence_number > 1) for
+  the customer that placed them. Companion to repeat_order_rate on the same
+  view. Derived from gold.fct_orders windowed per customer — no new source
+  data. CAVEAT: unverified against live ClickHouse, see
+  customer_purchase_sequence cube header comment.
+formula:
+  human_readable: "Count of orders with order_sequence_number > 1"
+  authoritative_source: cube
+cube_mapping:
+  view: customer_purchase_sequence
+  measure: customer_purchase_sequence.repeat_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, customer_id]
+supported_filters: [date_range, brand_id, customer_id]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Repeat orders last 90 days"
+    request: {measures: [repeat_order_count], time_range: {preset: last_90d}}
+validation_tests:
+  - "repeat_order_count <= orders (commerce_orders) for the same period"
+deprecated_aliases: []

@@ -197,3 +197,30 @@ async def test_executor_failure_releases_idempotency(broker_writes_on, settings,
 async def test_unknown_action(broker, settings):
     with pytest.raises(ValueError, match="Unknown action"):
         await broker.propose("delete_everything", {}, settings.caller_scopes, "t")
+
+
+async def test_business_rules_fail_closed_for_unimplemented_action(broker):
+    """_run_business_rules is per-action-id Python, not generic/data-driven
+    from the catalogue YAML. A contract that declares business_rules but has
+    no matching branch here must raise, not silently produce eligible=True
+    via all([]) == True on an empty rules list — that would approve a write
+    action with zero of its approved safety checks actually run. Uses a
+    synthetic contract (not a real catalogue entry) since only one action
+    exists today and it IS correctly wired."""
+    from seleric_mcp.catalogue_service.loader import ActionContractDef, BusinessRule
+
+    fake_contract = ActionContractDef(
+        id="hypothetical_future_action",
+        display_name="Hypothetical",
+        domain="test",
+        description="A contract with a declared rule nobody implemented yet.",
+        executor="pipeboard",
+        executor_action_type="noop",
+        payload_schema="PauseMetaAdPayload",
+        scopes_required=[],
+        risk_level="low",
+        business_rules=[BusinessRule(id="some_check", description="...", blocking=True)],
+        data_owner="Test",
+    )
+    with pytest.raises(NotImplementedError, match="hypothetical_future_action"):
+        await broker._run_business_rules(fake_contract, {})

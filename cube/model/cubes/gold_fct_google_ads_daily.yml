@@ -1,6 +1,7 @@
 # gold.fct_google_ads_daily — brand × date × campaign × adset × ad × device × network.
 cubes:
 - name: gold_fct_google_ads_daily
+  public: false
   sql_table: gold.fct_google_ads_daily
   title: Gold Google Ads Daily
   description: Google ad performance from gold.fct_google_ads_daily. Use google_ad_performance

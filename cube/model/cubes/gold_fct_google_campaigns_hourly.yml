@@ -1,6 +1,7 @@
 # gold.fct_google_campaigns_hourly — brand × date × hour × campaign × device × network.
 cubes:
 - name: gold_fct_google_campaigns_hourly
+  public: false
   sql_table: gold.fct_google_campaigns_hourly
   title: Gold Google Campaigns Hourly
   description: Hourly Google campaign performance. Use google_ad_hourly view for dayparting.

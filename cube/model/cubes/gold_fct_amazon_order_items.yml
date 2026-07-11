@@ -2,6 +2,7 @@
 # Analytics Platform Reference §5. Drill-down for Amazon SKU/ASIN economics.
 cubes:
 - name: gold_fct_amazon_order_items
+  public: false
   sql_table: gold.fct_amazon_order_items
   title: Amazon SP Order Items (Gold)
   description: >

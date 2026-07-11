@@ -1,0 +1,29 @@
+id: prepaid_orders
+display_name: Prepaid Orders
+category: commerce
+status: approved
+description: >
+  Non-cancelled, non-test orders paid by any method other than COD.
+  Percentage companion: prepaid_pct on the same view.
+formula:
+  human_readable: "Count of orders where is_cod = false and order_status != cancelled (is_test = false)"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.prepaid_orders
+  measure_pct: commerce_orders.prepaid_pct
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Prepaid vs COD mix this month"
+    request: {measures: [prepaid_orders, cod_orders], time_range: {preset: this_month}}
+validation_tests:
+  - "prepaid_orders + cod_orders <= orders for any slice"
+deprecated_aliases: []

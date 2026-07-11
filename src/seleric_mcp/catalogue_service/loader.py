@@ -70,6 +70,11 @@ class DimensionDef(BaseModel):
     description: str = ""
     is_time: bool = False
     views: dict[str, str]  # view name -> qualified cube member
+    allowed_values: list[str] | None = None  # declared only for small, stable
+    # enum-like dimensions (verified against source SQL, not guessed) — lets
+    # equals/notEquals filters be case/typo-corrected instead of silently
+    # matching zero rows. None means "no known enum" — filter values pass
+    # through unvalidated, exactly as before this field existed.
 
 
 class GlossaryTerm(BaseModel):

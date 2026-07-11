@@ -1,6 +1,7 @@
 """Query planner: validated catalogue metric ids -> Cube JSON -> executed
 result + provenance. Owns date-preset resolution (IST), comparison-period
-derivation, single-view enforcement, and the anti-pattern guards ported from
+derivation, multi-view composition (parallel single-view queries, never a
+cross-view SQL join), and the anti-pattern guards ported from
 cube_mcp/mcp_serve/server.js.
 """
 
@@ -12,10 +13,10 @@ import uuid
 from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
-from ..catalogue_service.loader import MetricDef
+from ..catalogue_service.loader import DimensionDef, MetricDef
 from ..catalogue_service.service import CatalogueService
 from ..semantic_layer.cube_client import CubeClient
-from .models import FilterSpec, PlanError, QueryRequest, TimeRange
+from .models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from .provenance import build_provenance
 from .result_store import ResultStore, StoredResult
 
@@ -92,13 +93,19 @@ class QueryPlanner:
                     suggestions=hints,
                 )
             metrics.append(m)
-        views = {m.cube_mapping.view for m in metrics}
-        if len(views) > 1:
-            raise PlanError(
-                f"Requested metrics span multiple views ({', '.join(sorted(views))}). "
-                "Query one view at a time — split into separate metrics_query calls."
-            )
         return metrics
+
+    def _metrics_supporting_dimension(self, dimension_id: str, *, exclude: str | None = None) -> list[str]:
+        """Catalogue ids that declare support for dimension_id (for PlanError hints)."""
+        hints: list[str] = []
+        for mid, m in self.catalogue.cat.metrics.items():
+            if m.status != "approved" or mid == exclude:
+                continue
+            if dimension_id in m.supported_dimensions:
+                hints.append(mid)
+            if len(hints) >= 8:
+                break
+        return hints
 
     def _validate_dimensions(self, metrics: list[MetricDef], dimension_ids: list[str]) -> list[str]:
         """Returns qualified cube dimension members."""
@@ -113,17 +120,57 @@ class QueryPlanner:
                 )
             for m in metrics:
                 if did not in m.supported_dimensions:
+                    alts = self._metrics_supporting_dimension(did, exclude=m.id)
+                    hint = (
+                        f" Metrics that support '{did}': {', '.join(alts)}."
+                        if alts
+                        else ""
+                    )
                     raise PlanError(
                         f"Dimension '{did}' is not supported by metric '{m.id}'. "
-                        f"Supported: {', '.join(m.supported_dimensions)}"
+                        f"Supported: {', '.join(m.supported_dimensions) or '(none)'}.{hint}",
+                        suggestions=alts,
                     )
             if view not in dim.views:
-                raise PlanError(f"Dimension '{did}' has no mapping on view '{view}'.")
+                alts = self._metrics_supporting_dimension(did)
+                raise PlanError(
+                    f"Dimension '{did}' has no mapping on view '{view}'.",
+                    suggestions=alts,
+                )
             qualified.append(dim.views[view])
         return qualified
 
-    def _validate_filters(self, view: str, filters: list[FilterSpec]) -> list[dict]:
+    def _resolve_filter_values(self, dim: DimensionDef, f: FilterSpec) -> tuple[list[str], list[str]]:
+        """Case/typo-correct filter values against a dimension's declared
+        allowed_values (small, stable enums only — see DimensionDef; most
+        dimensions have none and pass through unchanged). Returns
+        (resolved_values, warnings). Never invents a value: an exact match
+        passes through silently, a case-insensitive match is corrected and
+        recorded as a warning, anything else is a hard PlanError with the real
+        value set as suggestions — never a silent zero-row query."""
+        if dim.allowed_values is None or f.operator not in ("equals", "notEquals"):
+            return f.values, []
+        lower_map = {v.lower(): v for v in dim.allowed_values}
+        resolved: list[str] = []
+        warnings: list[str] = []
+        for v in f.values:
+            if v in dim.allowed_values:
+                resolved.append(v)
+            elif v.lower() in lower_map:
+                corrected = lower_map[v.lower()]
+                warnings.append(f"Filter value '{v}' on '{dim.id}' case-corrected to '{corrected}'.")
+                resolved.append(corrected)
+            else:
+                raise PlanError(
+                    f"Value '{v}' is not a known value for dimension '{dim.id}'. "
+                    f"Known values: {', '.join(dim.allowed_values)}.",
+                    suggestions=dim.allowed_values,
+                )
+        return resolved, warnings
+
+    def _validate_filters(self, view: str, filters: list[FilterSpec]) -> tuple[list[dict], list[str]]:
         cube_filters: list[dict] = []
+        warnings: list[str] = []
         for f in filters:
             dim = self.catalogue.cat.dimensions.get(f.dimension)
             if dim is None or view not in dim.views:
@@ -134,12 +181,35 @@ class QueryPlanner:
                 )
             if f.operator not in ("set", "notSet") and not f.values:
                 raise PlanError(f"Filter on '{f.dimension}' requires values.")
+            values, value_warnings = self._resolve_filter_values(dim, f)
+            warnings.extend(value_warnings)
             entry: dict = {"member": dim.views[view], "operator": f.operator}
-            if f.values:
-                entry["values"] = f.values
+            if values:
+                entry["values"] = values
             cube_filters.append(entry)
         self._guard_breakdown(view, filters)
-        return cube_filters
+        return cube_filters, warnings
+
+    def _validate_sort(self, metrics: list[MetricDef], view: str, sort: list[SortSpec]) -> dict[str, str]:
+        """Returns an ordered Cube 'order' dict. A sort field must be one of
+        the requested metric ids or a dimension already valid on this view —
+        never an invented field, matching requirement 9."""
+        order: dict[str, str] = {}
+        metric_by_id = {m.id: m for m in metrics}
+        for s in sort:
+            if s.field in metric_by_id:
+                member = metric_by_id[s.field].cube_mapping.measure
+            else:
+                dim = self.catalogue.cat.dimensions.get(s.field)
+                if dim is None or view not in dim.views:
+                    raise PlanError(
+                        f"Cannot sort by '{s.field}': not one of the requested measures "
+                        f"({', '.join(metric_by_id)}) and not a valid dimension on view "
+                        f"'{view}'."
+                    )
+                member = dim.views[view]
+            order[member] = s.direction
+        return order
 
     def _guard_breakdown(self, view: str, filters: list[FilterSpec]) -> None:
         """Ported from server.js validateBreakdownQuery: breakdown views repeat
@@ -169,6 +239,7 @@ class QueryPlanner:
         date_range: tuple[date, date],
         granularity: str,
         limit: int,
+        sort_order: dict[str, str] | None = None,
     ) -> dict:
         view = metrics[0].cube_mapping.view
         measures: list[str] = []
@@ -207,19 +278,30 @@ class QueryPlanner:
                 f"View '{view}' has no time axis; granularity must be 'none' "
                 "(time_range is ignored for this view)."
             )
+        # Explicit sort (e.g. top-N: sort by a requested measure desc) always
+        # wins over the default date-ascending order set above.
+        if sort_order:
+            query["order"] = sort_order
         return query
 
     # ---------- execution ----------
 
-    async def run(self, request: QueryRequest, parent_query_id: str | None = None) -> dict:
-        metrics = self._resolve_metrics(request.measures)
+    async def _run_single_view(
+        self,
+        request: QueryRequest,
+        metrics: list[MetricDef],
+        parent_query_id: str | None = None,
+    ) -> dict:
+        """Execute one Cube load (plus optional compare) for metrics on a single view."""
         view = metrics[0].cube_mapping.view
         qualified_dims = self._validate_dimensions(metrics, request.dimensions)
-        cube_filters = self._validate_filters(view, request.filters)
+        cube_filters, filter_warnings = self._validate_filters(view, request.filters)
+        sort_order = self._validate_sort(metrics, view, request.sort)
         current_range = resolve_time_range(request.time_range)
 
         cube_query = self._build_cube_query(
-            metrics, qualified_dims, cube_filters, current_range, request.granularity, request.limit
+            metrics, qualified_dims, cube_filters, current_range, request.granularity,
+            request.limit, sort_order=sort_order,
         )
 
         compare_range = None
@@ -227,7 +309,7 @@ class QueryPlanner:
             compare_range = derive_compare_range(*current_range, request.compare_period)
             compare_query = self._build_cube_query(
                 metrics, qualified_dims, cube_filters, compare_range,
-                request.granularity, request.limit,
+                request.granularity, request.limit, sort_order=sort_order,
             )
             current_res, compare_res = await asyncio.gather(
                 self.cube.load(cube_query), self.cube.load(compare_query)
@@ -237,6 +319,14 @@ class QueryPlanner:
             compare_res = None
 
         query_id = "q_" + uuid.uuid4().hex[:12]
+        currencies = sorted({m.currency_default for m in metrics if m.currency_default})
+        currency: str | list[str] | None
+        if not currencies:
+            currency = None
+        elif len(currencies) == 1:
+            currency = currencies[0]
+        else:
+            currency = currencies  # mixed-currency metrics in one query — report all, drop none
         provenance = build_provenance(
             query_id=query_id,
             parent_query_id=parent_query_id,
@@ -253,13 +343,16 @@ class QueryPlanner:
             freshness=self.catalogue.freshness(view),
             cube_last_refresh=current_res.last_refresh_time,
             catalogue_version=self.catalogue.version,
+            warnings=filter_warnings,
+            currency=currency,
         )
 
+        part_request = request.model_copy(update={"measures": [m.id for m in metrics]})
         self.store.save(
             StoredResult(
                 query_id=query_id,
                 parent_query_id=parent_query_id,
-                request_json=request.model_dump_json(),
+                request_json=part_request.model_dump_json(),
                 cube_query_json=json.dumps(cube_query),
                 result_json=json.dumps(current_res.data),
                 compare_result_json=json.dumps(compare_res.data) if compare_res else None,
@@ -273,7 +366,82 @@ class QueryPlanner:
             "columns": columns,
             "rows": current_res.data,
             "compare_rows": compare_res.data if compare_res else None,
+            "warnings": filter_warnings,
             "provenance": provenance,
+        }
+
+    async def run(self, request: QueryRequest, parent_query_id: str | None = None) -> dict:
+        """Run a metrics query. Metrics on different Cube views are executed as
+        parallel single-view queries (no cross-view SQL join) and returned as
+        ``composed`` parts — each part has its own rows + provenance.
+        """
+        metrics = self._resolve_metrics(request.measures)
+        by_view: dict[str, list[MetricDef]] = {}
+        for m in metrics:
+            by_view.setdefault(m.cube_mapping.view, []).append(m)
+
+        if len(by_view) == 1:
+            return await self._run_single_view(request, metrics, parent_query_id)
+
+        # Multi-view composition: one Cube query per view, never a cross-view join.
+        # Dimensions/filters must be valid on every participating view (validated
+        # inside each _run_single_view); grain-unsafe mixes stay separate parts.
+        parent_id = "q_" + uuid.uuid4().hex[:12]
+        parts = await asyncio.gather(
+            *[
+                self._run_single_view(
+                    request.model_copy(update={"measures": [m.id for m in ms]}),
+                    ms,
+                    parent_query_id=parent_id,
+                )
+                for _, ms in sorted(by_view.items())
+            ]
+        )
+        part_list = list(parts)
+        views = [p["provenance"]["cube_view"] for p in part_list]
+        all_metric_ids = [mid for p in part_list for mid in p["provenance"]["metric_ids"]]
+        # Parent store entry so drilldown can reject with a clear message.
+        self.store.save(
+            StoredResult(
+                query_id=parent_id,
+                parent_query_id=parent_query_id,
+                request_json=request.model_dump_json(),
+                cube_query_json=json.dumps({"composed": True, "views": views}),
+                result_json=json.dumps([{"query_id": p["query_id"]} for p in part_list]),
+                compare_result_json=None,
+                provenance_json=json.dumps(
+                    {
+                        "query_id": parent_id,
+                        "composed": True,
+                        "composition": "multi_view",
+                        "metric_ids": all_metric_ids,
+                        "cube_views": views,
+                        "part_query_ids": [p["query_id"] for p in part_list],
+                        "catalogue_version": self.catalogue.version,
+                    }
+                ),
+            )
+        )
+        return {
+            "query_id": parent_id,
+            "composed": True,
+            "composition": "multi_view",
+            "parts": part_list,
+            "warnings": [
+                "Metrics spanned multiple Cube views; ran one query per view. "
+                "Narrate each part with its own provenance — do not join or "
+                "sum rows across parts (grains may differ)."
+            ],
+            "provenance": {
+                "query_id": parent_id,
+                "parent_query_id": parent_query_id,
+                "composed": True,
+                "composition": "multi_view",
+                "metric_ids": all_metric_ids,
+                "cube_views": views,
+                "part_query_ids": [p["query_id"] for p in part_list],
+                "catalogue_version": self.catalogue.version,
+            },
         }
 
     async def drilldown(
@@ -289,6 +457,16 @@ class QueryPlanner:
                 f"Query '{parent_query_id}' not found or expired (results are kept ~1h). "
                 "Re-run metrics_query and drill down from the fresh query_id."
             )
+        try:
+            prov = json.loads(stored.provenance_json)
+        except json.JSONDecodeError:
+            prov = {}
+        if prov.get("composed"):
+            raise PlanError(
+                f"Query '{parent_query_id}' is a multi-view composition. "
+                "Call metrics_drilldown on a part query_id instead: "
+                + ", ".join(prov.get("part_query_ids") or [])
+            )
         parent = QueryRequest.model_validate_json(stored.request_json)
         # Child inherits time range, compare mode, and ALL parent filters; it may
         # only narrow (union of filters), never widen.
@@ -299,6 +477,7 @@ class QueryPlanner:
             time_range=parent.time_range,
             granularity=granularity if granularity is not None else parent.granularity,
             compare_period=parent.compare_period,
+            sort=parent.sort,
             limit=parent.limit,
         )
         return await self.run(child, parent_query_id=parent_query_id)

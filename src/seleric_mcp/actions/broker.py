@@ -157,6 +157,24 @@ class ActionBroker:
             rules.append(await self._rule_ad_exists(payload))
             status_rule, current_state = await self._rule_not_already_paused(payload)
             rules.append(status_rule)
+        if contract.business_rules and not rules:
+            # Fail closed, loudly — not silently. `eligible = all(r.passed is
+            # not False for r in rules if _is_blocking(...))` evaluates
+            # all([]) == True, so an action whose catalogue entry declares
+            # business_rules but has no branch here would otherwise become
+            # immediately eligible with zero of its approved safety checks
+            # actually run. Business-rule enforcement in this broker is
+            # per-action-id Python, not generic/data-driven from the YAML —
+            # this is the explicit trip-wire for the next action added
+            # without updating this function to match.
+            raise NotImplementedError(
+                f"Action '{contract.id}' declares business_rules "
+                f"({[r.id for r in contract.business_rules]}) in its catalogue "
+                "contract, but ActionBroker._run_business_rules has no "
+                "implementation branch for this action id — none of its "
+                "declared rules would be enforced. Add one before approving "
+                "this action for use."
+            )
         return rules, current_state
 
     async def _rule_ad_exists(self, payload: dict) -> RuleResult:

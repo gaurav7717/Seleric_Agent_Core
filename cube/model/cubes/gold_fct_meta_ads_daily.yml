@@ -1,6 +1,7 @@
 # gold.fct_meta_ads_daily — brand × date × account × campaign × adset × ad.
 cubes:
 - name: gold_fct_meta_ads_daily
+  public: false
   sql_table: gold.fct_meta_ads_daily
   title: Gold Meta Ads Daily
   description: Meta ad performance from gold.fct_meta_ads_daily. Use meta_ad_performance

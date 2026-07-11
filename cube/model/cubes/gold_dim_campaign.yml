@@ -1,6 +1,7 @@
 # gold.dim_campaign — cross-platform campaign dimension.
 cubes:
 - name: gold_dim_campaign
+  public: false
   sql_table: gold.dim_campaign
   title: Gold Campaign Dimension
   description: Unified Meta + Google campaigns. Join to ad facts via campaign_id +

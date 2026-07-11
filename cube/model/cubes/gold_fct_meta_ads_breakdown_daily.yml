@@ -3,6 +3,7 @@
 # breakdown_type before summing spend — mixing types multi-counts (~8×). For totals use fct_meta_ads_daily.
 cubes:
 - name: gold_fct_meta_ads_breakdown_daily
+  public: false
   sql_table: gold.fct_meta_ads_breakdown_daily
   title: Gold Meta Ads Breakdown Daily
   description: 'Meta ad performance by breakdown segment. Grain includes breakdown_type

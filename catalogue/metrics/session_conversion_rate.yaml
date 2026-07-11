@@ -1,0 +1,32 @@
+id: session_conversion_rate
+display_name: Session Conversion Rate
+category: marketing
+status: approved
+description: >
+  Share of sessions that converted (Snowplow funnel, gold.fct_session_funnel).
+  A ratio — never sum or average daily conversion-rate rows; recompute from
+  components (converted_sessions / sessions).
+formula:
+  human_readable: "Converted Sessions / Sessions"
+  authoritative_source: cube
+cube_mapping:
+  view: session_funnel
+  measure: session_funnel.overall_conversion_rate
+aggregation: ratio
+ratio_components:
+  numerator: session_funnel.converted_sessions
+  denominator: session_funnel.sessions
+unit: ratio
+grain: session
+supported_dimensions: [brand_id, session_date, channel, campaign_name, utm_source, utm_medium, landing_page]
+supported_filters: [date_range, brand_id, channel, campaign_name]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Conversion rate trend last 30 days"
+    request: {measures: [session_conversion_rate], time_range: {preset: last_30d}, granularity: day}
+validation_tests:
+  - "period conversion rate equals sum(converted_sessions)/sum(sessions) for the same slice"
+deprecated_aliases: []

@@ -1,0 +1,31 @@
+id: meta_ctr
+display_name: Meta CTR
+category: marketing
+status: approved
+description: >
+  Meta platform click-through rate. A ratio — recompute from clicks/impressions;
+  never average daily CTR rows.
+formula:
+  human_readable: "Meta clicks / Meta impressions"
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_performance
+  measure: meta_ad_performance.ctr
+aggregation: ratio
+ratio_components:
+  numerator: meta_ad_performance.clicks
+  denominator: meta_ad_performance.impressions
+unit: ratio
+grain: day
+supported_dimensions: [brand_id, report_date, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+supported_filters: [date_range, brand_id, campaign_id, campaign_name, adset_name, ad_id, ad_name]
+data_owner: "Growth"
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Meta CTR by campaign last 7 days"
+    request: {measures: [meta_ctr, meta_spend], dimensions: [campaign_name], time_range: {preset: last_7d}}
+validation_tests:
+  - "period CTR equals sum(clicks)/sum(impressions) for the same slice"
+deprecated_aliases: []

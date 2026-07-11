@@ -9,6 +9,16 @@ Stack: **ClickHouse `gold.*` only** via Cube views. MCP **`seleric-cube-serve`**
 **Terminology:** *Serve layer* = Cube + MCP + `serve_views.yml` (allowed). *Serve DB* = legacy `serve.*` Postgres (forbidden). All cubes read `gold.*` only.
 
 **Gap analysis:** [SEMANTIC_LAYER_GAP_ANALYSIS.md](./SEMANTIC_LAYER_GAP_ANALYSIS.md)
+**Cube overlap audit:** [../catalogue/CUBE_AUDIT_REPORT.md](../catalogue/CUBE_AUDIT_REPORT.md)
+
+> **2026-07-11 model change:** every cube in `model/cubes/` is now `public: false`
+> — only views (this file's routing table) are queryable. Renamed/retired/added:
+> `amazon_sp_orders` → `orders_amazon`; `customer_acquisition_ltv` removed (group
+> `customer_ltv` by its acquisition dimensions instead); `shopify_order_line_items`
+> merged into `product_performance`; new `meta_campaign_attribution` view added
+> (modern name for `dw_meta_ads_attribution`, still present but deprecated);
+> `marketing_performance` / `ad_performance` deprecated in favor of
+> `meta_ad_performance` / `meta_ad_hourly`. See `catalogue/deprecations.yaml`.
 
 ---
 
@@ -20,11 +30,10 @@ Stack: **ClickHouse `gold.*` only** via Cube views. MCP **`seleric-cube-serve`**
 | Dashboard P&L KPI strip (#01–#03, #08, #10) | `daily_pnl` | `cube_daily_pnl`, `cube_pnl_waterfall` |
 | Channel revenue / net profit (#04–#05, #07) | `channel_pnl` | `cube_channel_pnl` |
 | Order trends, AOV, geo, UTM (#06, #09, #20, #23–#24, #27, #29) | `shopify_orders` | `cube_commerce_orders` |
-| Line discounts, basket size (#25–#26) | `shopify_order_line_items` | `cube_line_economics` |
-| SKU / product performance (#21–#22, #28) | `product_performance` | `cube_product_performance` |
-| Meta ads daily (#11–#16) | `marketing_performance` | `cube_meta_ads` |
-| Meta ads hourly (#17) | `ad_performance` | `cube_query` |
-| Meta campaign attribution (#18) | `dw_meta_ads_attribution` | `cube_query` |
+| Line discounts, basket size (#25–#26); SKU / product performance (#21–#22, #28) | `product_performance` | `cube_product_performance` / `cube_line_economics` |
+| Meta ads daily (#11–#16) | `meta_ad_performance` (was `marketing_performance`, deprecated) | `cube_meta_ads` |
+| Meta ads hourly (#17) | `meta_ad_hourly` (was `ad_performance`, deprecated) | `cube_query` |
+| Meta campaign attribution (#18) | `meta_campaign_attribution` (was `dw_meta_ads_attribution`, deprecated) | `cube_query` |
 | Google ads | `google_ad_performance` | `cube_google_ads` |
 | Order attribution (raw) | `order_attribution` | `cube_order_attribution` |
 | Session funnel | `session_funnel` | `cube_session_funnel` |
@@ -33,7 +42,7 @@ Stack: **ClickHouse `gold.*` only** via Cube views. MCP **`seleric-cube-serve`**
 | Meta × tag analysis (fc/sc + attribution) | `meta_neurotag_analysis` | `cube_meta_neurotag` |
 | Meta spend by Neurohack tag (legacy) | `meta_neurohack_performance` | `cube_meta_neurohack` (deprecated) |
 | Campaign × SKU attribution | `campaign_product_performance` | `cube_campaign_product` |
-| Cohort LTV by acquisition | `customer_acquisition_ltv` | `cube_customer_acquisition_ltv` |
+| Cohort LTV by acquisition | `customer_ltv` grouped by `acquisition_channel`/`acquisition_campaign`/`acquisition_platform`/`first_order_cohort_month` (was `customer_acquisition_ltv`, removed) | `cube_customer_ltv` |
 | Neurohack × attributed revenue | `neurohack_attribution` | `cube_neurohack_attribution` |
 | Session CVR + P&L same day | `daily_performance` | `cube_daily_performance` |
 | Refund timing / cash-at-risk | `refund_events` | `cube_refund_events` |
@@ -72,7 +81,7 @@ for period totals (IST).
 
 | Need | View | Grain |
 |------|------|-------|
-| Amazon orders (date axis `purchase_date`; filter `order_attribution_tag = 'ORGANIC'`) | `amazon_sp_orders` | order |
+| Amazon orders (date axis `purchase_date`; filter `order_attribution_tag = 'ORGANIC'`) | `orders_amazon` (was `amazon_sp_orders`, renamed 2026-07-11) | order |
 | Amazon order-level P&L (payout, fees, COGS, profit) | `amazon_sp_order_pnl` | order |
 | Amazon SKU / ASIN line economics | `amazon_order_items` | order item |
 | Amazon Ads (date axis `report_date`) | `amazon_ad_performance` | campaign × day |
@@ -208,7 +217,7 @@ For ad-level video only (no tags): `cube_meta_ads` — includes `video_views_3s`
 - **Timezone:** `Asia/Kolkata` on all queries
 - **brand_id:** Filter when multi-brand data
 - **Deprecated serve.* cubes removed** — all chart views read `gold.*` only
-- **Legacy view names restored:** `daily_pnl`, `channel_pnl`, `shopify_orders`, etc. — see `chart_views.yml`
+- **Legacy view names restored:** `daily_pnl`, `channel_pnl`, `shopify_orders`, etc. — see `chart_views.yml`. Some (`marketing_performance`, `ad_performance`, `dw_meta_ads_attribution`) are now marked `[deprecated]` in favor of a modern-named equivalent; `shopify_order_line_items` and `customer_acquisition_ltv` were retired outright (2026-07-11) — see `catalogue/deprecations.yaml`.
 
 ---
 

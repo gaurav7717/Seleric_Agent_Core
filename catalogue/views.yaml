@@ -37,3 +37,69 @@ views:
     freshness:
       source: gold.fct_order_attribution
       expected_cadence: "daily, T-1, IST"
+  - name: channel_pnl
+    title: Channel P&L (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.fct_order_attribution + gold.fct_order_items + meta/google ad spend facts
+      expected_cadence: "daily, T-1, IST"
+  - name: meta_campaign_attribution
+    title: Meta Campaign Attribution (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.fct_order_attribution + gold.fct_order_items + gold.fct_meta_ads_daily
+      expected_cadence: "daily, T-1, IST"
+  - name: order_records
+    title: Order Records (Gold)
+    date_dimension: order_date
+    freshness:
+      source: gold.fct_orders + gold.fct_order_attribution + gold.dim_customers
+      expected_cadence: "daily, T-1, IST"
+  - name: order_item_records
+    title: Order Item Records (Gold)
+    date_dimension: order_date
+    freshness:
+      source: gold.fct_order_items + gold.fct_orders + gold.fct_order_attribution
+      expected_cadence: "daily, T-1, IST"
+  - name: google_ad_performance
+    title: Google Ad Performance (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.fct_google_ads_daily
+      expected_cadence: "daily, T-1, IST"
+  - name: product_performance
+    title: Product / SKU Performance (Gold)
+    date_dimension: created_at_ist
+    freshness:
+      source: gold.fct_order_items
+      expected_cadence: "daily, T-1, IST"
+  - name: session_funnel
+    title: Session Funnel (Gold)
+    date_dimension: session_date
+    freshness:
+      source: gold.fct_session_funnel
+      expected_cadence: "daily, T-1, IST"
+  - name: amazon_ad_performance
+    title: Amazon Ads Performance (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.fct_amazon_ads_campaigns_daily
+      expected_cadence: "daily, T-1, IST"
+  - name: refund_events
+    title: Refund Events (Gold)
+    date_dimension: refund_processed_date
+    freshness:
+      source: gold.fct_refund_line_items
+      expected_cadence: "daily, T-1, IST"
+  - name: payment_method_pnl
+    title: Payment Method P&L (Gold)
+    date_dimension: report_date
+    freshness:
+      source: gold.fct_orders + gold.fct_order_items
+      expected_cadence: "daily, T-1, IST"
+  - name: customer_purchase_sequence
+    title: Customer Purchase Sequence (Gold)
+    date_dimension: order_date
+    freshness:
+      source: gold.fct_orders (windowed — UNVERIFIED against live ClickHouse, see cube comment)
+      expected_cadence: "daily, T-1, IST"

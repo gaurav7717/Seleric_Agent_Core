@@ -1,6 +1,7 @@
 # Hourly commerce aggregates — inline from gold.fct_orders until gold.fct_orders_hourly is synced.
 cubes:
 - name: gold_hourly_commerce
+  public: false
   title: Hourly Commerce (Gold)
   description: >
     Hourly order counts and revenue (IST). Aggregates gold.fct_orders; switches to
@@ -41,6 +42,10 @@ cubes:
     type: sum
     format: currency
   dimensions:
+  - name: hourly_commerce_key
+    sql: "concat(toString(brand_id),'|',toString(report_date),'|',toString(hour_of_day))"
+    type: string
+    primary_key: true
   - name: brand_id
     sql: brand_id
     type: string

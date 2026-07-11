@@ -1,0 +1,28 @@
+id: units_per_order
+display_name: Average Units per Order
+category: commerce
+status: approved
+description: >
+  Average units sold per order from product_performance. A ratio — do not
+  average daily units_per_order rows; recompute from total_quantity / orders
+  when composing with order counts separately.
+formula:
+  human_readable: "Total quantity / distinct orders (product_performance)"
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.units_per_order
+aggregation: ratio
+unit: count
+grain: order_item
+supported_dimensions: [brand_id, order_date, product_title, sku]
+supported_filters: [date_range, brand_id, product_title, sku]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Average units per order last 30 days"
+    request: {measures: [units_per_order], time_range: {preset: last_30d}}
+validation_tests: []
+deprecated_aliases: []

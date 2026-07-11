@@ -9,6 +9,17 @@ dimensions:
       meta_ad_performance: meta_ad_performance.brand_id
       customer_ltv: customer_ltv.brand_id
       order_attribution: order_attribution.brand_id
+      channel_pnl: channel_pnl.brand_id
+      meta_campaign_attribution: meta_campaign_attribution.brand_id
+      order_records: order_records.brand_id
+      order_item_records: order_item_records.brand_id
+      google_ad_performance: google_ad_performance.brand_id
+      product_performance: product_performance.brand_id
+      session_funnel: session_funnel.brand_id
+      amazon_ad_performance: amazon_ad_performance.brand_id
+      refund_events: refund_events.brand_id
+      payment_method_pnl: payment_method_pnl.brand_id
+      customer_purchase_sequence: customer_purchase_sequence.brand_id
   - id: report_date
     display_name: Report Date
     description: IST calendar day for P&L and ads facts.
@@ -16,6 +27,23 @@ dimensions:
     views:
       canonical_pnl: canonical_pnl.report_date
       meta_ad_performance: meta_ad_performance.report_date
+      channel_pnl: channel_pnl.report_date
+      meta_campaign_attribution: meta_campaign_attribution.report_date
+      google_ad_performance: google_ad_performance.report_date
+      amazon_ad_performance: amazon_ad_performance.report_date
+      payment_method_pnl: payment_method_pnl.report_date
+  - id: refund_processed_date
+    display_name: Refund Processed Date
+    description: IST date the refund was processed (distinct from the order's return-status lifecycle date).
+    is_time: true
+    views:
+      refund_events: refund_events.refund_processed_date
+  - id: platform
+    display_name: Platform
+    description: Ad platform for the channel split (meta, google, organic).
+    allowed_values: [meta, google, organic]
+    views:
+      channel_pnl: channel_pnl.platform
   - id: order_date
     display_name: Order Date
     description: IST order placement day.
@@ -23,71 +51,230 @@ dimensions:
     views:
       commerce_orders: commerce_orders.order_date
       order_attribution: order_attribution.order_date
+      order_records: order_records.order_date
+      order_item_records: order_item_records.order_date
+      product_performance: product_performance.created_at_ist
+      customer_purchase_sequence: customer_purchase_sequence.order_date
+  - id: customer_id
+    display_name: Customer ID
+    description: Stable customer identifier.
+    views:
+      customer_purchase_sequence: customer_purchase_sequence.customer_id
+  - id: order_sequence_number
+    display_name: Order Sequence Number
+    description: 1 = customer's first order, 2 = second order, etc.
+    data_type: number
+    views:
+      customer_purchase_sequence: customer_purchase_sequence.order_sequence_number
+  - id: is_first_order
+    display_name: Is First Order
+    views:
+      customer_purchase_sequence: customer_purchase_sequence.is_first_order
+  - id: is_repeat_order
+    display_name: Is Repeat Order
+    views:
+      customer_purchase_sequence: customer_purchase_sequence.is_repeat_order
+  - id: session_date
+    display_name: Session Date
+    description: IST session start day (Snowplow funnel).
+    is_time: true
+    views:
+      session_funnel: session_funnel.session_date
   - id: payment_method
     display_name: Payment Method
     description: Payment method on the order (COD, prepaid gateways).
     views:
       commerce_orders: commerce_orders.payment_method
+      order_records: order_records.payment_method
+      order_item_records: order_item_records.payment_method
+      payment_method_pnl: payment_method_pnl.payment_method
   - id: utm_source
     display_name: UTM Source
-    description: Landing UTM source recorded on the order.
+    description: Landing UTM source (order or session funnel).
     views:
       commerce_orders: commerce_orders.utm_source
+      session_funnel: session_funnel.utm_source
+  - id: utm_medium
+    display_name: UTM Medium
+    description: Landing UTM medium on the Snowplow session funnel.
+    views:
+      session_funnel: session_funnel.utm_medium
+  - id: utm_campaign
+    display_name: UTM Campaign
+    description: >
+      Raw landing UTM campaign string recorded on the order (distinct from
+      lt_campaign_name, which is the last-touch-resolved campaign from
+      attribution — UTM is unresolved/free-text, may not match ad platform
+      metadata 1:1).
+    views:
+      commerce_orders: commerce_orders.utm_campaign
+      session_funnel: session_funnel.utm_campaign
+  - id: channel
+    display_name: Marketing Channel
+    description: Session marketing channel from the Snowplow funnel.
+    views:
+      session_funnel: session_funnel.channel
+  - id: landing_page
+    display_name: Landing Page
+    description: Session landing page from the Snowplow funnel.
+    views:
+      session_funnel: session_funnel.landing_page
   - id: shipping_country
     display_name: Shipping Country
     views:
       commerce_orders: commerce_orders.shipping_country
+      order_records: order_records.shipping_country
+      product_performance: product_performance.ship_country
   - id: shipping_region
     display_name: Shipping Region / State
     views:
       commerce_orders: commerce_orders.shipping_region
+      order_records: order_records.shipping_region
+      order_item_records: order_item_records.shipping_region
+  - id: shipping_city
+    display_name: Shipping City
+    views:
+      commerce_orders: commerce_orders.shipping_city
+      order_records: order_records.shipping_city
+      order_item_records: order_item_records.shipping_city
+      product_performance: product_performance.ship_city
   - id: campaign_id
     display_name: Campaign ID
     views:
       meta_ad_performance: meta_ad_performance.campaign_id
+      meta_campaign_attribution: meta_campaign_attribution.campaign_id
+      google_ad_performance: google_ad_performance.campaign_id
+      amazon_ad_performance: amazon_ad_performance.campaign_id
   - id: campaign_name
     display_name: Campaign Name
     views:
       meta_ad_performance: meta_ad_performance.campaign_name
+      meta_campaign_attribution: meta_campaign_attribution.campaign_name
+      google_ad_performance: google_ad_performance.campaign_name
+      session_funnel: session_funnel.campaign_name
+      amazon_ad_performance: amazon_ad_performance.campaign_name
+  - id: campaign_type
+    display_name: Campaign Type
+    description: Amazon Ads campaign type (SP/SB/SD).
+    allowed_values: [SP, SB, SD]
+    views:
+      amazon_ad_performance: amazon_ad_performance.campaign_type
+  - id: campaign_status
+    display_name: Campaign Status
+    views:
+      amazon_ad_performance: amazon_ad_performance.campaign_status
   - id: adset_name
     display_name: Ad Set Name
     views:
       meta_ad_performance: meta_ad_performance.adset_name
+      google_ad_performance: google_ad_performance.adset_name
   - id: ad_id
     display_name: Ad ID
     views:
       meta_ad_performance: meta_ad_performance.ad_id
+      google_ad_performance: google_ad_performance.ad_id
   - id: ad_name
     display_name: Ad Name
     views:
       meta_ad_performance: meta_ad_performance.ad_name
+      google_ad_performance: google_ad_performance.ad_name
   - id: lt_platform
     display_name: Last-Touch Platform
     description: Platform credited by last-touch attribution (meta, google, organic, ...).
+    allowed_values: [meta, google, organic]
     views:
       order_attribution: order_attribution.lt_platform
+      order_records: order_records.lt_platform
+      order_item_records: order_item_records.lt_platform
   - id: lt_channel
     display_name: Last-Touch Channel
     description: Channel credited by last-touch attribution.
     views:
       order_attribution: order_attribution.lt_channel
+      order_records: order_records.lt_channel
   - id: lt_campaign_id
     display_name: Last-Touch Campaign ID
     views:
       order_attribution: order_attribution.lt_campaign_id
+      order_records: order_records.lt_campaign_id
   - id: lt_campaign_name
     display_name: Last-Touch Campaign Name
     description: Campaign credited by last-touch attribution.
     views:
       order_attribution: order_attribution.lt_campaign_name
+      order_records: order_records.lt_campaign_name
+      order_item_records: order_item_records.lt_campaign_name
   - id: lt_adset_name
     display_name: Last-Touch Ad Set Name
     views:
       order_attribution: order_attribution.lt_adset_name
+      order_records: order_records.lt_adset_name
+      order_item_records: order_item_records.lt_adset_name
   - id: lt_ad_name
     display_name: Last-Touch Ad Name
     views:
       order_attribution: order_attribution.lt_ad_name
+      order_records: order_records.lt_ad_name
+      order_item_records: order_item_records.lt_ad_name
+  - id: attribution_method
+    display_name: Attribution Method
+    description: How the last-touch attribution record was resolved (e.g. UTM, click ID, identity match).
+    views:
+      order_records: order_records.attribution_method
+      order_item_records: order_item_records.attribution_method
+  - id: order_id
+    display_name: Order ID
+    description: Stable order identifier. Record-grain key for drill-down.
+    views:
+      order_records: order_records.order_id
+      order_item_records: order_item_records.order_id
+      refund_events: refund_events.order_id
+      customer_purchase_sequence: customer_purchase_sequence.order_id
+  - id: line_item_id
+    display_name: Line Item ID
+    description: >
+      Stable order-line-item identifier. Record-grain key for drill-down.
+      Found unexposed on both its cube and view (2026-07-11) despite being
+      selected in gold_refund_events' own SQL — see that cube's file comment.
+    views:
+      order_item_records: order_item_records.line_item_id
+      refund_events: refund_events.line_item_id
+  - id: order_name
+    display_name: Order Name
+    description: Human-readable order number (e.g. #1234), distinct from order_id.
+    views:
+      order_records: order_records.order_name
+      order_item_records: order_item_records.order_name
+  - id: order_status
+    display_name: Order Status
+    views:
+      order_records: order_records.order_status
+      order_item_records: order_item_records.order_status
+  - id: return_status
+    display_name: Return Status
+    views:
+      order_records: order_records.return_status
+      order_item_records: order_item_records.return_status
+      refund_events: refund_events.return_status
+  - id: is_new_customer
+    display_name: New Customer Flag
+    description: Whether this was the customer's first order.
+    views:
+      commerce_orders: commerce_orders.is_new_customer
+      order_records: order_records.is_new_customer
+      order_item_records: order_item_records.is_new_customer
+  - id: sku
+    display_name: SKU
+    views:
+      order_item_records: order_item_records.sku
+      product_performance: product_performance.sku
+      refund_events: refund_events.sku
+  - id: product_title
+    display_name: Product Title
+    views:
+      order_item_records: order_item_records.product_title
+      product_performance: product_performance.product_title
+      refund_events: refund_events.product_title
   - id: acquisition_channel
     display_name: Acquisition Channel
     description: Channel that acquired the customer (first order).
