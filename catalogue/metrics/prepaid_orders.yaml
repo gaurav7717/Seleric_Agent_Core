@@ -1,22 +1,21 @@
 id: prepaid_orders
-display_name: Prepaid Orders
+display_name: Prepaid / Online Orders
 category: commerce
-status: approved
+status: certified
 description: >
-  Non-cancelled, non-test orders paid by any method other than COD.
-  Percentage companion: prepaid_pct on the same view.
+  Online (prepaid) payment bucket from serve.commerce_orders. Residual after COD,
+  paytm card machine, and manual buckets. Excludes test, revenue-adjustment, draft.
 formula:
-  human_readable: "Count of orders where is_cod = false and order_status != cancelled (is_test = false)"
+  human_readable: "Count of orders in online payment bucket"
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
   measure: commerce_orders.prepaid_orders
-  measure_pct: commerce_orders.prepaid_pct
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+supported_dimensions: [brand_id, order_date, order_created_at_ist, payment_method, payment_bucket]
+supported_filters: [date_range, brand_id, payment_method, payment_bucket]
 data_owner: "Commerce Ops"
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
@@ -25,5 +24,5 @@ examples:
   - question: "Prepaid vs COD mix this month"
     request: {measures: [prepaid_orders, cod_orders], time_range: {preset: this_month}}
 validation_tests:
-  - "prepaid_orders + cod_orders <= orders for any slice"
+  - "prepaid_orders + cod_orders <= orders for payment-eligible slice"
 deprecated_aliases: []

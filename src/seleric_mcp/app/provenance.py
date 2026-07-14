@@ -24,7 +24,7 @@ def build_provenance(
     compare_range: tuple[date, date] | None,
     compare_mode: str | None,
     row_count: int,
-    row_limit: int,
+    row_limit: int | None,
     freshness: dict | None,
     cube_last_refresh: str | None,
     catalogue_version: str,
@@ -57,7 +57,7 @@ def build_provenance(
         "timezone": "Asia/Kolkata",
         "row_count": row_count,
         "row_limit": row_limit,
-        "row_limit_hit": row_count >= row_limit,
+        "row_limit_hit": bool(row_limit is not None and row_count >= row_limit),
         "freshness": {
             **(freshness or {}),
             "cube_last_refresh": cube_last_refresh,

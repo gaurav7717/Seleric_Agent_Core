@@ -55,8 +55,13 @@ class CubeClient:
     async def load(self, query: dict[str, Any]) -> CubeResult:
         query = dict(query)
         query.setdefault("timezone", "Asia/Kolkata")
-        limit = int(query.get("limit", self._settings.default_row_limit))
-        query["limit"] = min(limit, self._settings.max_row_limit)
+        # Only apply a row cap when the caller set one (e.g. top-N). Do not
+        # inject a default limit — that silently truncates ranked/list queries.
+        if "limit" in query and query["limit"] is not None:
+            limit = int(query["limit"])
+            query["limit"] = min(limit, self._settings.max_row_limit)
+        else:
+            query.pop("limit", None)
 
         t0 = time.monotonic()
         body: dict = {}

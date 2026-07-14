@@ -59,3 +59,15 @@ def test_row_limit_hit_flag():
     )
     assert prov["row_limit_hit"] is True
     assert prov["compare_period"] is None
+
+
+def test_unlimited_rows_never_marks_limit_hit():
+    prov = build_provenance(
+        query_id="q", parent_query_id=None, metric_ids=[], view="v", cube_query={},
+        filters_applied=[], time_range=(date(2026, 1, 1), date(2026, 1, 2)),
+        time_preset=None, compare_range=None, compare_mode=None,
+        row_count=12_000, row_limit=None, freshness=None, cube_last_refresh=None,
+        catalogue_version="x",
+    )
+    assert prov["row_limit"] is None
+    assert prov["row_limit_hit"] is False

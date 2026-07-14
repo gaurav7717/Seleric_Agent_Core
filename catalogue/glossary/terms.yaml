@@ -1,107 +1,178 @@
 # Business language -> canonical metric id. This is what makes
 # catalogue_search_metrics("topline") resolve without guessing.
+# Only reference ids that exist under catalogue/metrics/.
 terms:
   - term: topline
-    canonical_id: net_revenue
+    canonical_id: commerce_net_revenue
   - term: net sales
-    canonical_id: net_revenue
+    canonical_id: commerce_net_revenue
   - term: revenue
-    canonical_id: net_revenue
+    canonical_id: commerce_net_revenue
   - term: commerce net revenue
     canonical_id: commerce_net_revenue
   - term: revenue by city
     canonical_id: commerce_net_revenue
   - term: net revenue by city
     canonical_id: commerce_net_revenue
-  - term: bottom line
-    canonical_id: net_profit
-  - term: profit
-    canonical_id: net_profit
-  - term: MER
-    canonical_id: mer
-    definition: "Marketing Efficiency Ratio = net revenue (ex-GST) / total ad spend"
-  - term: marketing efficiency ratio
-    canonical_id: mer
-  - term: ROAS
-    canonical_id: blended_roas
-    definition: >
-      Blended ROAS by default; Meta platform-reported ROAS is the separate
-      metric meta_roas.
-  - term: return on ad spend
-    canonical_id: blended_roas
   - term: AOV
     canonical_id: aov
   - term: basket size
     canonical_id: aov
   - term: average order value
     canonical_id: aov
-  - term: COGS
-    canonical_id: total_cogs
-  - term: cost of goods
-    canonical_id: total_cogs
-  - term: ad spend
-    canonical_id: total_ad_spend
-  - term: marketing spend
-    canonical_id: total_ad_spend
-  - term: contribution
-    canonical_id: contribution_margin
-  - term: LTV
-    canonical_id: avg_ltv
-  - term: lifetime value
-    canonical_id: avg_ltv
   - term: order volume
     canonical_id: orders
-  - term: gross margin
-    canonical_id: gross_profit
-  - term: attributed revenue
-    canonical_id: attributed_revenue
+  - term: units sold
+    canonical_id: units_sold
+  - term: units
+    canonical_id: units_sold
+  - term: product revenue
+    canonical_id: product_net_revenue
+  - term: SKU revenue
+    canonical_id: product_net_revenue
+  - term: sales by product
+    canonical_id: product_net_revenue
+  - term: most profitable product
+    canonical_id: product_gross_profit
+  - term: product margin
+    canonical_id: product_gross_margin_pct
+  - term: gross margin by SKU
+    canonical_id: product_gross_margin_pct
+  - term: ASP
+    canonical_id: average_selling_price
+  - term: average selling price
+    canonical_id: average_selling_price
+  - term: best selling product
+    canonical_id: null
     definition: >
-      Business-truth net revenue (ex-GST) credited to the last marketing touch
-      (gold.fct_order_attribution). Not the platform-reported conversion value —
-      that is meta_ad_performance.purchase_value / google conversion_value.
-  - term: last-touch revenue
-    canonical_id: attributed_revenue
-  - term: campaign revenue
-    canonical_id: attributed_revenue
-  - term: attributed orders
-    canonical_id: attributed_orders
+      Ambiguous — "best" can mean highest units_sold, product_net_revenue, or
+      product_gross_profit. Resolve from context (default to units_sold for
+      "best selling"); clarify only when the business meaning materially changes.
+  - term: gross sales
+    canonical_id: gross_sales
+    definition: >
+      Placement revenue ex-GST before discounts (includes cancelled/voided
+      placement orders — dashboard Gross Sales card definition).
+  - term: discounts
+    canonical_id: discounts
+  - term: coupons
+    canonical_id: discounts
+  - term: returns and cancellations
+    canonical_id: returns_cancels
+  - term: returns / cancels
+    canonical_id: returns_cancels
+  - term: return revenue
+    canonical_id: return_cancel_revenue
+  - term: revenue lost to returns
+    canonical_id: return_cancel_revenue
   - term: RTO
     canonical_id: null
     definition: >
-      Return to Origin — an order returned before/at delivery, reversed out of
-      net revenue. RTO cost is a COGS component (canonical_pnl.rto_cost); not a
-      standalone catalogued metric yet.
+      Return to Origin — an order returned before/at delivery. Not a
+      standalone catalogued metric in the current commerce/product set.
+  - term: bottom line
+    canonical_id: null
+    definition: >
+      Company net_profit is not in the current catalogue (commerce/product
+      metrics only). Use product_gross_profit for SKU-level profit.
+  - term: profit
+    canonical_id: null
+    definition: >
+      Ambiguous — company P&L net_profit is not catalogued; for products use
+      product_gross_profit.
+  - term: COGS
+    canonical_id: product_cogs
+  - term: cost of goods
+    canonical_id: product_cogs
+  - term: gross margin
+    canonical_id: product_gross_margin_pct
+  - term: MER
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: marketing efficiency ratio
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: ROAS
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: return on ad spend
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: ad spend
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: marketing spend
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: contribution
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: LTV
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: lifetime value
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: attributed revenue
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: last-touch revenue
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: campaign revenue
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: attributed orders
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta impressions
-    canonical_id: meta_impressions
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta clicks
-    canonical_id: meta_clicks
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta CTR
-    canonical_id: meta_ctr
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta CPC
-    canonical_id: meta_cpc
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta purchases
-    canonical_id: meta_purchases
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta CPA
-    canonical_id: meta_cpa
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: meta purchase value
-    canonical_id: meta_purchase_value
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: product views
-    canonical_id: product_view_sessions
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: add to carts
-    canonical_id: add_to_cart_sessions
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: add-to-carts
-    canonical_id: add_to_cart_sessions
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: checkouts
-    canonical_id: checkout_sessions
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: funnel purchases
-    canonical_id: funnel_purchases
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: cart abandonment
-    canonical_id: cart_abandonment_rate
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: checkout abandonment
-    canonical_id: checkout_abandonment_rate
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: google conversions
-    canonical_id: google_conversions
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: google conversion value
-    canonical_id: google_conversion_value
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: google CPA
-    canonical_id: google_cpa
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.

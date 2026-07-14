@@ -24,6 +24,11 @@ class CubeMapping(BaseModel):
     view: str
     measure: str
     measure_pct: str | None = None
+    # Fully-qualified time dimension (e.g. "commerce_orders.event_date") that
+    # date-range filters must apply to for THIS metric, overriding the view's
+    # default date_dimension. Event-axis metrics (returns/cancels) declare it;
+    # placement-axis metrics leave it unset.
+    time_dimension: str | None = None
 
 
 class RatioComponents(BaseModel):
@@ -45,7 +50,11 @@ class MetricDef(BaseModel):
     id: str
     display_name: str
     category: str
-    status: Literal["approved", "draft", "broken"] = "approved"
+    status: Literal["approved", "certified", "draft", "broken"] = "approved"
+
+    @property
+    def is_queryable(self) -> bool:
+        return self.status in ("approved", "certified")
     description: str
     formula: Formula
     cube_mapping: CubeMapping
@@ -195,6 +204,13 @@ def _check_integrity(cat: Catalogue) -> None:
     for m in cat.metrics.values():
         if m.cube_mapping.view not in cat.views:
             problems.append(f"metric {m.id}: unknown view {m.cube_mapping.view}")
+        if m.cube_mapping.time_dimension and not m.cube_mapping.time_dimension.startswith(
+            f"{m.cube_mapping.view}."
+        ):
+            problems.append(
+                f"metric {m.id}: time_dimension {m.cube_mapping.time_dimension} "
+                f"is not on view {m.cube_mapping.view}"
+            )
         for dim_id in m.supported_dimensions:
             dim = cat.dimensions.get(dim_id)
             if dim is None:

@@ -1,13 +1,12 @@
 id: orders
 display_name: Orders
 category: commerce
-status: approved
+status: certified
 description: >
-  Order count from gold.fct_orders (test orders excluded in Cube). Status
-  buckets on the same view: active_orders + cancelled_orders + refunded_orders
-  (cancelled takes precedence over refunded).
+  Shopify placement order count from serve.commerce_orders. Excludes test and
+  revenue-adjustment orders; includes later-cancelled and voided placements.
 formula:
-  human_readable: "Count of orders placed (is_test = false)"
+  human_readable: "Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)"
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -15,8 +14,8 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
 data_owner: "Commerce Ops"
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]

@@ -1,0 +1,29 @@
+id: product_orders
+display_name: Product Orders
+category: product
+status: certified
+description: >
+  Distinct eligible orders containing the product/SKU (serve.product_performance).
+  One order can contain many SKUs — NEVER sum per-SKU order counts across SKUs;
+  the ungrouped total is the count of orders with at least one product line.
+formula:
+  human_readable: "Count of distinct eligible orders containing the product line"
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.product_orders
+aggregation: additive
+unit: count
+grain: order_item
+supported_dimensions: [brand_id, order_date, product_title, variant_title, sku, product_type, vendor, shipping_city, shipping_region, shipping_country]
+supported_filters: [date_range, brand_id, product_title, sku, product_type, vendor]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "How many orders contained TH-149-SCRATCHLOUNGE last month?"
+    request: {measures: [product_orders], filters: [{dimension: sku, operator: equals, values: ["TH-149-SCRATCHLOUNGE"]}], time_range: {preset: last_month}}
+validation_tests:
+  - "ungrouped total <= commerce orders for the same window"
+deprecated_aliases: []

@@ -5,10 +5,8 @@ Run from Base_Agent:
     uv sync
     uv run python scripts/chat_client.py
 
-Requires in .env:
-    AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_DEPLOYMENT
-Optional:
-    AZURE_OPENAI_API_VERSION (default 2024-12-01-preview)
+Requires AZURE_OPENAI_API_KEY in .env. Endpoint / deployment / api_version
+and chat tunables come from config.yaml (env overrides still work).
 """
 
 from __future__ import annotations
@@ -20,7 +18,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from openai import AzureOpenAI
@@ -28,10 +25,10 @@ from openai import AzureOpenAI
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from seleric_mcp.config import load_azure_settings, load_chat_settings  # noqa: E402
 from seleric_mcp.gateway.prompts import NO_HALLUCINATION_GUARD  # noqa: E402
 
-# Tool-round cap per user turn (env-overridable, no magic number in code)
-MAX_TOOL_ROUNDS = int(os.getenv("CHAT_MAX_TOOL_ROUNDS", "12"))
+MAX_TOOL_ROUNDS = load_chat_settings().max_tool_rounds
 
 # Agent policy lives in an editable file next to this script, not in code.
 _POLICY_PATH = Path(__file__).with_name("agent_policy.md")
@@ -90,32 +87,25 @@ SCRATCHPAD_TOOL = {
 
 
 def _load_azure() -> tuple[AzureOpenAI, str]:
-    load_dotenv(ROOT / ".env")
-    load_dotenv(ROOT / ".env.local", override=True)
-
-    api_key = os.getenv("AZURE_OPENAI_API_KEY", "").strip()
-    endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "").strip().rstrip("/")
-    deployment = os.getenv("AZURE_DEPLOYMENT", "").strip()
-    api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview").strip()
-
+    azure = load_azure_settings()
     missing = [
         name
         for name, val in [
-            ("AZURE_OPENAI_API_KEY", api_key),
-            ("AZURE_OPENAI_ENDPOINT", endpoint),
-            ("AZURE_DEPLOYMENT", deployment),
+            ("AZURE_OPENAI_API_KEY", azure.api_key),
+            ("azure.endpoint (config.yaml or AZURE_OPENAI_ENDPOINT)", azure.endpoint),
+            ("azure.deployment (config.yaml or AZURE_DEPLOYMENT)", azure.deployment),
         ]
         if not val
     ]
     if missing:
-        raise SystemExit(f"Missing required env vars: {', '.join(missing)}")
+        raise SystemExit(f"Missing required Azure settings: {', '.join(missing)}")
 
     client = AzureOpenAI(
-        api_key=api_key,
-        azure_endpoint=endpoint,
-        api_version=api_version,
+        api_key=azure.api_key,
+        azure_endpoint=azure.endpoint,
+        api_version=azure.api_version,
     )
-    return client, deployment
+    return client, azure.deployment
 
 
 def _mcp_tools_to_openai(tools: list[Any]) -> list[dict[str, Any]]:

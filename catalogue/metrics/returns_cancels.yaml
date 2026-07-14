@@ -1,0 +1,33 @@
+id: returns_cancels
+display_name: Returns + Cancels (orders)
+category: commerce
+status: certified
+description: >
+  Combined count of orders with a return or cancellation event in the period,
+  on the event date (Asia/Kolkata) — matches the dashboard Returns / Cancels
+  card (Shopify-only). Event axis: event_date, not order_date. For the split,
+  use cancelled_orders and refunded_orders (returned leg).
+formula:
+  human_readable: >
+    Distinct orders with a cancellation or return event in period
+    (pnl_refund_class buckets, gift cards excluded)
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.returns_cancels_orders
+  time_dimension: commerce_orders.event_date
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions: [brand_id, event_date]
+supported_filters: [date_range, brand_id]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Returns and cancellations last 30 days"
+    request: {measures: [returns_cancels], time_range: {preset: last_30d}}
+validation_tests:
+  - "reconciles to dashboard Returns / Cancels card for closed periods"
+deprecated_aliases: []

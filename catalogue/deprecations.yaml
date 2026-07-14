@@ -1,50 +1,24 @@
-# Pre-migration names -> current canonical surface. Source: cube_mcp/semantic_layer_serve/AGENTS.md (2026-07-10).
+# Pre-migration names -> current canonical surface.
+# Platform slimmed 2026-07-14 to the two certified data products
+# (Commerce.CommercePerformance + Product.ProductPerformance); every other
+# view/metric family was removed from the semantic layer.
 deprecations:
+  - old: canonical_pnl
+    new: commerce_performance (order/net-sales scope only)
+    reason: >
+      Company P&L view removed in the 2026-07-14 slim-down. COGS/ad-spend/profit
+      metrics return when a finance data product is certified.
   - old: gold.fct_daily_pnl
-    new: canonical_pnl
-    reason: Broken product-cost basis (negative COGS, net_profit > net_revenue). No longer exposed.
-  - old: gold.fct_finance_waterfall_daily
-    new: canonical_pnl
-    reason: Shared the broken product-cost basis of fct_daily_pnl.
-  - old: finance_waterfall
-    new: canonical_pnl.statutory_net_sales_excl_gst / canonical_pnl.deferred_revenue_excl_gst
-    reason: View removed 2026-07-10; statutory/deferred net sales moved onto canonical_pnl.
-  - old: meta_neurohack_performance
-    new: meta_neurotag_analysis
-    reason: Legacy SQL bridge without attribution or split-credit; prefer cube_meta_neurotag.
+    new: (removed)
+    reason: Broken product-cost basis (negative COGS, net_profit > net_revenue).
+  - old: order_records / order_item_records
+    new: commerce_orders / product_performance
+    reason: Record-grain chart views superseded by the certified serve products.
   - old: daily_pnl.*
-    new: canonical_pnl.*
-    reason: Chart-era view; canonical_pnl (rebuilt on int_finance_daily_rollups) is the P&L source of truth for the agent.
-  - old: customer_acquisition_ltv
-    new: customer_ltv (grouped by acquisition_channel / acquisition_campaign / acquisition_platform / first_order_cohort_month)
+    new: (removed)
+    reason: Chart-era view; no P&L surface in the slimmed catalogue.
+  - old: gold_fct_order_items (cube) / product_performance on gold
+    new: serve_product_performance -> product_performance view
     reason: >
-      View removed 2026-07-11 — gold_customer_acquisition_ltv was a strict subset
-      of gold_dim_customers/customer_ltv, which already stores and exposes the
-      same acquisition dimensions per customer. See CUBE_AUDIT_REPORT.md §2.5.
-  - old: marketing_performance.*
-    new: meta_ad_performance.*
-    reason: >
-      Chart-era alias of gold_fct_meta_ads_daily with a narrower field set and
-      legacy naming (ad_spend/date_start). meta_ad_performance is canonical.
-      See CUBE_AUDIT_REPORT.md §2.3.
-  - old: ad_performance.*
-    new: meta_ad_hourly.*
-    reason: >
-      Chart-era alias of gold_fct_meta_ads_hourly. meta_ad_hourly is canonical.
-      See CUBE_AUDIT_REPORT.md §2.3.
-  - old: shopify_order_line_items
-    new: product_performance
-    reason: >
-      View removed 2026-07-11 — both wrapped gold_fct_order_items with
-      overlapping field subsets; merged into product_performance (added
-      units_per_order, unique_products, line_item_count). See CUBE_AUDIT_REPORT.md §7 Q1.
-  - old: dw_meta_ads_attribution
-    new: meta_campaign_attribution
-    reason: >
-      Legacy chart-era name for gold_meta_campaign_attribution; promoted to a
-      modern-named serve view 2026-07-11. See CUBE_AUDIT_REPORT.md §7 Q6.
-  - old: amazon_sp_orders
-    new: orders_amazon
-    reason: >
-      Renamed 2026-07-11 for unambiguous platform-specific naming (orders_amazon
-      vs a future orders_blended), same cube (gold_fct_amazon_sp_orders).
+      Product surface repointed 2026-07-14 to serve.product_performance
+      (lifecycle net revenue, net units, fully-loaded lifecycle COGS).

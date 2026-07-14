@@ -1,10 +1,13 @@
 id: cod_orders
 display_name: Cash-on-Delivery Orders
 category: commerce
-status: approved
-description: Non-test orders where is_cod = true, regardless of order_status.
+status: certified
+description: >
+  COD bucket orders from serve.commerce_orders (dashboard payment_bucket = cod).
+  Excludes test, revenue-adjustment, and draft orders. Payment mix uses
+  order_created_at_ist date axis in dashboard SQL.
 formula:
-  human_readable: "Count of orders where is_cod = true (is_test = false)"
+  human_readable: "Count of orders in COD payment bucket"
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -12,8 +15,8 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+supported_dimensions: [brand_id, order_date, order_created_at_ist, payment_method, payment_bucket]
+supported_filters: [date_range, brand_id, payment_method, payment_bucket]
 data_owner: "Commerce Ops"
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]

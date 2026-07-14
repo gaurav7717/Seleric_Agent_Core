@@ -118,7 +118,7 @@ class CatalogueService:
         return self.cat.version
 
     def _searchable_metrics(self) -> list[MetricDef]:
-        return [m for m in self.cat.metrics.values() if m.status == "approved"]
+        return [m for m in self.cat.metrics.values() if m.is_queryable]
 
     def _vocab_entries(self) -> list[tuple[str, str, str]]:
         """(normalized_form, metric_id, matched_via) for every resolvable name."""
@@ -144,7 +144,7 @@ class CatalogueService:
         matches: dict[str, MetricSummary] = {}
 
         def add(m: MetricDef, matched_on: str) -> None:
-            if m.status != "approved" or m.id in matches:
+            if not m.is_queryable or m.id in matches:
                 return
             matches[m.id] = MetricSummary(
                 id=m.id,
@@ -197,7 +197,7 @@ class CatalogueService:
                     matched_via=f"glossary:{t}", definition=entry.definition,
                 )
             return DefinitionOnlyTerm(term=text, definition=entry.definition or "")
-        if t in self.cat.metrics and self.cat.metrics[t].status == "approved":
+        if t in self.cat.metrics and self.cat.metrics[t].is_queryable:
             return ResolvedTerm(term=text, metric_id=t, matched_via="metric_id")
         alias_target = self._alias_index.get(t)
         if alias_target:

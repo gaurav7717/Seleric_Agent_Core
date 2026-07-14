@@ -55,7 +55,8 @@ class QueryRequest(BaseModel):
     sort: list[SortSpec] = Field(default_factory=list)  # e.g. top-N: sort by a
     # metric desc + limit=N. Empty means Cube's default order (date ascending
     # when a time dimension with granularity is present, else unordered).
-    limit: int = Field(default=500, ge=1, le=5000)
+    # None = no row cap (full result set). Pass limit only for top/bottom-N.
+    limit: int | None = Field(default=None, ge=1)
 
 
 class PlanError(ValueError):

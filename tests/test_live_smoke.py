@@ -39,13 +39,27 @@ async def test_meta_health(live_settings):
     await cube.aclose()
 
 
-async def test_canonical_pnl_last_7d(live_settings):
+async def test_commerce_performance_last_7d(live_settings):
     cube = CubeClient(live_settings)
     res = await cube.load(
         {
-            "measures": ["canonical_pnl.net_profit"],
+            "measures": ["commerce_performance.commerce_net_revenue"],
             "timeDimensions": [
-                {"dimension": "canonical_pnl.report_date", "dateRange": "last 7 days"}
+                {"dimension": "commerce_performance.report_date", "dateRange": "last 7 days"}
+            ],
+        }
+    )
+    assert isinstance(res.data, list)
+    await cube.aclose()
+
+
+async def test_product_performance_last_7d(live_settings):
+    cube = CubeClient(live_settings)
+    res = await cube.load(
+        {
+            "measures": ["product_performance.net_line_revenue_ex_gst"],
+            "timeDimensions": [
+                {"dimension": "product_performance.order_date", "dateRange": "last 7 days"}
             ],
         }
     )

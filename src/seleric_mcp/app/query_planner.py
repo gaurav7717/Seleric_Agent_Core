@@ -72,10 +72,32 @@ def derive_compare_range(start: date, end: date, mode: str) -> tuple[date, date]
 
 
 class QueryPlanner:
-    def __init__(self, catalogue: CatalogueService, cube: CubeClient, store: ResultStore):
+    def __init__(
+        self,
+        catalogue: CatalogueService,
+        cube: CubeClient,
+        store: ResultStore,
+        default_brand_id: str | None = None,
+    ):
         self.catalogue = catalogue
         self.cube = cube
         self.store = store
+        # When set, queries without an explicit brand_id filter are scoped to
+        # this brand on views that expose a brand_id dimension (single-tenant
+        # deployments must not silently aggregate other/test brands).
+        self.default_brand_id = default_brand_id
+
+    def _effective_time_dimension(self, m: MetricDef) -> str | None:
+        """Fully-qualified time dimension date-range filters apply to for this
+        metric: the metric's own cube_mapping.time_dimension (event-axis
+        metrics) or the view's default date_dimension."""
+        if m.cube_mapping.time_dimension:
+            return m.cube_mapping.time_dimension
+        view = m.cube_mapping.view
+        view_def = self.catalogue.cat.views.get(view)
+        if view_def is not None and view_def.date_dimension:
+            return f"{view}.{view_def.date_dimension}"
+        return None
 
     # ---------- validation ----------
 
@@ -83,7 +105,7 @@ class QueryPlanner:
         metrics: list[MetricDef] = []
         for mid in metric_ids:
             m = self.catalogue.get_metric(mid)
-            if m is None or m.status != "approved":
+            if m is None or not m.is_queryable:
                 result = self.catalogue.search(mid)
                 hints = [s.id for s in result.matches] + result.suggestions
                 reason = "unknown" if m is None else f"status={m.status}"
@@ -99,7 +121,7 @@ class QueryPlanner:
         """Catalogue ids that declare support for dimension_id (for PlanError hints)."""
         hints: list[str] = []
         for mid, m in self.catalogue.cat.metrics.items():
-            if m.status != "approved" or mid == exclude:
+            if not m.is_queryable or mid == exclude:
                 continue
             if dimension_id in m.supported_dimensions:
                 hints.append(mid)
@@ -238,8 +260,9 @@ class QueryPlanner:
         cube_filters: list[dict],
         date_range: tuple[date, date],
         granularity: str,
-        limit: int,
+        limit: int | None,
         sort_order: dict[str, str] | None = None,
+        time_dimension: str | None = None,
     ) -> dict:
         view = metrics[0].cube_mapping.view
         measures: list[str] = []
@@ -256,15 +279,18 @@ class QueryPlanner:
         query: dict = {
             "measures": measures,
             "timezone": "Asia/Kolkata",
-            "limit": limit,
         }
+        if limit is not None:
+            query["limit"] = limit
         if qualified_dims:
             query["dimensions"] = qualified_dims
         if cube_filters:
             query["filters"] = cube_filters
 
-        if view_def.date_dimension:
-            date_dim = f"{view}.{view_def.date_dimension}"
+        date_dim = time_dimension or (
+            f"{view}.{view_def.date_dimension}" if view_def.date_dimension else None
+        )
+        if date_dim:
             td: dict = {
                 "dimension": date_dim,
                 "dateRange": [date_range[0].isoformat(), date_range[1].isoformat()],
@@ -298,10 +324,26 @@ class QueryPlanner:
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)
         sort_order = self._validate_sort(metrics, view, request.sort)
         current_range = resolve_time_range(request.time_range)
+        time_dimension = self._effective_time_dimension(metrics[0])
+
+        # Default brand scope: without an explicit brand filter, aggregates on
+        # brand-scoped views would silently mix other/test brands' rows.
+        if self.default_brand_id and not any(f.dimension == "brand_id" for f in request.filters):
+            brand_dim = self.catalogue.cat.dimensions.get("brand_id")
+            member = brand_dim.views.get(view) if brand_dim else None
+            if member:
+                cube_filters = [
+                    *cube_filters,
+                    {"member": member, "operator": "equals", "values": [self.default_brand_id]},
+                ]
+                filter_warnings = [
+                    *filter_warnings,
+                    f"No brand filter given — scoped to default brand_id={self.default_brand_id}.",
+                ]
 
         cube_query = self._build_cube_query(
             metrics, qualified_dims, cube_filters, current_range, request.granularity,
-            request.limit, sort_order=sort_order,
+            request.limit, sort_order=sort_order, time_dimension=time_dimension,
         )
 
         compare_range = None
@@ -310,6 +352,7 @@ class QueryPlanner:
             compare_query = self._build_cube_query(
                 metrics, qualified_dims, cube_filters, compare_range,
                 request.granularity, request.limit, sort_order=sort_order,
+                time_dimension=time_dimension,
             )
             current_res, compare_res = await asyncio.gather(
                 self.cube.load(cube_query), self.cube.load(compare_query)
@@ -376,14 +419,21 @@ class QueryPlanner:
         ``composed`` parts — each part has its own rows + provenance.
         """
         metrics = self._resolve_metrics(request.measures)
-        by_view: dict[str, list[MetricDef]] = {}
+        # Group by (view, effective time dimension): metrics on different views
+        # can never share a Cube query, and metrics on the SAME view but a
+        # different time axis (placement order_date vs event event_date) must
+        # not share one date-range filter — mixing them silently answers a
+        # different question (e.g. "June-placed orders that ever returned"
+        # instead of "returns that happened in June").
+        by_view: dict[tuple[str, str | None], list[MetricDef]] = {}
         for m in metrics:
-            by_view.setdefault(m.cube_mapping.view, []).append(m)
+            key = (m.cube_mapping.view, self._effective_time_dimension(m))
+            by_view.setdefault(key, []).append(m)
 
         if len(by_view) == 1:
             return await self._run_single_view(request, metrics, parent_query_id)
 
-        # Multi-view composition: one Cube query per view, never a cross-view join.
+        # Composition: one Cube query per (view, time axis), never a cross join.
         # Dimensions/filters must be valid on every participating view (validated
         # inside each _run_single_view); grain-unsafe mixes stay separate parts.
         parent_id = "q_" + uuid.uuid4().hex[:12]
@@ -399,6 +449,7 @@ class QueryPlanner:
         )
         part_list = list(parts)
         views = [p["provenance"]["cube_view"] for p in part_list]
+        composition = "multi_view" if len(set(views)) > 1 else "multi_time_axis"
         all_metric_ids = [mid for p in part_list for mid in p["provenance"]["metric_ids"]]
         # Parent store entry so drilldown can reject with a clear message.
         self.store.save(
@@ -413,7 +464,7 @@ class QueryPlanner:
                     {
                         "query_id": parent_id,
                         "composed": True,
-                        "composition": "multi_view",
+                        "composition": composition,
                         "metric_ids": all_metric_ids,
                         "cube_views": views,
                         "part_query_ids": [p["query_id"] for p in part_list],
@@ -425,18 +476,19 @@ class QueryPlanner:
         return {
             "query_id": parent_id,
             "composed": True,
-            "composition": "multi_view",
+            "composition": composition,
             "parts": part_list,
             "warnings": [
-                "Metrics spanned multiple Cube views; ran one query per view. "
-                "Narrate each part with its own provenance — do not join or "
-                "sum rows across parts (grains may differ)."
+                "Metrics spanned multiple Cube views or time axes (e.g. "
+                "placement order_date vs event event_date); ran one query per "
+                "group. Narrate each part with its own provenance — do not "
+                "join or sum rows across parts (grains/axes may differ)."
             ],
             "provenance": {
                 "query_id": parent_id,
                 "parent_query_id": parent_query_id,
                 "composed": True,
-                "composition": "multi_view",
+                "composition": composition,
                 "metric_ids": all_metric_ids,
                 "cube_views": views,
                 "part_query_ids": [p["query_id"] for p in part_list],

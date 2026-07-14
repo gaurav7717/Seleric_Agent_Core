@@ -1,18 +1,22 @@
-# In-project Cube semantic layer. seleric-mcp queries this instance by default
-# (CUBE_API_URL=http://127.0.0.1:4001). The model lives in ./cube/model and is
-# versioned with this repo — edit YAML, Cube hot-reloads (CUBEJS_DEV_MODE).
+# Canonical Cube model: data_platform/mage-ai/infra/cube ONLY.
+# Base_Agent/cube/model is a stub — do not mount ./cube here.
 #
-#   docker compose up -d          # start cube-serve
-#   uv run python scripts/smoke_cube.py   # verify
+#   docker compose up -d --force-recreate cube
+#   uv run python scripts/smoke_cube.py
 name: seleric-mcp
 
 services:
   cube:
     image: cubejs/cube:latest
+    container_name: seleric-mcp-cube-1
     restart: unless-stopped
     volumes:
-      - ./cube:/cube/conf
+      - ../data_platform/mage-ai/infra/cube/model:/cube/conf/model:ro
+      - ../data_platform/mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
     env_file:
-      - ./cube/.env
+      - ../data_platform/mage-ai/infra/cube/.env
     ports:
       - "127.0.0.1:${CUBE_HOST_PORT:-4001}:4000"
+    extra_hosts:
+      - "clickhouse.seleric.com:72.61.228.168"
+      - "host.docker.internal:host-gateway"

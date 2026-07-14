@@ -1,0 +1,33 @@
+id: average_selling_price
+display_name: Average Selling Price (ex-GST)
+category: product
+status: certified
+description: >
+  Lifecycle net revenue per net unit from serve.product_performance. A ratio —
+  never average daily ASP rows; recompute from components. No dashboard card
+  exists for ASP (policy-defined metric).
+formula:
+  human_readable: "product_net_revenue / units_sold (net)"
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.average_selling_price
+aggregation: ratio
+ratio_components:
+  numerator: product_performance.net_line_revenue_ex_gst
+  denominator: product_performance.units_sold
+unit: currency
+currency_default: INR
+grain: order_item
+supported_dimensions: [brand_id, order_date, product_title, variant_title, sku, product_type, vendor]
+supported_filters: [date_range, brand_id, product_title, sku, product_type, vendor]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: "Average selling price by SKU this month"
+    request: {measures: [average_selling_price], dimensions: [sku], time_range: {preset: this_month}}
+validation_tests:
+  - "period value equals sum(net_revenue)/sum(units_sold) for the same slice"
+deprecated_aliases: []

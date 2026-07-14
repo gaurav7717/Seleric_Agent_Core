@@ -36,14 +36,17 @@ async def main() -> int:
 
     res = await cube.load(
         {
-            "measures": ["canonical_pnl.net_profit", "canonical_pnl.net_revenue_excl_tax"],
+            "measures": [
+                "commerce_performance.commerce_net_revenue",
+                "commerce_performance.orders",
+            ],
             "timeDimensions": [
-                {"dimension": "canonical_pnl.report_date", "dateRange": "last 7 days"}
+                {"dimension": "commerce_performance.report_date", "dateRange": "last 7 days"}
             ],
             "limit": 10,
         }
     )
-    print(f"3. canonical_pnl last-7d load: {len(res.data)} row(s)")
+    print(f"3. commerce_performance last-7d load: {len(res.data)} row(s)")
     if res.data:
         print(json.dumps(res.data[0], indent=2))
     await cube.aclose()

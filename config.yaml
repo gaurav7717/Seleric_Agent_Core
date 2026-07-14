@@ -1,0 +1,58 @@
+# Non-secret application settings. Secrets stay in .env / .env.local.
+# Env vars still override any key here (useful for tests and one-off ops).
+
+cube:
+  # Cube model: data_platform/mage-ai/infra/cube/ (NOT Base_Agent/cube/).
+  # docker compose mounts that path at 127.0.0.1:4001.
+  api_url: http://127.0.0.1:4001
+
+pipeboard:
+  mcp_url: https://meta-ads.mcp.pipeboard.co
+
+gateway:
+  # Global kill switch for write actions. Must be true to allow commits.
+  write_enabled: false
+  # Scopes granted to the caller
+  scopes:
+    - metrics:read
+    - meta_ads:write:status
+
+storage:
+  # SQLite path relative to project root (or absolute)
+  db_path: var/seleric_mcp.db
+
+defaults:
+  # Injected when metrics_query has no brand filter (single-tenant: Tilting Heads)
+  brand_id: "20"
+
+tunables:
+  # Term-resolution confidence bands (SequenceMatcher ratio, 0..1)
+  resolve_auto_threshold: 0.85
+  resolve_ambiguous_threshold: 0.60
+  resolve_runner_up_margin: 0.05
+  # Query limits / timeouts — 0 default_row_limit = unlimited when limit omitted
+  default_row_limit: 0
+  max_row_limit: 100000
+  cube_timeout_seconds: 30
+  # Stored query results and action idempotency windows
+  result_ttl_minutes: 60
+  idempotency_window_hours: 24
+  # Insight engine
+  top_movers_limit: 10
+  anomaly_sigma: 3.0
+  anomaly_min_points: 14
+  # Freshness resource cache + fail-closed gate
+  freshness_cache_ttl_seconds: 600
+  freshness_enforcement: true
+  freshness_grace_days: 1
+
+# Terminal / web chat clients (scripts/chat_*.py). API key stays in .env.
+azure:
+  endpoint: https://llama4-maverick-prod-resource.cognitiveservices.azure.com
+  deployment: gpt-5-mini
+  api_version: 2024-12-01-preview
+
+chat:
+  max_tool_rounds: 1100
+  web_port: 8766
+  tool_preview_chars: 4000

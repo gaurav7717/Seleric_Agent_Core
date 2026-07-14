@@ -70,15 +70,19 @@ async def test_unknown_metric_rejected_with_suggestions(planner):
 
 async def test_multi_view_composed(planner, fake_cube):
     """Metrics on different views run as parallel single-view parts (no join)."""
-    fake_cube.by_prefix["canonical_pnl"] = [{"canonical_pnl.net_revenue_excl_tax": "100"}]
+    fake_cube.by_prefix["product_performance"] = [
+        {"product_performance.net_line_revenue_ex_gst": "100"}
+    ]
     fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "7"}]
-    req = QueryRequest(measures=["net_revenue", "orders"], time_range=TimeRange(preset="last_7d"))
+    req = QueryRequest(
+        measures=["product_net_revenue", "orders"], time_range=TimeRange(preset="last_7d")
+    )
     out = await planner.run(req)
     assert out["composed"] is True
     assert out["composition"] == "multi_view"
     assert len(out["parts"]) == 2
     views = {p["provenance"]["cube_view"] for p in out["parts"]}
-    assert views == {"canonical_pnl", "commerce_orders"}
+    assert views == {"product_performance", "commerce_orders"}
     assert len(fake_cube.queries) == 2
     assert all(p["query_id"].startswith("q_") for p in out["parts"])
     assert out["query_id"].startswith("q_")
@@ -87,7 +91,7 @@ async def test_multi_view_composed(planner, fake_cube):
 async def test_multi_view_dimension_must_work_on_each_part(planner):
     """A dimension invalid for one of the views still fails (no silent drop)."""
     req = QueryRequest(
-        measures=["net_revenue", "orders"],
+        measures=["product_net_revenue", "orders"],
         dimensions=["payment_method"],  # commerce only
         time_range=TimeRange(preset="last_7d"),
     )
@@ -96,21 +100,22 @@ async def test_multi_view_dimension_must_work_on_each_part(planner):
 
 
 async def test_unsupported_dimension_suggests_alternate_metrics(planner):
+    # units_per_order does not support shipping_city; suggestions must name
+    # metrics that do (e.g. product_net_revenue / commerce_net_revenue).
     req = QueryRequest(
-        measures=["net_revenue"],
+        measures=["units_per_order"],
         dimensions=["shipping_city"],
         time_range=TimeRange(preset="last_7d"),
     )
     with pytest.raises(PlanError) as exc:
         await planner.run(req)
-    assert "commerce_net_revenue" in (exc.value.suggestions or [])
-    assert "commerce_net_revenue" in str(exc.value)
+    assert any("net_revenue" in s for s in (exc.value.suggestions or []))
 
 
 async def test_filter_dimension_must_be_on_view(planner):
     req = QueryRequest(
-        measures=["net_revenue"],
-        filters=[FilterSpec(dimension="campaign_name", values=["x"])],
+        measures=["product_net_revenue"],
+        filters=[FilterSpec(dimension="payment_bucket", values=["cod"])],  # commerce only
         time_range=TimeRange(preset="last_7d"),
     )
     with pytest.raises(PlanError, match="not valid on view"):
@@ -128,33 +133,36 @@ def test_breakdown_guard():
 # ---------- execution ----------
 
 async def test_run_builds_cube_query_and_provenance(planner, fake_cube):
-    fake_cube.by_prefix["canonical_pnl"] = [
-        {"canonical_pnl.net_revenue_excl_tax": "100", "canonical_pnl.total_ad_spend": "20",
-         "canonical_pnl.mer": "5"}
+    fake_cube.by_prefix["product_performance"] = [
+        {"product_performance.gross_profit_ex_gst": "100",
+         "product_performance.net_line_revenue_ex_gst": "500",
+         "product_performance.product_gross_margin_pct": "20"}
     ]
     req = QueryRequest(
-        measures=["mer"],
+        measures=["product_gross_margin_pct"],
         time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
     )
     out = await planner.run(req)
     q = fake_cube.queries[0]
     # ratio components auto-included for period recomputation
-    assert "canonical_pnl.net_revenue_excl_tax" in q["measures"]
-    assert "canonical_pnl.total_ad_spend" in q["measures"]
+    assert "product_performance.gross_profit_ex_gst" in q["measures"]
+    assert "product_performance.net_line_revenue_ex_gst" in q["measures"]
     assert q["timezone"] == "Asia/Kolkata"
     assert q["timeDimensions"][0]["dateRange"] == ["2026-06-01", "2026-06-30"]
     prov = out["provenance"]
-    assert prov["metric_ids"] == ["mer"]
-    assert prov["cube_view"] == "canonical_pnl"
+    assert prov["metric_ids"] == ["product_gross_margin_pct"]
+    assert prov["cube_view"] == "product_performance"
     assert prov["freshness"]["cube_last_refresh"] == "2026-07-10T04:00:00Z"
     assert prov["catalogue_version"]
     assert out["query_id"].startswith("q_")
 
 
 async def test_compare_period_fires_two_loads(planner, fake_cube):
-    fake_cube.by_prefix["canonical_pnl"] = [{"canonical_pnl.net_profit": "10"}]
+    fake_cube.by_prefix["commerce_performance"] = [
+        {"commerce_performance.commerce_net_revenue": "10"}
+    ]
     req = QueryRequest(
-        measures=["net_profit"],
+        measures=["commerce_net_revenue"],
         time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
         compare_period="previous_period",
     )
@@ -194,3 +202,87 @@ async def test_drilldown_inherits_and_narrows(planner, fake_cube):
 async def test_drilldown_unknown_parent(planner):
     with pytest.raises(PlanError, match="not found or expired"):
         await planner.drilldown("q_nope", ["payment_method"], [])
+
+
+# ---------- per-metric time axis (cube_mapping.time_dimension) ----------
+# Live failure 2026-07-14: "cancelled/returned orders last month" filtered the
+# PLACEMENT axis (order_date) because the planner always used the view's
+# date_dimension — answering "June-placed orders that ever cancelled/returned"
+# (57/108) instead of "cancel/return events in June" (59/211, the dashboard
+# card). Event-axis metrics declare cube_mapping.time_dimension; the planner
+# must apply the date range there, and must NOT share one date filter across
+# metrics on different axes.
+
+async def test_event_axis_metric_filters_on_event_date(planner, fake_cube):
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.cancelled_orders": "59"}]
+    req = QueryRequest(
+        measures=["cancelled_orders"],
+        time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+    )
+    out = await planner.run(req)
+    td = fake_cube.queries[0]["timeDimensions"][0]
+    assert td["dimension"] == "commerce_orders.event_date"
+    assert td["dateRange"] == ["2026-06-01", "2026-06-30"]
+    assert "error" not in out
+
+
+async def test_mixed_time_axes_on_one_view_compose_as_parts(planner, fake_cube):
+    """orders (placement) + cancelled_orders (event) must run as two Cube
+    queries with their own date filters, not one query with a single axis."""
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "1849"}]
+    req = QueryRequest(
+        measures=["orders", "cancelled_orders", "refunded_orders"],
+        time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+    )
+    out = await planner.run(req)
+    assert out["composed"] is True
+    assert out["composition"] == "multi_time_axis"
+    assert len(out["parts"]) == 2
+    axes = {q["timeDimensions"][0]["dimension"] for q in fake_cube.queries}
+    assert axes == {"commerce_orders.order_date", "commerce_orders.event_date"}
+    # Event-axis part carries both event metrics together.
+    part_metrics = sorted(
+        tuple(sorted(p["provenance"]["metric_ids"])) for p in out["parts"]
+    )
+    assert part_metrics == [("cancelled_orders", "refunded_orders"), ("orders",)]
+
+
+# ---------- default brand scope injection ----------
+
+async def test_default_brand_scope_injected_when_no_brand_filter(
+    catalogue, fake_cube, result_store
+):
+    planner = QueryPlanner(catalogue, fake_cube, result_store, default_brand_id="20")
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "1849"}]
+    req = QueryRequest(
+        measures=["orders"],
+        time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+    )
+    out = await planner.run(req)
+    brand_filters = [
+        f for f in fake_cube.queries[0].get("filters", [])
+        if f["member"] == "commerce_orders.brand_id"
+    ]
+    assert brand_filters == [
+        {"member": "commerce_orders.brand_id", "operator": "equals", "values": ["20"]}
+    ]
+    assert any("default brand" in w or "brand_id=20" in w for w in out["warnings"])
+
+
+async def test_default_brand_scope_not_injected_when_brand_filter_given(
+    catalogue, fake_cube, result_store
+):
+    planner = QueryPlanner(catalogue, fake_cube, result_store, default_brand_id="20")
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "10"}]
+    req = QueryRequest(
+        measures=["orders"],
+        filters=[FilterSpec(dimension="brand_id", operator="equals", values=["31"])],
+        time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+    )
+    await planner.run(req)
+    values = [
+        f["values"]
+        for f in fake_cube.queries[0]["filters"]
+        if f["member"] == "commerce_orders.brand_id"
+    ]
+    assert values == [["31"]]  # explicit filter wins; nothing injected

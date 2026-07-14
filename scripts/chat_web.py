@@ -7,6 +7,7 @@ Run from Base_Agent:
     uv run python scripts/chat_web.py          # http://127.0.0.1:8766
     CHAT_WEB_PORT=9000 uv run python scripts/chat_web.py
 
+Port / preview size: config.yaml → chat (env overrides still work).
 Single-session by design (testing tool): one MCP connection, one conversation,
 one scratchpad. POST /reset starts over.
 """
@@ -34,12 +35,14 @@ from mcp import ClientSession, StdioServerParameters  # noqa: E402
 from mcp.client.stdio import stdio_client  # noqa: E402
 
 import chat_client  # noqa: E402  (reuses _load_azure, Scratchpad, policy, helpers)
+from seleric_mcp.config import load_chat_settings  # noqa: E402
 from seleric_mcp.gateway.prompts import NO_HALLUCINATION_GUARD  # noqa: E402
 
 UI_PATH = Path(__file__).with_name("chat_web_ui.html")
-PORT = int(os.getenv("CHAT_WEB_PORT", "876699"))
+_CHAT = load_chat_settings()
+PORT = _CHAT.web_port
 MAX_TOOL_ROUNDS = chat_client.MAX_TOOL_ROUNDS
-TOOL_RESULT_PREVIEW_CHARS = int(os.getenv("CHAT_WEB_TOOL_PREVIEW_CHARS", "4000"))
+TOOL_RESULT_PREVIEW_CHARS = _CHAT.tool_preview_chars
 
 
 class AgentRuntime:

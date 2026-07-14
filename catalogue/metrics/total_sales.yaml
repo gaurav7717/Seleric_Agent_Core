@@ -1,18 +1,17 @@
-id: aov
-display_name: Average Order Value
+id: total_sales
+display_name: Total Sales
 category: commerce
 status: certified
 description: >
-  Total Sales (incl. GST) divided by Total Orders on the placement axis.
-  Ratio — never sum or average daily AOV rows.
+  Pre-discount checkout value including GST on eligible placement orders
+  (gross_revenue + total_discounts). Shopify-only Commerce Performance.
 formula:
-  human_readable: "Total Sales ÷ Total Orders"
+  human_readable: "Sum of gross_revenue + total_discounts per eligible order"
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
-  measure: commerce_orders.aov
-  measure_pct: null
-aggregation: ratio
+  measure: commerce_orders.total_sales
+aggregation: additive
 unit: currency
 currency_default: INR
 grain: order
@@ -23,8 +22,8 @@ access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 examples:
-  - question: "AOV by shipping region this quarter"
-    request: {measures: [aov], dimensions: [shipping_region], time_range: {preset: last_90d}}
+  - question: "Total sales last week"
+    request: {measures: [total_sales], time_range: {preset: last_7d}}
 validation_tests:
-  - "aov > 0 for any slice with orders"
-deprecated_aliases: [daily_pnl.avg_order_value]
+  - "total_sales >= commerce_net_revenue for same period when both on placement axis"
+deprecated_aliases: []

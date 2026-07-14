@@ -1,28 +1,29 @@
 id: refunded_orders
-display_name: Refunded Orders
+display_name: Returned Orders
 category: commerce
-status: approved
+status: certified
 description: >
-  Orders with order_status in (refunded, partially_refunded), excluding
-  cancelled and test orders.
+  Orders with return events on event date (Asia/Kolkata). Maps to returned_orders
+  measure. Filter on event_date — not order_date.
 formula:
-  human_readable: "Count of orders where order_status IN (refunded, partially_refunded) and status != cancelled (is_test = false)"
+  human_readable: "Distinct orders with return event in period"
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
-  measure: commerce_orders.refunded_orders
+  measure: commerce_orders.returned_orders
+  time_dimension: commerce_orders.event_date
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region]
+supported_dimensions: [brand_id, event_date]
+supported_filters: [date_range, brand_id]
 data_owner: "Commerce Ops"
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 examples:
-  - question: "Refunded orders last month"
+  - question: "Returned orders last month"
     request: {measures: [refunded_orders], time_range: {preset: last_month}}
 validation_tests:
-  - "refunded_orders <= orders for any slice"
-deprecated_aliases: []
+  - "reconciles to dashboard Returns card for closed periods"
+deprecated_aliases: [returned_orders]

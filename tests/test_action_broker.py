@@ -29,8 +29,37 @@ STATUS_ROWS = [
 ]
 
 
+# The platform ships ZERO actions since the 2026-07-14 slim-down (catalogue/
+# actions/ is empty), but the broker is live shipped code — keep its mechanism
+# coverage with a synthetic contract that mirrors the retired pause_meta_ad
+# (recovered from git history) exactly.
+_TEST_ACTION = {
+    "id": "pause_meta_ad",
+    "display_name": "Pause Meta Ad",
+    "domain": "meta_ads",
+    "status": "approved",
+    "description": "Test-only synthetic contract mirroring the retired pause_meta_ad.",
+    "executor": "pipeboard",
+    "executor_action_type": "pause_ad",
+    "payload_schema": "PauseMetaAdPayload",
+    "scopes_required": ["meta_ads:write:status"],
+    "risk_level": "medium",
+    "confirmation_ttl_seconds": 300,
+    "business_rules": [
+        {"id": "ad_exists", "description": "Ad must appear in meta_ad_performance.", "blocking": True},
+        {"id": "not_already_paused", "description": "Latest status should not be PAUSED.", "blocking": False},
+        {"id": "write_enabled", "description": "WRITE_ENABLED kill switch.", "blocking": True},
+    ],
+    "preview": {"sources": []},
+    "data_owner": "Growth",
+}
+
+
 @pytest.fixture()
 def broker(settings, catalogue, fake_cube, fake_executor, action_store, idempotency, audit):
+    from seleric_mcp.catalogue_service.loader import ActionContractDef
+
+    catalogue.cat.actions["pause_meta_ad"] = ActionContractDef.model_validate(_TEST_ACTION)
     fake_cube.by_prefix["meta_ad_performance"] = AD_ROWS
     fake_cube.by_prefix["meta_ad_status_changes"] = STATUS_ROWS
     return ActionBroker(

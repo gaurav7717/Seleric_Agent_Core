@@ -6,9 +6,11 @@ client-specific branches, which is what keeps this model-agnostic.
 from __future__ import annotations
 
 import json
+import re
 import time
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import structlog
 from mcp.server.fastmcp import FastMCP
@@ -31,6 +33,25 @@ from . import prompts as prompt_templates
 
 logger = structlog.get_logger()
 
+_CADENCE_LAG_RE = re.compile(r"T-(\d+)")
+
+
+def _cadence_lag_days(cadence: str) -> int | None:
+    """Expected data lag in days from a views.yaml expected_cadence string.
+    'daily, T-1, IST' -> 1; hourly cadences -> 0. None means the cadence is
+    unparseable and the view is never gated on freshness."""
+    if not cadence:
+        return None
+    m = _CADENCE_LAG_RE.search(cadence)
+    if m:
+        return int(m.group(1))
+    low = cadence.lower()
+    if "hourly" in low:
+        return 0
+    if "daily" in low:
+        return 1
+    return None
+
 
 class AppContext:
     """Wires every layer once; shared by all tools. All behavior tunables come
@@ -49,7 +70,12 @@ class AppContext:
         self.result_store = ResultStore(
             self.db, ttl=timedelta(minutes=settings.result_ttl_minutes)
         )
-        self.planner = QueryPlanner(self.catalogue, self.cube, self.result_store)
+        self.planner = QueryPlanner(
+            self.catalogue,
+            self.cube,
+            self.result_store,
+            default_brand_id=settings.default_brand_id or None,
+        )
         self.audit = AuditLog(self.db)
         self.broker = ActionBroker(
             settings=settings,
@@ -63,6 +89,7 @@ class AppContext:
             audit=self.audit,
         )
         self._freshness_cache: tuple[float, dict] | None = None
+        self._view_latest_cache: dict[str, tuple[float, str | None]] = {}
 
     @property
     def actor(self) -> str:
@@ -94,6 +121,74 @@ class AppContext:
         payload = {"views": report, "catalogue_version": self.catalogue.version}
         self._freshness_cache = (time.monotonic(), payload)
         return payload
+
+    async def _latest_data_date(self, view_name: str) -> str | None:
+        """Latest value of the view's date dimension via a 1-row Cube probe
+        (cached per view for freshness_cache_ttl_seconds). None when the view
+        has no date dimension or the probe fails."""
+        ttl = self.settings.freshness_cache_ttl_seconds
+        cached = self._view_latest_cache.get(view_name)
+        if cached and time.monotonic() - cached[0] < ttl:
+            return cached[1]
+        view = self.catalogue.cat.views.get(view_name)
+        latest: str | None = None
+        if view is not None and view.date_dimension:
+            member = f"{view_name}.{view.date_dimension}"
+            try:
+                res = await self.cube.load(
+                    {"dimensions": [member], "order": {member: "desc"}, "limit": 1}
+                )
+                if res.data:
+                    latest = res.data[0].get(member)
+            except Exception:
+                latest = None
+        self._view_latest_cache[view_name] = (time.monotonic(), latest)
+        return latest
+
+    async def stale_views(self, metric_ids: list[str]) -> dict[str, dict]:
+        """Fail-closed freshness gate: map of view -> staleness detail for every
+        view backing the requested metrics whose latest data date is POSITIVELY
+        known to be older than its cadence allows (+ grace). Only the views
+        actually queried are probed. Views whose freshness could not be
+        determined (probe error, unparseable cadence, no date dimension) are
+        NOT blocked — only confirmed staleness refuses, so a transient Cube
+        hiccup cannot take every metric down."""
+        if not self.settings.freshness_enforcement:
+            return {}
+        views_needed: dict[str, list[str]] = {}
+        for mid in metric_ids:
+            m = self.catalogue.get_metric(mid)
+            if m is not None:
+                views_needed.setdefault(m.cube_mapping.view, []).append(mid)
+        if not views_needed:
+            return {}
+        today_ist = datetime.now(ZoneInfo("Asia/Kolkata")).date()
+        stale: dict[str, dict] = {}
+        for view_name, mids in views_needed.items():
+            view = self.catalogue.cat.views.get(view_name)
+            if view is None:
+                continue
+            cadence = view.freshness.expected_cadence if view.freshness else ""
+            lag = _cadence_lag_days(cadence)
+            if lag is None:
+                continue
+            latest_raw = await self._latest_data_date(view_name)
+            if not latest_raw:
+                continue
+            try:
+                latest = date.fromisoformat(str(latest_raw)[:10])
+            except ValueError:
+                continue
+            allowed = lag + self.settings.freshness_grace_days
+            if (today_ist - latest).days > allowed:
+                stale[view_name] = {
+                    "metrics": mids,
+                    "latest_data_at": str(latest_raw),
+                    "expected_cadence": cadence,
+                    "allowed_lag_days": allowed,
+                    "days_behind": (today_ist - latest).days,
+                }
+        return stale
 
 
 def build_server(settings: Settings) -> FastMCP:
@@ -140,6 +235,21 @@ def build_server(settings: Settings) -> FastMCP:
             "error": "Caller lacks required scopes for one or more requested metrics.",
             "missing_scopes_by_metric": denied,
             "caller_scopes": sorted(ctx.settings.caller_scopes),
+        }
+
+    def _stale_refusal(stale: dict[str, dict]) -> dict:
+        """Structured fail-closed refusal for stale data. The agent must relay
+        the refusal, not invent numbers."""
+        return {
+            "error": "stale_data",
+            "policy": "fail_closed",
+            "detail": (
+                "Data behind one or more requested metrics is older than its "
+                "freshness SLA allows; numeric answers are refused until the "
+                "pipeline catches up. Tell the user which views are stale and "
+                "as-of when data is available — do not estimate values."
+            ),
+            "stale_views": stale,
         }
 
     # ---------------- catalogue tools ----------------
@@ -209,7 +319,7 @@ def build_server(settings: Settings) -> FastMCP:
         granularity: str = "none",
         compare_period: str | None = None,
         sort: list[dict] | None = None,
-        limit: int = 500,
+        limit: int | None = None,
     ) -> dict:
         """THE only path to numeric data. measures = catalogue metric ids
         (from catalogue_search_metrics), not raw cube members. time_range is
@@ -220,8 +330,9 @@ def build_server(settings: Settings) -> FastMCP:
         previous_period|previous_year. sort entries: {"field": <metric_id or
         dimension_id used in this query>, "direction": "asc"|"desc"} — for
         "top N" / "bottom N" questions, sort by the relevant metric desc/asc
-        and set limit=N; without sort, row order is unspecified except when a
-        time granularity is set (defaults to ascending by date). Metrics on
+        and set limit=N; omit limit for the full result set (no default row
+        cap). Without sort, row order is unspecified except when a time
+        granularity is set (defaults to ascending by date). Metrics on
         different views are run as parallel single-view queries and returned
         with composed=true and a parts[] array — narrate each part separately
         (do not join across views). Same-view metrics return the usual rows +
@@ -231,6 +342,10 @@ def build_server(settings: Settings) -> FastMCP:
         if denial:
             logger.warning("metrics_query_denied", trace_id=trace_id, measures=measures)
             return denial
+        stale = await ctx.stale_views(measures)
+        if stale:
+            logger.warning("metrics_query_stale_blocked", trace_id=trace_id, stale_views=list(stale))
+            return _stale_refusal(stale)
         try:
             request = QueryRequest(
                 measures=measures,
@@ -264,12 +379,19 @@ def build_server(settings: Settings) -> FastMCP:
         if stored is not None:
             try:
                 parent_measures = QueryRequest.model_validate_json(stored.request_json).measures
+            except Exception:
+                parent_measures = None  # malformed/legacy stored request — let drilldown() surface its own error
+            if parent_measures is not None:
                 denial = _check_metric_scopes(parent_measures)
                 if denial:
                     logger.warning("metrics_drilldown_denied", trace_id=trace_id, measures=parent_measures)
                     return denial
-            except Exception:
-                pass  # malformed/legacy stored request — let drilldown() surface its own error
+                stale = await ctx.stale_views(parent_measures)
+                if stale:
+                    logger.warning(
+                        "metrics_drilldown_stale_blocked", trace_id=trace_id, stale_views=list(stale)
+                    )
+                    return _stale_refusal(stale)
         try:
             return await ctx.planner.drilldown(
                 parent_query_id,

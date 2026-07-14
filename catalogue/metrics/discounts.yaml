@@ -1,0 +1,32 @@
+id: discounts
+display_name: Discounts (ex-GST)
+category: commerce
+status: certified
+description: >
+  Coupon/discount value in taxable (ex-GST) terms on eligible placement orders
+  (proportional GST strip per Commerce Metric Policy v1). Matches the dashboard
+  Discounts card (Shopify-only). Placement axis: order_date.
+formula:
+  human_readable: >
+    Sum of total_discounts x ((gross_revenue - total_tax) / gross_revenue)
+    per eligible order (is_test = 0, is_revenue_adjustment = 0)
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.discount_amount_excl_tax
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order
+supported_dimensions: [brand_id, order_date, payment_method, payment_bucket, utm_source, shipping_country, shipping_region, shipping_city]
+supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Discounts given last month"
+    request: {measures: [discounts], time_range: {preset: last_month}}
+validation_tests:
+  - "reconciles to dashboard Discounts card for closed periods"
+deprecated_aliases: []
