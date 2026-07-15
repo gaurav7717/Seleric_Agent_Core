@@ -31,9 +31,12 @@ def cube_model_dir() -> Path:
     env = os.getenv("CUBE_MODEL_DIR", "").strip()
     if env:
         return Path(env)
-    canonical = PROJECT_ROOT.parent / "data_platform" / "mage-ai" / "infra" / "cube" / "model"
-    if canonical.is_dir():
-        return canonical
+    for candidate in (
+        PROJECT_ROOT.parent / "mage-ai" / "infra" / "cube" / "model",
+        PROJECT_ROOT.parent / "data_platform" / "mage-ai" / "infra" / "cube" / "model",
+    ):
+        if candidate.is_dir():
+            return candidate
     return PROJECT_ROOT / "cube" / "model"
 
 

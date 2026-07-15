@@ -1,8 +1,11 @@
-# Canonical Cube model: data_platform/mage-ai/infra/cube ONLY.
+# Canonical Cube model: mage-ai/infra/cube ONLY.
 # Base_Agent/cube/model is a stub — do not mount ./cube here.
 #
 #   docker compose up -d --force-recreate cube
 #   uv run python scripts/smoke_cube.py
+#
+# Note: if mage-cube is already bound to 127.0.0.1:4001, skip this compose
+# and point config.yaml cube.api_url at that instance instead.
 name: seleric-mcp
 
 services:
@@ -11,10 +14,10 @@ services:
     container_name: seleric-mcp-cube-1
     restart: unless-stopped
     volumes:
-      - ../data_platform/mage-ai/infra/cube/model:/cube/conf/model:ro
-      - ../data_platform/mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
+      - ../mage-ai/infra/cube/model:/cube/conf/model:ro
+      - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
     env_file:
-      - ../data_platform/mage-ai/infra/cube/.env
+      - ../mage-ai/infra/cube/.env
     ports:
       - "127.0.0.1:${CUBE_HOST_PORT:-4001}:4000"
     extra_hosts:
