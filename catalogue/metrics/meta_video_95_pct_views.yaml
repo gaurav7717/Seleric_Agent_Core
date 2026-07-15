@@ -1,0 +1,53 @@
+id: meta_video_95_pct_views
+display_name: Meta Video 95% Views
+category: paid_media
+status: certified
+description: Views reaching 95% of video length.
+formula:
+  human_readable: SUM(meta_video_95_pct_views)
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_performance
+  measure: meta_ad_performance.meta_video_95_pct_views
+aggregation: additive
+unit: count
+grain: daily ad grain (brand x account x day x campaign x adset x ad)
+supported_dimensions:
+- brand_id
+- report_date
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_status
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_id
+- creative_type
+supported_filters:
+- date_range
+- brand_id
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_status
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_id
+- creative_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- meta_video_95_pct_views >= 0 for any slice

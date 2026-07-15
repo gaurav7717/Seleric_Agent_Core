@@ -22,3 +22,23 @@ deprecations:
     reason: >
       Product surface repointed 2026-07-14 to serve.product_performance
       (lifecycle net revenue, net units, fully-loaded lifecycle COGS).
+  # ---- Paid media (2026-07-15): platform-reported attribution stays out of the
+  # certified surface; delivery metrics are the replacement ----
+  - old: meta_roas / meta_purchase_value / meta_purchases
+    new: meta_ad_performance (delivery metrics only) — attribution product pending
+    reason: >
+      Meta platform-attributed purchases/value/ROAS are platform_reported and
+      non-canonical. Fields remain in gold.fct_meta_ads_daily as internal
+      diagnostics; certified PaidMedia.MetaAdsPerformance exposes delivery +
+      video engagement only. See docs/paid_media/attribution_boundary.md.
+  - old: google_roas / google_conversion_value / google_conversions
+    new: google_ad_performance (delivery metrics only) — attribution product pending
+    reason: >
+      Google platform-attributed conversions/value/ROAS are platform_reported.
+      Fields remain in gold.fct_google_ads_daily; excluded from certified V1.
+  - old: amazon_ads_roas / amazon_acos / amazon_attributed_sales
+    new: amazon_ad_performance (delivery metrics only) — attribution product pending
+    reason: >
+      Amazon attributed sales/orders (1/7/14/30d windows), ACOS and ROAS are
+      platform_reported. Fields remain in gold.fct_amazon_ads_campaigns_daily;
+      excluded from certified V1.

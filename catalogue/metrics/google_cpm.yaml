@@ -1,0 +1,46 @@
+id: google_cpm
+display_name: Google CPM
+category: paid_media
+status: certified
+description: Google CPM recomputed from aggregated components.
+formula:
+  human_readable: SUM(spend) * 1000 / SUM(impressions)
+  authoritative_source: cube
+cube_mapping:
+  view: google_ad_performance
+  measure: google_ad_performance.google_cpm
+aggregation: ratio
+unit: INR
+grain: daily campaign grain (brand x customer account x day x campaign)
+supported_dimensions:
+- brand_id
+- report_date
+- customer_account_id
+- campaign_id
+- campaign_name
+- campaign_type
+supported_filters:
+- date_range
+- brand_id
+- customer_account_id
+- campaign_id
+- campaign_name
+- campaign_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- google_cpm equals google_spend / google_impressions recomputed on any slice
+ratio_components:
+  numerator: google_ad_performance.google_spend
+  denominator: google_ad_performance.google_impressions
+companion_measures:
+- google_spend
+- google_impressions
+currency_default: INR

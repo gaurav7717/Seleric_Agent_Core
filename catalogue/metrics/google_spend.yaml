@@ -1,0 +1,40 @@
+id: google_spend
+display_name: Google Spend
+category: paid_media
+status: certified
+description: Google Ads cost (cost_micros / 1,000,000 converted exactly once in silver).
+formula:
+  human_readable: SUM(google_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: google_ad_performance
+  measure: google_ad_performance.google_spend
+aggregation: additive
+unit: INR
+grain: daily campaign grain (brand x customer account x day x campaign)
+supported_dimensions:
+- brand_id
+- report_date
+- customer_account_id
+- campaign_id
+- campaign_name
+- campaign_type
+supported_filters:
+- date_range
+- brand_id
+- customer_account_id
+- campaign_id
+- campaign_name
+- campaign_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- google_spend >= 0 for any slice
+currency_default: INR

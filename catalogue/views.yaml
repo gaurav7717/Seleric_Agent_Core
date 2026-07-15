@@ -19,3 +19,27 @@ views:
     freshness:
       source: serve.product_performance (VIEW over gold.fct_order_items FINAL)
       expected_cadence: "hourly after gold sync, IST"
+  - name: meta_ad_performance
+    title: Meta Ads Performance (Serve, daily)
+    date_dimension: report_date
+    freshness:
+      source: serve.meta_ads_daily (VIEW over gold.fct_meta_ads_daily FINAL)
+      expected_cadence: "5-min gold sync after dbt orchestrator; platform account day"
+  - name: google_ad_performance
+    title: Google Ads Performance (Serve, daily)
+    date_dimension: report_date
+    freshness:
+      source: serve.google_ads_daily (VIEW aggregating gold.fct_google_ads_daily FINAL)
+      expected_cadence: "5-min gold sync after dbt orchestrator; customer account day"
+  - name: amazon_ad_performance
+    title: Amazon Ads Performance (Serve, daily)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_ads_daily (VIEW over gold.fct_amazon_ads_campaigns_daily FINAL)
+      expected_cadence: "daily Reports API (T-1) via curated dbt + 5-min gold sync"
+  - name: meta_ad_breakdown_performance
+    title: Meta Ads Breakdown (Serve, daily)
+    date_dimension: report_date
+    freshness:
+      source: serve.meta_ads_breakdown_daily (VIEW over gold.mart_meta_ad_breakdown_daily FINAL)
+      expected_cadence: "5-min gold sync after dbt orchestrator; platform account day"

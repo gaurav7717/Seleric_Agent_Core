@@ -6,6 +6,10 @@ dimensions:
     views:
       commerce_orders: commerce_orders.brand_id
       product_performance: product_performance.brand_id
+      meta_ad_performance: meta_ad_performance.brand_id
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
+      google_ad_performance: google_ad_performance.brand_id
+      amazon_ad_performance: amazon_ad_performance.brand_id
   - id: order_date
     display_name: Order Date
     description: IST order placement day.
@@ -96,3 +100,131 @@ dimensions:
     display_name: Vendor
     views:
       product_performance: product_performance.vendor
+  # ---- Paid media (2026-07-15): PaidMedia.{Meta,Google,Amazon}AdsPerformance ----
+  - id: report_date
+    display_name: Report Date
+    description: >
+      Daily platform reporting day (platform account day; IST-aligned accounts).
+      The ONLY time axis for paid-media products — no hourly axis exists.
+    is_time: true
+    views:
+      commerce_performance: commerce_performance.report_date
+      meta_ad_performance: meta_ad_performance.report_date
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.report_date
+      google_ad_performance: google_ad_performance.report_date
+      amazon_ad_performance: amazon_ad_performance.report_date
+  - id: campaign_id
+    display_name: Campaign ID
+    description: Platform campaign identifier.
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_id
+      google_ad_performance: google_ad_performance.campaign_id
+      amazon_ad_performance: amazon_ad_performance.campaign_id
+  - id: campaign_name
+    display_name: Campaign Name
+    description: Platform campaign name.
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_name
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_name
+      google_ad_performance: google_ad_performance.campaign_name
+      amazon_ad_performance: amazon_ad_performance.campaign_name
+  - id: campaign_status
+    display_name: Campaign Status
+    description: Platform campaign status (ACTIVE/PAUSED/... per platform).
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_status
+      amazon_ad_performance: amazon_ad_performance.campaign_status
+  - id: campaign_objective
+    display_name: Campaign Objective (Meta)
+    allowed_values: [OUTCOME_SALES, LINK_CLICKS, OUTCOME_LEADS, OUTCOME_ENGAGEMENT, OUTCOME_AWARENESS]
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_objective
+  - id: campaign_type
+    display_name: Campaign Type
+    description: >
+      Google channel (SEARCH/PERFORMANCE_MAX/DEMAND_GEN/SHOPPING/DISPLAY) or
+      Amazon ads program (SP only — SB/SD not ingested).
+    views:
+      google_ad_performance: google_ad_performance.campaign_type
+      amazon_ad_performance: amazon_ad_performance.campaign_type
+  - id: adset_id
+    display_name: Adset ID (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.adset_id
+  - id: adset_name
+    display_name: Adset Name (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.adset_name
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_name
+  - id: ad_id
+    display_name: Ad ID (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.ad_id
+  - id: ad_name
+    display_name: Ad Name (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.ad_name
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_name
+  - id: creative_id
+    display_name: Creative ID (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.creative_id
+  - id: creative_type
+    display_name: Creative Type (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.creative_type
+  - id: ad_account_id
+    display_name: Ad Account (Meta)
+    views:
+      meta_ad_performance: meta_ad_performance.ad_account_id
+  - id: customer_account_id
+    display_name: Customer Account (Google)
+    views:
+      google_ad_performance: google_ad_performance.customer_account_id
+  - id: targeting_type
+    display_name: Targeting Type (Amazon)
+    allowed_values: [AUTO, MANUAL]
+    views:
+      amazon_ad_performance: amazon_ad_performance.targeting_type
+  - id: is_final
+    display_name: Is Final
+    description: 1 when the report day is outside the mutable restatement window.
+    views:
+      meta_ad_performance: meta_ad_performance.is_final
+      google_ad_performance: google_ad_performance.is_final
+      amazon_ad_performance: amazon_ad_performance.is_final
+  # ---- Meta breakdown port (2026-07-15): serve.meta_ads_breakdown_daily ----
+  - id: breakdown_type
+    display_name: Breakdown Type (Meta)
+    description: >
+      Which re-slice of the same Meta delivery to use. Queries MUST filter to
+      exactly one value or spend/impressions count 5x.
+    allowed_values: [age_and_gender, placement, platform_device, publisher_platform, region]
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.breakdown_type
+  - id: age
+    display_name: Age Band (Meta)
+    description: Populated only when breakdown_type = age_and_gender.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.age
+  - id: gender
+    display_name: Gender (Meta)
+    description: Populated only when breakdown_type = age_and_gender.
+    allowed_values: [female, male, unknown]
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.gender
+  - id: publisher_platform
+    display_name: Publisher Platform (Meta)
+    description: facebook/instagram/etc. Populated for placement + publisher_platform types.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.publisher_platform
+  - id: platform_position
+    display_name: Placement Position (Meta)
+    description: feed/reels/stories/etc. Populated only when breakdown_type = placement.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.platform_position
+  - id: region
+    display_name: Region (Meta delivery)
+    description: Delivery region. Populated only when breakdown_type = region.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.region

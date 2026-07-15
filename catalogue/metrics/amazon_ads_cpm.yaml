@@ -1,0 +1,48 @@
+id: amazon_ads_cpm
+display_name: Amazon Ads CPM
+category: paid_media
+status: certified
+description: Amazon Ads CPM recomputed from aggregated components.
+formula:
+  human_readable: SUM(spend) * 1000 / SUM(impressions)
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_ad_performance
+  measure: amazon_ad_performance.amazon_ads_cpm
+aggregation: ratio
+unit: INR
+grain: daily SP campaign grain (brand x day x campaign_type x campaign)
+supported_dimensions:
+- brand_id
+- report_date
+- campaign_type
+- campaign_id
+- campaign_name
+- campaign_status
+- targeting_type
+supported_filters:
+- date_range
+- brand_id
+- campaign_type
+- campaign_id
+- campaign_name
+- campaign_status
+- targeting_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- amazon_ads_cpm equals amazon_ads_spend / amazon_ads_impressions recomputed on any slice
+ratio_components:
+  numerator: amazon_ad_performance.amazon_ads_spend
+  denominator: amazon_ad_performance.amazon_ads_impressions
+companion_measures:
+- amazon_ads_spend
+- amazon_ads_impressions
+currency_default: INR

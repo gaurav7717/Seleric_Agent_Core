@@ -1,0 +1,57 @@
+id: meta_breakdown_video_completion_rate
+display_name: Meta Video Completion Rate (breakdown)
+category: paid_media
+status: certified
+description: MUST filter exactly one breakdown_type (age_and_gender | placement | platform_device
+  | publisher_platform | region) — the five slices repeat the same delivery, so unfiltered
+  aggregation counts spend 5x. Completion rate per slice (approved gold formula).
+formula:
+  human_readable: SUM(100% views)/SUM(3s views) within one breakdown_type
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_breakdown_performance
+  measure: meta_ad_breakdown_performance.meta_video_completion_rate
+aggregation: ratio
+unit: ratio
+grain: daily ad x breakdown-slice grain (filter exactly one breakdown_type per query)
+supported_dimensions:
+- brand_id
+- report_date
+- breakdown_type
+- age
+- gender
+- publisher_platform
+- platform_position
+- region
+- campaign_name
+- adset_name
+- ad_name
+supported_filters:
+- date_range
+- brand_id
+- breakdown_type
+- age
+- gender
+- publisher_platform
+- platform_position
+- region
+- campaign_name
+- adset_name
+- ad_name
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- single breakdown_type totals reconcile to meta_spend/meta_impressions on meta_ad_performance
+ratio_components:
+  numerator: meta_ad_breakdown_performance.meta_video_100_pct_views
+  denominator: meta_ad_breakdown_performance.meta_video_3s_views
+companion_measures:
+- meta_video_100_pct_views
+- meta_video_3s_views

@@ -1,0 +1,59 @@
+id: meta_frequency
+display_name: Meta Frequency
+category: paid_media
+status: certified
+description: Meta Frequency recomputed from aggregated components — never SUM/AVG of row ratios.
+formula:
+  human_readable: SUM(impressions) / SUM(daily reach) — approximation above ad-day grain
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_performance
+  measure: meta_ad_performance.meta_frequency
+aggregation: ratio
+unit: ratio
+grain: daily ad grain (brand x account x day x campaign x adset x ad)
+supported_dimensions:
+- brand_id
+- report_date
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_status
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_id
+- creative_type
+supported_filters:
+- date_range
+- brand_id
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_status
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_id
+- creative_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- meta_frequency equals meta_impressions / meta_reach recomputed on any slice
+ratio_components:
+  numerator: meta_ad_performance.meta_impressions
+  denominator: meta_ad_performance.meta_reach
+companion_measures:
+- meta_impressions
+- meta_reach

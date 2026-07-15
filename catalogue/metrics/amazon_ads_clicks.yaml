@@ -1,0 +1,41 @@
+id: amazon_ads_clicks
+display_name: Amazon Ads Clicks
+category: paid_media
+status: certified
+description: Amazon SP campaign clicks.
+formula:
+  human_readable: SUM(amazon_ads_clicks)
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_ad_performance
+  measure: amazon_ad_performance.amazon_ads_clicks
+aggregation: additive
+unit: count
+grain: daily SP campaign grain (brand x day x campaign_type x campaign)
+supported_dimensions:
+- brand_id
+- report_date
+- campaign_type
+- campaign_id
+- campaign_name
+- campaign_status
+- targeting_type
+supported_filters:
+- date_range
+- brand_id
+- campaign_type
+- campaign_id
+- campaign_name
+- campaign_status
+- targeting_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- amazon_ads_clicks >= 0 for any slice

@@ -1,0 +1,53 @@
+id: meta_reach
+display_name: Meta Reach (diagnostic)
+category: paid_media_diagnostic
+status: approved
+description: 'CAVEAT: reach is deduplicated per ad-day only; summing across days/ads overcounts
+  unique people. Diagnostic only — prefer meta_frequency.'
+formula:
+  human_readable: SUM(daily ad-level reach) — non-deduplicated above ad-day grain
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_performance
+  measure: meta_ad_performance.meta_reach
+aggregation: additive
+unit: count
+grain: daily ad grain (brand x account x day x campaign x adset x ad)
+supported_dimensions:
+- brand_id
+- report_date
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_status
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_id
+- creative_type
+supported_filters:
+- date_range
+- brand_id
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_status
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_id
+- creative_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests: []
