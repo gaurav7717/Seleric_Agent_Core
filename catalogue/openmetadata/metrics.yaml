@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 136
+count: 139
 metrics:
   active_orders:
     category: commerce
@@ -333,6 +333,13 @@ metrics:
     glossary:
     - Commerce.GrossSales
     om_name: grossSales
+  gross_sales_all_channels:
+    category: commerce
+    cube_view: sales_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: grossSalesAllChannels
   gross_units_ordered:
     category: product
     cube_view: product_performance
@@ -722,6 +729,13 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: netRoas
+  net_sales_all_channels:
+    category: commerce
+    cube_view: sales_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: netSalesAllChannels
   new_customer_orders:
     category: commerce
     cube_view: commerce_orders
@@ -931,6 +945,13 @@ metrics:
     glossary:
     - Commerce.TotalSales
     om_name: totalSales
+  total_sales_all_channels:
+    category: commerce
+    cube_view: sales_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: totalSalesAllChannels
   touch_attributed_orders:
     category: attribution
     cube_view: order_attribution

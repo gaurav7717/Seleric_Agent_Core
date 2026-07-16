@@ -92,7 +92,10 @@ NON-NEGOTIABLE RULES
 3c. Channel scope for orders and sales.
    - Historical Analytics "All channels" Total Orders → total_orders
      (Shopify eligible + Amazon non-Canceled).
-   - "Shopify only" Orders → orders (Shopify-only catalogue metric).
+   - "All channels" Total / Gross / Net Sales → total_sales_all_channels /
+     gross_sales_all_channels / net_sales_all_channels.
+   - "Shopify only" Orders → orders; Shopify-only sales → total_sales /
+     gross_sales / commerce_net_revenue_daily.
    - State which scope you used when the user did not say Shopify-only.
 
 4. Handle broad requests by resolving their implied business concepts.

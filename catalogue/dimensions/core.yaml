@@ -9,6 +9,7 @@ dimensions:
       canonical_pnl: canonical_pnl.brand_id
       amazon_daily_pnl: amazon_daily_pnl.brand_id
       orders_all_channels: orders_all_channels.brand_id
+      sales_all_channels: sales_all_channels.brand_id
       order_attribution: order_attribution.brand_id
       meta_ad_attribution: meta_ad_attribution.brand_id
       customer_ltv: customer_ltv.brand_id
@@ -241,6 +242,7 @@ dimensions:
       canonical_pnl: canonical_pnl.report_date
       amazon_daily_pnl: amazon_daily_pnl.report_date
       orders_all_channels: orders_all_channels.report_date
+      sales_all_channels: sales_all_channels.report_date
       meta_ad_attribution: meta_ad_attribution.report_date
       meta_ad_performance: meta_ad_performance.report_date
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.report_date

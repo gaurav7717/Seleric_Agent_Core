@@ -359,6 +359,7 @@ terms:
     canonical_id: total_sales
     definition: >
       Shopify-only Total Sales including GST. Does not include Amazon SP.
+      For All channels use total_sales_all_channels.
   - term: total sales (including gst)
     canonical_id: total_sales
   - term: total sales including gst
@@ -367,6 +368,22 @@ terms:
     canonical_id: total_sales
   - term: shopify total sales
     canonical_id: total_sales
+  - term: total sales (all channels)
+    canonical_id: total_sales_all_channels
+  - term: total sales all channels
+    canonical_id: total_sales_all_channels
+  - term: all channels total sales
+    canonical_id: total_sales_all_channels
+  - term: gross sales (all channels)
+    canonical_id: gross_sales_all_channels
+  - term: gross sales all channels
+    canonical_id: gross_sales_all_channels
+  - term: net sales (all channels)
+    canonical_id: net_sales_all_channels
+  - term: net sales all channels
+    canonical_id: net_sales_all_channels
+  - term: all channels net sales
+    canonical_id: net_sales_all_channels
   - term: gross units
     canonical_id: gross_units_ordered
   - term: cancelled orders

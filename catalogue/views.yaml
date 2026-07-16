@@ -85,6 +85,12 @@ views:
     freshness:
       source: serve.commerce_orders + gold.fct_amazon_sp_orders
       expected_cadence: "hourly after gold sync, IST"
+  - name: sales_all_channels
+    title: Sales (All Channels)
+    date_dimension: report_date
+    freshness:
+      source: serve.commerce_performance_daily + gold.fct_amazon_sp_order_pnl
+      expected_cadence: "hourly after gold sync, IST"
   - name: refund_events
     title: Refund Events (Serve)
     date_dimension: refund_date
