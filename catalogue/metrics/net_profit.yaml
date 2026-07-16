@@ -1,51 +1,39 @@
 id: net_profit
 display_name: Net Profit
 category: finance
-status: draft
-description: 'Company P&L bottom line: contribution margin minus operating cost minus
-  total ad spend, for the period (brand x day). This is the canonical answer for ''net
-  profit'' / ''profit'' — previously uncatalogued (only product_gross_profit existed
-  at product-line grain).
-
-
-  DATA QUALITY CAVEAT: sourced from gold.fct_daily_pnl, whose cost/spend columns are
-  flagged broken in the cube''s own header comment (mage-ai/infra/cube/model/cubes/serve_canonical_pnl.yml).
-  Cross-checked against ClickHouse for June 2026/brand 20: net_cogs summed to ~90.6K
-  vs. the dashboard''s Net COGS card of ~15.86L (17x off), and derived net_profit
-  was positive (~11.9L) vs. the dashboard''s Net Profit card of -2.72L (wrong sign).
-  Marked draft (not queryable) until the fct_daily_pnl cost columns are fixed upstream
-  — do not certify or surface this value.'
+status: certified
+description: >
+  Company P&L bottom line matching the Historical Analytics Net Profit card
+  (Shopify-only): Net Sales − Net COGS − (Meta + Google) ad spend. FE
+  buildDashboardStats identity. Uses Shopify-only spend because commerce net
+  sales exclude Amazon SP; for blended Meta+Google+Amazon profit ask for
+  net_profit_blended.
 formula:
-  human_readable: contribution_margin - operating_cost - total_ad_spend
+  human_readable: net_sales - net_cogs - shopify_ad_spend
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
-  measure: canonical_pnl.net_profit
+  measure: canonical_pnl.net_profit_shopify
 aggregation: additive
 unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-- brand_id
-- report_date
+  - brand_id
+  - report_date
 supported_filters:
-- date_range
-- brand_id
+  - date_range
+  - brand_id
 data_owner: Finance
 access_policy:
-  roles_allowed:
-  - exec
-  - finance
-  scopes:
-  - metrics:read
+  roles_allowed: [exec, finance]
+  scopes: [metrics:read]
 examples:
-- question: Net Profit for June 2026
-  request:
-    measures:
-    - net_profit
-    time_range:
-      start: '2026-06-01'
-      end: '2026-06-30'
+  - question: Net Profit for June 2026
+    request:
+      measures: [net_profit]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
-- net_profit can be negative (loss periods are valid)
+  - net_profit can be negative (loss periods are valid)
+  - June 2026 brand 20 ≈ dashboard Net Profit −₹2,72,173.77
 deprecated_aliases: []

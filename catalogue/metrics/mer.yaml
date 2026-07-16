@@ -2,9 +2,10 @@ id: mer
 display_name: MER (Media Efficiency Ratio)
 category: finance
 status: certified
-description: First-party net sales divided by total (blended) certified ad spend.
-  NOT platform-reported ROAS — uses commerce oracle net sales only, never platform
-  attribution. Previously uncatalogued (glossary returned 'not catalogued' for MER).
+description: >
+  First-party net sales divided by blended (Meta+Google+Amazon) ad spend.
+  NOT Net ROAS — Net ROAS is (Net Sales − Net COGS) / Shopify ad spend
+  (catalogue id net_roas). Never answer "Net ROAS" with this metric.
 formula:
   human_readable: SUM(net_sales) / SUM(total_ad_spend)
   authoritative_source: cube
@@ -15,29 +16,22 @@ aggregation: ratio
 unit: ratio
 grain: daily
 supported_dimensions:
-- brand_id
-- report_date
+  - brand_id
+  - report_date
 supported_filters:
-- date_range
-- brand_id
+  - date_range
+  - brand_id
 data_owner: Finance
 access_policy:
-  roles_allowed:
-  - exec
-  - finance
-  scopes:
-  - metrics:read
+  roles_allowed: [exec, finance]
+  scopes: [metrics:read]
 examples:
-- question: MER (Media Efficiency Ratio) for June 2026
-  request:
-    measures:
-    - mer
-    time_range:
-      start: '2026-06-01'
-      end: '2026-06-30'
+  - question: MER for June 2026
+    request:
+      measures: [mer]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
-- mer equals sum(net_sales)/sum(total_ad_spend) for the same slice, first-party basis
-  only
+  - mer equals sum(net_sales)/sum(total_ad_spend) for the same slice
 deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.net_sales

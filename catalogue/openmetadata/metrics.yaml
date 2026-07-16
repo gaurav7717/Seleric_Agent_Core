@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 123
+count: 127
 metrics:
   active_orders:
     category: commerce
@@ -151,6 +151,13 @@ metrics:
     glossary:
     - Customer.LifetimeValue
     om_name: avgOrdersPerCustomer
+  be_roas:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: beRoas
   cancelled_orders:
     category: commerce
     cube_view: commerce_orders
@@ -291,6 +298,13 @@ metrics:
     glossary:
     - Finance.GrossProfit
     om_name: grossProfit
+  gross_roas:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.GrossProfit
+    om_name: grossRoas
   gross_sales:
     category: commerce
     cube_view: commerce_orders
@@ -673,6 +687,13 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: netProfit
+  net_roas:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: netRoas
   new_customer_orders:
     category: commerce
     cube_view: commerce_orders
@@ -826,6 +847,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: shippingCost
+  shopify_ad_spend:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: shopifyAdSpend
   total_ad_spend:
     category: finance
     cube_view: canonical_pnl

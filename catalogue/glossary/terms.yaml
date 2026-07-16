@@ -75,31 +75,20 @@ terms:
       Return to Origin — an order returned before/at delivery. Not a
       standalone catalogued metric in the current commerce/product set.
   - term: bottom line
-    canonical_id: null
-    definition: >
-      canonical_pnl.net_profit exists but is marked draft (not queryable) —
-      its cost/spend source columns (gold.fct_daily_pnl) are known-broken;
-      cross-check found the derived value has the wrong sign vs. the dashboard's
-      Net Profit card. Use product_gross_profit for SKU-level profit until fixed.
+    canonical_id: net_profit
   - term: profit
-    canonical_id: null
-    definition: >
-      Ambiguous, and company-level net_profit is draft/not queryable (see
-      "bottom line"). For products use product_gross_profit.
+    canonical_id: net_profit
   - term: net profit
-    canonical_id: null
-    definition: >
-      canonical_pnl.net_profit exists but is marked draft (not queryable) —
-      see "bottom line" for why.
+    canonical_id: net_profit
   - term: COGS
-    canonical_id: product_cogs
+    canonical_id: net_cogs
   - term: company COGS
-    canonical_id: null
-    definition: >
-      canonical_pnl.net_cogs exists but is marked draft (not queryable) —
-      its source (gold.fct_daily_pnl) is known-broken (~17x too low vs. the
-      dashboard's Net COGS card). Use product_cogs for SKU-level COGS.
+    canonical_id: net_cogs
+  - term: net cogs
+    canonical_id: net_cogs
   - term: cost of goods
+    canonical_id: net_cogs
+  - term: product COGS
     canonical_id: product_cogs
   - term: gross margin
     canonical_id: product_gross_margin_pct
@@ -108,19 +97,33 @@ terms:
   - term: marketing efficiency ratio
     canonical_id: mer
   - term: ROAS
-    canonical_id: null
+    canonical_id: net_roas
     definition: >
-      Platform-reported ROAS is not in the certified catalogue (attribution
-      boundary). Use delivery metrics (meta_spend, google_spend, amazon_ads_spend)
-      and certified commerce revenue separately.
+      Defaults to Net ROAS ((Net Sales − Net COGS) / Shopify ad spend).
+      Platform-reported Meta/Google/Amazon ROAS is not certified.
+  - term: net ROAS
+    canonical_id: net_roas
+  - term: net roas
+    canonical_id: net_roas
+  - term: gross ROAS
+    canonical_id: gross_roas
+  - term: gross roas
+    canonical_id: gross_roas
+  - term: BE ROAS
+    canonical_id: be_roas
+  - term: break even ROAS
+    canonical_id: be_roas
+  - term: breakeven ROAS
+    canonical_id: be_roas
   - term: return on ad spend
-    canonical_id: null
-    definition: >
-      Platform-reported ROAS is not certified. See deprecations for
-      meta_roas/google_roas/amazon_ads_roas.
+    canonical_id: net_roas
   - term: ad spend
-    canonical_id: total_ad_spend
+    canonical_id: shopify_ad_spend
+  - term: total ad spend
+    canonical_id: shopify_ad_spend
   - term: marketing spend
+    canonical_id: shopify_ad_spend
+  - term: blended ad spend
     canonical_id: total_ad_spend
   - term: meta spend
     canonical_id: meta_spend

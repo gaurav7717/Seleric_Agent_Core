@@ -86,6 +86,7 @@ HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     "rto_cost": ("rtoCost", ["Finance.NetCogs"]),
     "operating_cost": ("operatingCost", ["Finance.NetCogs"]),
     "total_ad_spend": ("totalAdSpend", ["Finance.NetCogs"]),
+    "shopify_ad_spend": ("shopifyAdSpend", ["Finance.NetCogs"]),
     "gross_profit": ("grossProfit", ["Finance.GrossProfit"]),
     "contribution_margin": ("contributionMargin", ["Finance.ContributionMargin"]),
     "net_profit": ("netProfit", ["Finance.NetProfit"]),
@@ -93,6 +94,9 @@ HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     "contribution_margin_pct": ("contributionMarginPct", ["Finance.ContributionMargin"]),
     "net_margin_pct": ("netMarginPct", ["Finance.NetProfit"]),
     "mer": ("mer", ["Finance.MER"]),
+    "net_roas": ("netRoas", ["Finance.NetProfit"]),
+    "gross_roas": ("grossRoas", ["Finance.GrossProfit"]),
+    "be_roas": ("beRoas", ["Finance.NetProfit"]),
     "cost_coverage_pct": ("costCoveragePct", ["Finance.CostCoverage"]),
     # Attribution (order_attribution)
     "attributed_orders": ("attributedOrders", ["Attribution.AttributedOrder"]),

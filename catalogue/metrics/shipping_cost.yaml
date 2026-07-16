@@ -1,7 +1,7 @@
 id: shipping_cost
 display_name: Shipping Cost
 category: finance
-status: draft
+status: certified
 description: 'Fulfilment shipping cost for the period (brand x day).
 
 

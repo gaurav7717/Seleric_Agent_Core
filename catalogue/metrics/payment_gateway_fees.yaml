@@ -1,7 +1,7 @@
 id: payment_gateway_fees
 display_name: Payment Gateway Fees
 category: finance
-status: draft
+status: certified
 description: 'Payment gateway/processing fees for the period (brand x day).
 
 

@@ -1,0 +1,37 @@
+id: gross_roas
+display_name: Gross ROAS
+category: finance
+status: certified
+description: >
+  Historical Analytics Gross ROAS: Gross Sales / Shopify ad spend (Meta + Google).
+  FE §11. Not platform-reported ROAS.
+formula:
+  human_readable: SUM(gross_sales) / SUM(shopify_ad_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.gross_roas
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed: [exec, finance, growth_lead]
+  scopes: [metrics:read]
+examples:
+  - question: Gross ROAS for June 2026
+    request:
+      measures: [gross_roas]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
+validation_tests:
+  - June 2026 brand 20 ≈ dashboard 2.03x
+deprecated_aliases: []
+ratio_components:
+  numerator: canonical_pnl.gross_sales
+  denominator: canonical_pnl.shopify_ad_spend
