@@ -213,3 +213,78 @@ contracts:
     time_dimension: refund_date
     currency: INR
     notes: Secondary port; line-level returns with recovered cost components.
+
+  amazon_orders_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_orders
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    grain: [brand_id, amazon_order_id]
+    time_dimension: order_date
+    currency: INR
+    notes: Marketplace revenue INCLUDES GST.
+
+  amazon_commerce_daily_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_commerce_daily
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    grain: [brand_id, report_date]
+    time_dimension: report_date
+    currency: INR
+    notes: Secondary daily port of AmazonCommercePerformance.
+
+  channel_attribution_daily_contract_v1:
+    serve_table: clickhouse.default.serve.channel_attribution_daily
+    data_product: ChannelAttribution
+    domain: Attribution
+    grain: [brand_id, report_date, channel]
+    time_dimension: report_date
+    currency: INR
+    notes: Mixed revenue bases — Shopify ex-GST vs Amazon incl-GST.
+
+  customer_data_contract_v1:
+    serve_table: clickhouse.default.serve.customer_data
+    data_product: CustomerData
+    domain: Customer
+    grain: [brand_id, customer_id]
+    currency: INR
+    notes: Master data only; no lifetime revenue on this port.
+
+  commerce_order_events_contract_v1:
+    serve_table: clickhouse.default.serve.commerce_order_events
+    data_product: CommercePerformance
+    domain: Commerce
+    grain: [brand_id, order_id, event_type]
+    time_dimension: event_date
+    currency: INR
+    notes: Secondary event-axis port of CommercePerformance.
+
+  commerce_performance_daily_contract_v1:
+    serve_table: clickhouse.default.serve.commerce_performance_daily
+    data_product: CommercePerformance
+    domain: Commerce
+    grain: [brand_id, report_date]
+    time_dimension: report_date
+    currency: INR
+    notes: Secondary daily rollup port of CommercePerformance.
+
+  session_funnel_contract_v1:
+    serve_table: clickhouse.default.serve.session_funnel
+    data_product: SessionFunnel
+    domain: WebAnalytics
+    grain: [brand_id, session_id]
+    time_dimension: session_date
+    currency: INR
+    notes: >
+      Snowplow session grain; no visitor identifiers on serve. Deeper funnel
+      stages do NOT imply earlier ones (direct checkout / thank-you sessions).
+
+  funnel_daily_contract_v1:
+    serve_table: clickhouse.default.serve.funnel_daily
+    data_product: SessionFunnel
+    domain: WebAnalytics
+    grain: [brand_id, report_date, channel]
+    time_dimension: report_date
+    currency: INR
+    notes: >
+      Secondary channel-day port. FINE channel; purchases/revenue are order-grain
+      last-touch attribution — use purchases for CVR, never converted_sessions.

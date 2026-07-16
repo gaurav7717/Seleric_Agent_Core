@@ -1,0 +1,33 @@
+id: channel_net_revenue
+display_name: Channel Net Revenue (ex-GST)
+category: attribution
+status: certified
+description: >
+  First-party Shopify net revenue ex-GST by channel. NULL/absent on Amazon
+  channel rows (marketplace incl-GST basis — use channel_gross_revenue).
+formula:
+  human_readable: SUM(net_revenue_excl_tax)
+  authoritative_source: cube
+cube_mapping:
+  view: channel_attribution
+  measure: channel_attribution.net_revenue_excl_tax
+aggregation: additive
+unit: INR
+grain: brand × day × channel
+supported_dimensions:
+  - brand_id
+  - report_date
+  - channel
+  - revenue_basis
+supported_filters:
+  - date_range
+  - brand_id
+  - channel
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+currency_default: INR
+validation_tests:
+  - channel_net_revenue is Shopify-basis only
+deprecated_aliases: []

@@ -1,0 +1,37 @@
+id: funnel_conversion_rate
+display_name: Funnel Conversion Rate
+category: web_analytics
+status: certified
+description: >
+  Purchases / sessions on the channel-day funnel, recomputed from aggregated
+  components on any slice. Purchases are last-touch attributed orders.
+formula:
+  human_readable: SUM(purchases) / SUM(sessions)
+  authoritative_source: cube
+cube_mapping:
+  view: funnel_daily
+  measure: funnel_daily.funnel_conversion_rate
+aggregation: ratio
+unit: ratio
+grain: brand × day × fine channel
+supported_dimensions:
+  - brand_id
+  - report_date
+  - channel
+supported_filters:
+  - date_range
+  - brand_id
+  - channel
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests:
+  - funnel_conversion_rate equals funnel_purchases / web_sessions recomputed on any slice
+ratio_components:
+  numerator: funnel_daily.purchases
+  denominator: funnel_daily.sessions
+companion_measures:
+  - funnel_purchases
+  - web_sessions
+deprecated_aliases: []

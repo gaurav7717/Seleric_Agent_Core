@@ -1,0 +1,31 @@
+id: funnel_revenue
+display_name: Funnel Revenue
+category: web_analytics
+status: certified
+description: >
+  First-party attributed net revenue (ex-GST) on the channel-day funnel —
+  order-grain last-touch attribution, never platform-reported.
+formula:
+  human_readable: SUM(revenue)
+  authoritative_source: cube
+cube_mapping:
+  view: funnel_daily
+  measure: funnel_daily.revenue
+aggregation: additive
+unit: INR
+grain: brand × day × fine channel
+supported_dimensions:
+  - brand_id
+  - report_date
+  - channel
+supported_filters:
+  - date_range
+  - brand_id
+  - channel
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests:
+  - funnel_revenue >= 0
+deprecated_aliases: []

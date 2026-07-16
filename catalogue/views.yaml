@@ -103,3 +103,33 @@ views:
     freshness:
       source: serve.return_lifecycle (VIEW over gold.fct_refund_line_items FINAL)
       expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_commerce_performance
+    title: Amazon Commerce Performance Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_commerce_daily
+      expected_cadence: "daily after Amazon SP sync; 30h SLA"
+  - name: channel_attribution
+    title: Channel Attribution Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.channel_attribution_daily
+      expected_cadence: "hourly Shopify + daily Amazon SP; 30h SLA"
+  - name: customer_data
+    title: Customer Data (Serve)
+    date_dimension: null
+    freshness:
+      source: serve.customer_data
+      expected_cadence: "hourly after gold dim_customers sync, IST"
+  - name: session_funnel
+    title: Session Funnel (Serve)
+    date_dimension: session_date
+    freshness:
+      source: serve.session_funnel (VIEW over gold.fct_session_funnel FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: funnel_daily
+    title: Funnel Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.funnel_daily (VIEW over gold.mart_funnel_daily FINAL)
+      expected_cadence: "daily after dw/mart run; 26h SLA"

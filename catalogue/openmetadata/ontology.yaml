@@ -5,9 +5,14 @@ domains:
   Commerce:
     om_glossary: Commerce
     owner_team: commerce-data-team
-    data_product: CommercePerformance
-    cube_views: [commerce_orders, commerce_performance]
-    grain: Order
+    data_products: [CommercePerformance, AmazonCommercePerformance]
+    cube_views:
+      - commerce_orders
+      - commerce_performance
+      - amazon_commerce_performance
+      - amazon_daily_pnl
+      - orders_all_channels
+    grain: Order (+ Daily Amazon)
     date_axes: [placement, event]
   Product:
     om_glossary: Product
@@ -33,23 +38,33 @@ domains:
   Attribution:
     om_glossary: Attribution
     owner_team: growth-attribution
-    data_product: MarketingAttribution
-    cube_views: [order_attribution, meta_ad_attribution]
-    grain: Order (+ Meta ad-day rollup)
+    data_products: [MarketingAttribution, ChannelAttribution]
+    cube_views: [order_attribution, meta_ad_attribution, channel_attribution]
+    grain: Order (+ Meta ad-day + channel-day)
     date_axes: [order_date, report_date]
     notes: >
       Last-touch, first-party revenue, Shopify orders + Meta/Google touchpoints.
-      Amazon ad→order linkage (gold.fct_amazon_ads_ad_order_attribution) = V2 port.
+      ChannelAttribution adds amazon/organic_amazon with mixed revenue basis.
   Customer:
     om_glossary: Customer
     owner_team: growth-retention
-    data_product: CustomerIntelligence
-    cube_views: [customer_ltv, purchase_sequence]
-    grain: Customer (+ Order sequence port)
+    data_products: [CustomerIntelligence, CustomerData]
+    cube_views: [customer_ltv, purchase_sequence, customer_data]
+    grain: Customer (+ Order sequence + profile)
     date_axes: [last_order_at, order_date]
     notes: >
       Hashed PII only; Shopify customers only — Amazon SP-API exposes no durable
-      buyer identity (permanent boundary).
+      buyer identity (permanent boundary). CustomerData = profile only.
+  WebAnalytics:
+    om_glossary: Web Analytics
+    owner_team: growth-analytics
+    data_product: SessionFunnel
+    cube_views: [session_funnel, funnel_daily]
+    grain: Session (+ channel-day rollup)
+    date_axes: [session_date, report_date]
+    notes: >
+      Snowplow website behaviour; funnel stages are event-based and deeper
+      stages can skip earlier ones. Rates are ratio-of-aggregates only.
   Finance:
     om_glossary: Finance
     owner_team: finance-team
@@ -57,10 +72,10 @@ domains:
     cube_views: [canonical_pnl]
     grain: Daily
     date_axes: [report_date]
+    agent_ready: false
     notes: >
-      Net sales = Shopify commerce oracle; spend = certified Meta + Google +
-      Amazon Ads serve views; fct_daily_pnl contributes cost columns only.
-      Amazon marketplace revenue/fees (fct_amazon_daily_pnl) = V2 port.
+      OM InProgress. Net sales = Shopify commerce oracle; spend = certified ads;
+      additive amazon_* marketplace block on CanonicalPnl v3.
   Operations:
     om_glossary: Operations
     owner_team: ops-team

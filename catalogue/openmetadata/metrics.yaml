@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 139
+count: 150
 metrics:
   active_orders:
     category: commerce
@@ -53,6 +53,27 @@ metrics:
     - Paid Media.Spend
     - Paid Media.SponsoredProducts(SP)
     om_name: amazonAdsSpend
+  amazon_gross_revenue:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonGrossRevenue
+  amazon_marketplace_fees:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonMarketplaceFees
+  amazon_net_payout:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonNetPayout
   amazon_orders:
     category: commerce
     cube_view: orders_all_channels
@@ -172,6 +193,12 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: beRoas
+  bounce_rate:
+    category: web_analytics
+    cube_view: funnel_daily
+    contract: null
+    glossary: []
+    om_name: bounceRate
   cancel_revenue:
     category: commerce
     cube_view: canonical_pnl
@@ -186,6 +213,18 @@ metrics:
     glossary:
     - Commerce.CancelledOrder
     om_name: cancelledOrders
+  channel_net_revenue:
+    category: attribution
+    cube_view: channel_attribution
+    contract: null
+    glossary: []
+    om_name: channelNetRevenue
+  channel_orders:
+    category: attribution
+    cube_view: channel_attribution
+    contract: null
+    glossary: []
+    om_name: channelOrders
   cod_orders:
     category: commerce
     cube_view: commerce_orders
@@ -228,6 +267,12 @@ metrics:
     glossary:
     - Finance.CostCoverage
     om_name: costCoveragePct
+  customer_profiles:
+    category: customer
+    cube_view: customer_data
+    contract: null
+    glossary: []
+    om_name: customerProfiles
   customers:
     category: customer
     cube_view: customer_ltv
@@ -249,6 +294,24 @@ metrics:
     glossary:
     - Customer.RepeatCustomer
     om_name: firstOrders
+  funnel_conversion_rate:
+    category: web_analytics
+    cube_view: funnel_daily
+    contract: null
+    glossary: []
+    om_name: funnelConversionRate
+  funnel_purchases:
+    category: web_analytics
+    cube_view: funnel_daily
+    contract: null
+    glossary: []
+    om_name: funnelPurchases
+  funnel_revenue:
+    category: web_analytics
+    cube_view: funnel_daily
+    contract: null
+    glossary: []
+    om_name: funnelRevenue
   google_clicks:
     category: paid_media
     cube_view: google_ad_performance
@@ -973,3 +1036,9 @@ metrics:
     glossary:
     - Product.UnitsSold
     om_name: unitsSold
+  web_sessions:
+    category: web_analytics
+    cube_view: funnel_daily
+    contract: null
+    glossary: []
+    om_name: webSessions

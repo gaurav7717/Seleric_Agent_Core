@@ -17,11 +17,25 @@ data_products:
     owner_team: commerce-data-team
     primary_serve_table: clickhouse.default.serve.commerce_orders
     contract: commerce_performance_contract_v1
+    secondary_contracts:
+      - commerce_order_events_contract_v1
+      - commerce_performance_daily_contract_v1
     cube_views: [commerce_orders, commerce_performance]
     platforms: [Shopify]
     notes: >
       Shopify-only by frozen dashboard-oracle policy. Amazon marketplace orders
-      (gold.fct_amazon_sp_orders / gold.fct_amazon_order_items) = V2 port.
+      are the sibling product AmazonCommercePerformance (not unioned here).
+  - name: AmazonCommercePerformance
+    domain: Commerce
+    owner_team: commerce-data-team
+    primary_serve_table: clickhouse.default.serve.amazon_orders
+    contract: amazon_orders_contract_v1
+    secondary_contracts: [amazon_commerce_daily_contract_v1]
+    cube_views: [amazon_commerce_performance, amazon_daily_pnl, orders_all_channels]
+    platforms: [AmazonSP]
+    notes: >
+      Marketplace-reported revenue INCLUDES GST. Never mix with Shopify ex-GST
+      CommercePerformance without stating the basis. Ads stay on AmazonAdsPerformance.
   - name: ProductPerformance
     domain: Product
     owner_team: commerce-data-team
@@ -71,6 +85,16 @@ data_products:
       Last-touch, Shopify orders + Meta/Google touchpoints, first-party revenue
       only. Amazon ad→order linkage (gold.fct_amazon_ads_ad_order_attribution)
       = V2 port; platform-attributed sales/ACOS excluded.
+  - name: ChannelAttribution
+    domain: Attribution
+    owner_team: growth-attribution
+    primary_serve_table: clickhouse.default.serve.channel_attribution_daily
+    contract: channel_attribution_daily_contract_v1
+    cube_views: [channel_attribution]
+    platforms: [Shopify, Meta, GoogleAds, AmazonSP]
+    notes: >
+      Closed channel set (meta/google/organic_shopify/amazon/organic_amazon).
+      Shopify rows use first-party ex-GST; Amazon rows use marketplace incl-GST.
   - name: CustomerIntelligence
     domain: Customer
     owner_team: growth-retention
@@ -82,18 +106,40 @@ data_products:
     notes: >
       Hashed PII only. Amazon SP-API exposes no durable buyer identity —
       Amazon orders cannot join LTV (permanent boundary, not V2).
+  - name: CustomerData
+    domain: Customer
+    owner_team: growth-retention
+    primary_serve_table: clickhouse.default.serve.customer_data
+    contract: customer_data_contract_v1
+    cube_views: [customer_data]
+    platforms: [Shopify]
+    notes: >
+      Master-data profile/consent/acquisition only — no lifetime counts or
+      revenue (those stay on CustomerIntelligence).
+  - name: SessionFunnel
+    domain: WebAnalytics
+    owner_team: growth-analytics
+    primary_serve_table: clickhouse.default.serve.session_funnel
+    contract: session_funnel_contract_v1
+    secondary_contracts: [funnel_daily_contract_v1]
+    cube_views: [session_funnel, funnel_daily]
+    platforms: [Shopify]
+    notes: >
+      Snowplow website funnel (browse/product_view/add_to_cart/reached_checkout/
+      purchased). No visitor identifiers on serve. FINE channel — the closed
+      5-channel set is ChannelAttribution. funnel_daily purchases/revenue are
+      order-grain last-touch attribution.
   - name: CanonicalPnl
     domain: Finance
     owner_team: finance-team
     primary_serve_table: clickhouse.default.serve.canonical_pnl
     contract: canonical_pnl_contract_v1
     cube_views: [canonical_pnl]
-    platforms: [Shopify, Meta, GoogleAds, AmazonAds]
+    platforms: [Shopify, Meta, GoogleAds, AmazonAds, AmazonSP]
+    agent_ready: false
     notes: >
-      Composed: commerce oracle net sales + fct_daily_pnl COST columns only +
-      certified Meta/Google/Amazon Ads spend (serve.*_ads_daily). Amazon
-      marketplace revenue/fees (gold.fct_amazon_daily_pnl,
-      gold.fct_amazon_sp_order_pnl) = V2 port — v1 net sales are Shopify only.
+      OM certification InProgress until cost-basis gates close. Net sales =
+      Shopify oracle; additive amazon_* block; spend from certified ads serve.
   - name: ReturnsRefunds
     domain: Operations
     owner_team: ops-team
@@ -181,8 +227,23 @@ views:
     serve_table: clickhouse.default.serve.return_lifecycle
     contract: return_lifecycle_contract_v1
     gold_inputs: [clickhouse.default.gold.fct_refund_line_items]
+  amazon_commerce_performance:
+    data_product: AmazonCommercePerformance
+    serve_table: clickhouse.default.serve.amazon_commerce_daily
+    contract: amazon_commerce_daily_contract_v1
+    gold_inputs: [clickhouse.default.gold.fct_amazon_daily_pnl]
+  channel_attribution:
+    data_product: ChannelAttribution
+    serve_table: clickhouse.default.serve.channel_attribution_daily
+    gold_inputs:
+      - clickhouse.default.gold.fct_order_attribution
+      - clickhouse.default.gold.fct_amazon_sp_orders
+  customer_data:
+    data_product: CustomerData
+    serve_table: clickhouse.default.serve.customer_data
+    gold_inputs: [clickhouse.default.gold.dim_customers]
 
-# catalogue metric crosswalk lives in openmetadata/metrics.yaml (76 metrics).
+# catalogue metric crosswalk lives in openmetadata/metrics.yaml.
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 glossaries:
@@ -195,12 +256,12 @@ glossaries:
     terms: [Spend, CTR, CPC, CPM, ReportDate, IsFinal, HookRate(Meta), ThruPlay, SponsoredProducts(SP)]
   - name: Attribution
     domain: Attribution
-    terms: [AttributedOrder, AttributedNetRevenue, AttributionRate, LastTouch]
+    terms: [AttributedOrder, AttributedNetRevenue, AttributionRate, LastTouch, Channel]
   - name: Customer
     domain: Customer
-    terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel, PurchaseSequence, HashedPII]
+    terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel, PurchaseSequence, HashedPII, CustomerProfile]
   - name: Finance
     domain: Finance
-    terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage]
+    terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage, TotalAdSpend]
   - name: Operations
     domain: Operations
