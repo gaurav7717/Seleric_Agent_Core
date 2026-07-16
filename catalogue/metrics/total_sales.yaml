@@ -1,12 +1,13 @@
 id: total_sales
-display_name: Total Sales
+display_name: Total Sales (Shopify-only, incl. GST)
 category: commerce
 status: certified
-description: >
-  Pre-discount checkout value including GST on eligible placement orders
-  (gross_revenue + total_discounts). Shopify-only Commerce Performance.
+description: 'Pre-discount checkout value including GST on eligible placement orders (gross_revenue +
+  total_discounts). Shopify-only Commerce Performance. Scope: Shopify-only (Historical Analytics / commerce
+  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
+  for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: "Sum of gross_revenue + total_discounts per eligible order"
+  human_readable: Sum of gross_revenue + total_discounts per eligible order
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -15,15 +16,39 @@ aggregation: additive
 unit: currency
 currency_default: INR
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "Total sales last week"
-    request: {measures: [total_sales], time_range: {preset: last_7d}}
+- question: Total sales last week
+  request:
+    measures:
+    - total_sales
+    time_range:
+      preset: last_7d
 validation_tests:
-  - "total_sales >= commerce_net_revenue for same period when both on placement axis"
+- total_sales >= commerce_net_revenue for same period when both on placement axis
 deprecated_aliases: []

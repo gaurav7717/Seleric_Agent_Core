@@ -1,17 +1,16 @@
 id: commerce_net_revenue
-display_name: Commerce Net Revenue (ex-GST)
+display_name: Commerce Net Revenue (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: >
-  Per-order dashboard net sales (DASHBOARD_NET_SALES_O) summed on placement
-  order_date. Placement-axis only — does NOT deduct returns/cancels recognized
-  on a later event date, so it will NOT reconcile to the dashboard Net Sales
-  card for periods with cross-period returns/cancels. Use this only when a
-  query needs order-grain breakdowns (city, UTM, payment method). For
-  topline/period totals matching the dashboard, use
-  commerce_net_revenue_daily instead.
+description: 'Per-order dashboard net sales (DASHBOARD_NET_SALES_O) summed on placement order_date. Placement-axis
+  only — does NOT deduct returns/cancels recognized on a later event date, so it will NOT reconcile to
+  the dashboard Net Sales card for periods with cross-period returns/cancels. Use this only when a query
+  needs order-grain breakdowns (city, UTM, payment method). For topline/period totals matching the dashboard,
+  use commerce_net_revenue_daily instead. Scope: Shopify-only (Historical Analytics / commerce oracle).
+  Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
+  for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: "Sum of per-order net sales ex-GST (placement axis)"
+  human_readable: Sum of per-order net sales ex-GST (placement axis)
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -21,31 +20,40 @@ unit: currency
 currency_default: INR
 grain: order
 supported_dimensions:
-  - brand_id
-  - order_date
-  - payment_method
-  - utm_source
-  - shipping_country
-  - shipping_region
-  - shipping_city
+- brand_id
+- order_date
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
 supported_filters:
-  - date_range
-  - brand_id
-  - payment_method
-  - utm_source
-  - shipping_country
-  - shipping_region
-  - shipping_city
-data_owner: "Commerce Ops"
+- date_range
+- brand_id
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "Net revenue by city last 30 days"
-    request:
-      measures: [commerce_net_revenue]
-      dimensions: [shipping_city]
-      time_range: {preset: last_30d}
+- question: Net revenue by city last 30 days
+  request:
+    measures:
+    - commerce_net_revenue
+    dimensions:
+    - shipping_city
+    time_range:
+      preset: last_30d
 validation_tests:
-  - "placement-axis total within tolerance of DASHBOARD_NET_SALES_O sum for closed periods"
+- placement-axis total within tolerance of DASHBOARD_NET_SALES_O sum for closed periods
 deprecated_aliases: []

@@ -1,9 +1,10 @@
 id: net_margin_pct
-display_name: Net Margin %
+display_name: Net Margin % (Shopify-only)
 category: finance
 status: certified
-description: >
-  Net profit (Shopify-only) as a share of net sales — ratio of aggregates.
+description: 'Net profit (Shopify-only) as a share of net sales — ratio of aggregates. Scope: Shopify-only
+  (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
+  all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: 100 x SUM(net_profit_shopify) / SUM(net_sales)
   authoritative_source: cube
@@ -14,22 +15,28 @@ aggregation: ratio
 unit: percent
 grain: daily
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
 data_owner: Finance
 access_policy:
-  roles_allowed: [exec, finance]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
 examples:
-  - question: Net Margin % for June 2026
-    request:
-      measures: [net_margin_pct]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: Net Margin % for June 2026
+  request:
+    measures:
+    - net_margin_pct
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - period value equals 100 x sum(net_profit_shopify)/sum(net_sales)
+- period value equals 100 x sum(net_profit_shopify)/sum(net_sales)
 deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.net_profit_shopify

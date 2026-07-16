@@ -1,6 +1,5 @@
 from seleric_mcp.catalogue_service.service import (
     AmbiguousTerm,
-    DefinitionOnlyTerm,
     ResolvedTerm,
     UnknownTerm,
 )
@@ -63,10 +62,40 @@ def test_resolve_deprecated_alias(catalogue):
     assert r.deprecation_notice
 
 
-def test_resolve_definition_only_term(catalogue):
-    r = catalogue.resolve_term("RTO")
-    assert isinstance(r, DefinitionOnlyTerm)
-    assert "Return to Origin" in r.definition
+def test_resolve_total_orders_all_channels(catalogue):
+    for term in ("Total Orders", "order count", "orders"):
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), term
+        assert r.metric_id == "total_orders", term
+    r = catalogue.resolve_term("shopify orders")
+    assert isinstance(r, ResolvedTerm)
+    assert r.metric_id == "orders"
+
+
+def test_resolve_pnl_metrics_glossary(catalogue):
+    cases = {
+        "Gross Sales (Ex-GST)": "gross_sales",
+        "Returns": "return_revenue",
+        "Cancelled": "cancel_revenue",
+        "Net Sales (Ex-GST)": "commerce_net_revenue_daily",
+        "Taxes (18% on Shopify Net)": "taxes_on_net_sales",
+        "Product Cost": "product_cost",
+        "Amazon Platform Fees": "amazon_platform_fees",
+        "Shipping Cost (Courier)": "shipping_cost",
+        "RTO Logistics Cost": "rto_cost",
+        "Total Operating Cost": "total_operating_cost",
+        "Total Sales (Including GST)": "total_sales",
+        "Total Performance Marketing": "total_ad_spend",
+        "Total Ad Spend (all platforms)": "total_ad_spend",
+        "Total Ad Spend": "total_ad_spend",
+        "Meta Ads": "meta_spend",
+        "Google Ads": "google_spend",
+        "Amazon Ads": "amazon_ads_spend",
+    }
+    for term, expected in cases.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), f"{term} -> {r}"
+        assert r.metric_id == expected, f"{term}: got {r.metric_id}"
 
 
 def test_resolve_unknown(catalogue):

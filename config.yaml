@@ -33,7 +33,7 @@ tunables:
   # Query limits / timeouts — 0 default_row_limit = unlimited when limit omitted
   default_row_limit: 0
   max_row_limit: 100000
-  cube_timeout_seconds: 30
+  cube_timeout_seconds: 120
   # Stored query results and action idempotency windows
   result_ttl_minutes: 60
   idempotency_window_hours: 24

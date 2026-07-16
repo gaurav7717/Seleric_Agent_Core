@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 127
+count: 136
 metrics:
   active_orders:
     category: commerce
@@ -53,6 +53,20 @@ metrics:
     - Paid Media.Spend
     - Paid Media.SponsoredProducts(SP)
     om_name: amazonAdsSpend
+  amazon_orders:
+    category: commerce
+    cube_view: orders_all_channels
+    contract: null
+    glossary:
+    - Commerce.TotalOrders
+    om_name: amazonOrders
+  amazon_platform_fees:
+    category: finance
+    cube_view: amazon_daily_pnl
+    contract: null
+    glossary:
+    - Finance.NetCogs
+    om_name: amazonPlatformFees
   aov:
     category: commerce
     cube_view: commerce_orders
@@ -158,6 +172,13 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: beRoas
+  cancel_revenue:
+    category: commerce
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Commerce.ReturnCancelRevenue
+    om_name: cancelRevenue
   cancelled_orders:
     category: commerce
     cube_view: commerce_orders
@@ -687,6 +708,13 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: netProfit
+  net_profit_blended:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: netProfitBlended
   net_roas:
     category: finance
     cube_view: canonical_pnl
@@ -742,6 +770,13 @@ metrics:
     glossary:
     - Product.ProductCOGS
     om_name: productCogs
+  product_cost:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: productCost
   product_gross_margin_pct:
     category: product
     cube_view: product_performance
@@ -826,6 +861,13 @@ metrics:
     glossary:
     - Commerce.ReturnCancelRevenue
     om_name: returnCancelRevenue
+  return_revenue:
+    category: commerce
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Commerce.ReturnCancelRevenue
+    om_name: returnRevenue
   returns_cancels:
     category: commerce
     cube_view: commerce_orders
@@ -854,6 +896,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: shopifyAdSpend
+  taxes_on_net_sales:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: taxesOnNetSales
   total_ad_spend:
     category: finance
     cube_view: canonical_pnl
@@ -861,6 +910,20 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: totalAdSpend
+  total_operating_cost:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: totalOperatingCost
+  total_orders:
+    category: commerce
+    cube_view: orders_all_channels
+    contract: null
+    glossary:
+    - Commerce.TotalOrders
+    om_name: totalOrders
   total_sales:
     category: commerce
     cube_view: commerce_orders

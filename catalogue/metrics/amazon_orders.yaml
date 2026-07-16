@@ -1,0 +1,34 @@
+id: amazon_orders
+display_name: Amazon Orders (excl. Canceled)
+category: commerce
+status: certified
+description: >
+  Amazon SP order count on purchase_date, excluding Canceled status — the
+  Amazon slice inside Historical Analytics Total Orders (All channels).
+formula:
+  human_readable: countDistinct(amazon_order_id) where order_status != Canceled
+  authoritative_source: cube
+cube_mapping:
+  view: orders_all_channels
+  measure: orders_all_channels.amazon_orders
+aggregation: additive
+unit: count
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Amazon orders last month
+    request:
+      measures: [amazon_orders]
+      time_range: {preset: last_month}
+validation_tests:
+  - amazon_orders >= 0
+deprecated_aliases: []

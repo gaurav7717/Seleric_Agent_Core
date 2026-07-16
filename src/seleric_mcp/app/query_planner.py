@@ -251,6 +251,27 @@ class QueryPlanner:
                 "types multi-counts ~8x). For total Meta spend use meta_spend."
             )
 
+    @staticmethod
+    def _alias_metric_ids(rows: list[dict], metrics: list[MetricDef]) -> list[dict]:
+        """Copy Cube measure values onto catalogue metric id keys.
+
+        Keeps original Cube member keys (insight_engine / drilldown still use
+        them) and adds ``metric.id`` so narrators can find aliases like
+        ``total_operating_cost`` even when the Cube member is shared.
+        """
+        if not rows:
+            return rows
+        aliased: list[dict] = []
+        for row in rows:
+            out = dict(row)
+            for m in metrics:
+                if m.cube_mapping.measure in row:
+                    out[m.id] = row[m.cube_mapping.measure]
+                if m.cube_mapping.measure_pct and m.cube_mapping.measure_pct in row:
+                    out[f"{m.id}_pct"] = row[m.cube_mapping.measure_pct]
+            aliased.append(out)
+        return aliased
+
     # ---------- cube query build ----------
 
     def _build_cube_query(
@@ -390,6 +411,14 @@ class QueryPlanner:
             currency=currency,
         )
 
+        # Expose catalogue metric ids as row keys (in addition to Cube member
+        # names) so aliases like total_operating_cost → net_cogs SQL still
+        # surface a column the host can narrate as "Total Operating Cost".
+        rows = self._alias_metric_ids(current_res.data, metrics)
+        compare_rows = (
+            self._alias_metric_ids(compare_res.data, metrics) if compare_res else None
+        )
+
         part_request = request.model_copy(update={"measures": [m.id for m in metrics]})
         self.store.save(
             StoredResult(
@@ -397,18 +426,18 @@ class QueryPlanner:
                 parent_query_id=parent_query_id,
                 request_json=part_request.model_dump_json(),
                 cube_query_json=json.dumps(cube_query),
-                result_json=json.dumps(current_res.data),
-                compare_result_json=json.dumps(compare_res.data) if compare_res else None,
+                result_json=json.dumps(rows),
+                compare_result_json=json.dumps(compare_rows) if compare_rows else None,
                 provenance_json=json.dumps(provenance),
             )
         )
 
-        columns = sorted({k for row in current_res.data for k in row})
+        columns = sorted({k for row in rows for k in row})
         return {
             "query_id": query_id,
             "columns": columns,
-            "rows": current_res.data,
-            "compare_rows": compare_res.data if compare_res else None,
+            "rows": rows,
+            "compare_rows": compare_rows,
             "warnings": filter_warnings,
             "provenance": provenance,
         }

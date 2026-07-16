@@ -1,17 +1,17 @@
-id: shopify_ad_spend
-display_name: Total Ad Spend (Shopify-only)
-category: finance
+id: return_revenue
+display_name: Returns Revenue (Shopify-only, ex-GST)
+category: commerce
 status: certified
-description: 'Meta + Google ad spend only — Historical Analytics "Total Ad Spend" when Shopify-only is
-  selected. Excludes Amazon Ads. For all-platform Total Ad Spend (= Total Performance Marketing) use total_ad_spend.
+description: 'Revenue deducted by return events in the period (ex-GST), on the return event date — FE
+  §13 P&L Returns card / half of Return/Cancel Rev. Not an order count (use refunded_orders for that).
   Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
   sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: SUM(meta_spend) + SUM(google_spend)
+  human_readable: SUM(return_revenue_excl_tax)
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
-  measure: canonical_pnl.shopify_ad_spend
+  measure: canonical_pnl.return_revenue
 aggregation: additive
 unit: currency
 currency_default: INR
@@ -22,23 +22,24 @@ supported_dimensions:
 supported_filters:
 - date_range
 - brand_id
-data_owner: Finance
+data_owner: Commerce Ops
 access_policy:
   roles_allowed:
   - exec
   - finance
   - growth_lead
+  - analyst
+  - ops
   scopes:
   - metrics:read
 examples:
-- question: Total Ad Spend for June 2026 (Shopify dashboard)
+- question: Returns revenue for June 2026
   request:
     measures:
-    - shopify_ad_spend
+    - return_revenue
     time_range:
       start: '2026-06-01'
       end: '2026-06-30'
 validation_tests:
-- shopify_ad_spend >= 0 for any slice
-- June 2026 brand 20 ≈ dashboard ₹19,07,629.36
+- June 2026 brand 20 ≈ ₹4,37,371.90
 deprecated_aliases: []

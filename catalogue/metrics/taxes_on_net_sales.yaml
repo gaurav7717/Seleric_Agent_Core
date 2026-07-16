@@ -1,0 +1,42 @@
+id: taxes_on_net_sales
+display_name: Taxes 18% on Shopify Net (Shopify-only)
+category: finance
+status: certified
+description: 'P&L forward output-GST estimate: Net Sales (ex-GST) × 0.18. Matches FE §13 /api/v1/pnl taxes
+  card. Not a stored tax ledger or input GST recovery. Scope: Shopify-only (Historical Analytics / commerce
+  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
+  for blended-ads net profit use net_profit_blended.'
+formula:
+  human_readable: SUM(net_sales_excl_tax) * 0.18
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.taxes_on_net_sales
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: Taxes (18% on Shopify Net) for June 2026
+  request:
+    measures:
+    - taxes_on_net_sales
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- equals 0.18 * net_sales for the same slice
+deprecated_aliases: []

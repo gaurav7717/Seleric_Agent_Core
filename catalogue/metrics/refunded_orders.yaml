@@ -1,12 +1,13 @@
 id: refunded_orders
-display_name: Returned Orders
+display_name: Returned Orders (Shopify-only)
 category: commerce
 status: certified
-description: >
-  Orders with return events on event date (Asia/Kolkata). Maps to returned_orders
-  measure. Filter on event_date — not order_date.
+description: 'Orders with return events on event date (Asia/Kolkata). Maps to returned_orders measure.
+  Filter on event_date — not order_date. Scope: Shopify-only (Historical Analytics / commerce oracle).
+  Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
+  for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: "Distinct orders with return event in period"
+  human_readable: Distinct orders with return event in period
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -15,15 +16,30 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, event_date]
-supported_filters: [date_range, brand_id]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- event_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "Returned orders last month"
-    request: {measures: [refunded_orders], time_range: {preset: last_month}}
+- question: Returned orders last month
+  request:
+    measures:
+    - refunded_orders
+    time_range:
+      preset: last_month
 validation_tests:
-  - "reconciles to dashboard Returns card for closed periods"
-deprecated_aliases: [returned_orders]
+- reconciles to dashboard Returns card for closed periods
+deprecated_aliases:
+- returned_orders

@@ -1,12 +1,13 @@
 id: aov
-display_name: Average Order Value
+display_name: Average Order Value (Shopify-only)
 category: commerce
 status: certified
-description: >
-  Total Sales (incl. GST) divided by Total Orders on the placement axis.
-  Ratio — never sum or average daily AOV rows.
+description: 'Total Sales (incl. GST) divided by Total Orders on the placement axis. Ratio — never sum
+  or average daily AOV rows. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include
+  Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net
+  profit use net_profit_blended.'
 formula:
-  human_readable: "Total Sales ÷ Total Orders"
+  human_readable: Total Sales ÷ Total Orders
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -16,15 +17,42 @@ aggregation: ratio
 unit: currency
 currency_default: INR
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "AOV by shipping region this quarter"
-    request: {measures: [aov], dimensions: [shipping_region], time_range: {preset: last_90d}}
+- question: AOV by shipping region this quarter
+  request:
+    measures:
+    - aov
+    dimensions:
+    - shipping_region
+    time_range:
+      preset: last_90d
 validation_tests:
-  - "aov > 0 for any slice with orders"
-deprecated_aliases: [daily_pnl.avg_order_value]
+- aov > 0 for any slice with orders
+deprecated_aliases:
+- daily_pnl.avg_order_value

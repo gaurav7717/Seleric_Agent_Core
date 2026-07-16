@@ -1,17 +1,12 @@
 id: shipping_cost
-display_name: Shipping Cost
+display_name: Shipping Cost (Shopify-only)
 category: finance
 status: certified
-description: 'Fulfilment shipping cost for the period (brand x day).
-
-
-  DATA QUALITY CAVEAT: sourced from gold.fct_daily_pnl, whose cost/spend columns are
-  flagged broken in the cube''s own header comment (mage-ai/infra/cube/model/cubes/serve_canonical_pnl.yml).
-  Cross-checked against ClickHouse for June 2026/brand 20: net_cogs summed to ~90.6K
-  vs. the dashboard''s Net COGS card of ~15.86L (17x off), and derived net_profit
-  was positive (~11.9L) vs. the dashboard''s Net Profit card of -2.72L (wrong sign).
-  Marked draft (not queryable) until the fct_daily_pnl cost columns are fixed upstream
-  — do not certify or surface this value.'
+description: 'Fulfilment shipping cost arm of Shopify Net COGS (brand × day), including return-event shipping.
+  FE §13 Shipping Cost (Courier). Part of Net COGS — do not subtract again when Net COGS / Total Operating
+  Cost is used. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon
+  SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
+  use net_profit_blended.'
 formula:
   human_readable: SUM(shipping_cost)
   authoritative_source: cube
@@ -45,4 +40,5 @@ examples:
       end: '2026-06-30'
 validation_tests:
 - shipping_cost >= 0 for any slice
+- June 2026 brand 20 ≈ ₹2,85,227.00
 deprecated_aliases: []

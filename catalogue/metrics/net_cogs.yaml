@@ -1,14 +1,14 @@
 id: net_cogs
-display_name: Net COGS
+display_name: Net COGS (Shopify-only)
 category: finance
 status: certified
-description: >
-  Fully-loaded Shopify Net COGS for the period (brand × day), matching the
-  Historical Analytics Net COGS card (FE §11). Composed from gold.fct_order_items:
-  ACTIVE placement (product + ship + pack + online gateway on order date) +
-  CANCELLATION (online gateway on cancel date) + RETURN (ship + pack + gateway +
-  RTO on return event date, no product). Amazon SP COGS are excluded so the
-  figure pairs with the Shopify commerce oracle. Not product_cogs (SKU line grain).
+description: 'Fully-loaded Shopify Net COGS for the period (brand × day), matching the Historical Analytics
+  Net COGS card (FE §11). Composed from gold.fct_order_items: ACTIVE placement (product + ship + pack
+  + online gateway on order date) + CANCELLATION (online gateway on cancel date) + RETURN (ship + pack
+  + gateway + RTO on return event date, no product). Amazon SP COGS are excluded so the figure pairs with
+  the Shopify commerce oracle. Not product_cogs (SKU line grain). Scope: Shopify-only (Historical Analytics
+  / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend
+  use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: SUM(net_cogs)
   authoritative_source: cube
@@ -20,21 +20,27 @@ unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
 data_owner: Finance
 access_policy:
-  roles_allowed: [exec, finance]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
 examples:
-  - question: Net COGS for June 2026
-    request:
-      measures: [net_cogs]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: Net COGS for June 2026
+  request:
+    measures:
+    - net_cogs
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - net_cogs >= 0 for any slice
-  - June 2026 brand 20 ≈ dashboard Net COGS ₹15,85,787.92
+- net_cogs >= 0 for any slice
+- June 2026 brand 20 ≈ dashboard Net COGS ₹15,85,787.92
 deprecated_aliases: []

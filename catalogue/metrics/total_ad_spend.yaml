@@ -1,13 +1,13 @@
 id: total_ad_spend
-display_name: Total Ad Spend (Blended)
+display_name: Total Ad Spend (all platforms)
 category: finance
 status: certified
 description: >
-  Blended Meta + Google + Amazon Ads spend. For the Historical Analytics
-  Shopify-only "Total Ad Spend" card use shopify_ad_spend (Meta+Google only) —
-  that is what the FE shows when Shopify-only is selected.
+  Total Ad Spend across all platforms = Total Performance Marketing =
+  Meta + Google + Amazon Ads. FE §13 identity. For Historical Analytics
+  Shopify-only Total Ad Spend (Meta+Google, no Amazon) use shopify_ad_spend.
 formula:
-  human_readable: SUM(total_ad_spend)
+  human_readable: SUM(meta_spend) + SUM(google_spend) + SUM(amazon_spend)
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
@@ -27,10 +27,13 @@ access_policy:
   roles_allowed: [exec, finance]
   scopes: [metrics:read]
 examples:
-  - question: Blended total ad spend for June 2026
+  - question: Total Performance Marketing / Total Ad Spend (all platforms) for June 2026
     request:
       measures: [total_ad_spend]
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
   - total_ad_spend >= 0 for any slice
-deprecated_aliases: []
+  - equals meta_spend + google_spend + amazon_spend for the same slice
+  - June 2026 brand 20 ≈ ₹19,22,687.25
+deprecated_aliases:
+  - total_performance_marketing

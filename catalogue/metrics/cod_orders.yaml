@@ -1,13 +1,13 @@
 id: cod_orders
-display_name: Cash-on-Delivery Orders
+display_name: COD Orders (Shopify-only)
 category: commerce
 status: certified
-description: >
-  COD bucket orders from serve.commerce_orders (dashboard payment_bucket = cod).
-  Excludes test, revenue-adjustment, and draft orders. Payment mix uses
-  order_created_at_ist date axis in dashboard SQL.
+description: 'COD bucket orders from serve.commerce_orders (dashboard payment_bucket = cod). Excludes
+  test, revenue-adjustment, and draft orders. Payment mix uses order_created_at_ist date axis in dashboard
+  SQL. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
+  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: "Count of orders in COD payment bucket"
+  human_readable: Count of orders in COD payment bucket
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -15,15 +15,36 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, order_created_at_ist, payment_method, payment_bucket]
-supported_filters: [date_range, brand_id, payment_method, payment_bucket]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- order_created_at_ist
+- payment_method
+- payment_bucket
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- payment_bucket
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "COD orders by shipping region last 7 days"
-    request: {measures: [cod_orders], dimensions: [shipping_region], time_range: {preset: last_7d}}
+- question: COD orders by shipping region last 7 days
+  request:
+    measures:
+    - cod_orders
+    dimensions:
+    - shipping_region
+    time_range:
+      preset: last_7d
 validation_tests:
-  - "cod_orders <= orders for any slice"
+- cod_orders <= orders for any slice
 deprecated_aliases: []

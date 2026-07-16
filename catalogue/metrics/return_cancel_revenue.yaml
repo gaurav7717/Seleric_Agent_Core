@@ -1,17 +1,17 @@
 id: return_cancel_revenue
-display_name: Return / Cancel Revenue (ex-GST)
+display_name: Return / Cancel Revenue (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: >
-  Revenue deducted from Gross Sales by return and cancellation events in the
-  period, excluding GST, on the event date (Asia/Kolkata) — matches the
-  dashboard Return / Cancel Rev card (Shopify-only; the dashboard displays it
-  negated). Event axis: event_date, not order_date.
+description: 'Revenue deducted from Gross Sales by return and cancellation events in the period, excluding
+  GST, on the event date (Asia/Kolkata) — matches the dashboard Return / Cancel Rev card (Shopify-only;
+  the dashboard displays it negated). Event axis: event_date, not order_date. Scope: Shopify-only (Historical
+  Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform
+  ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: >
-    Sum of per-line return/cancel revenue deductions (returned_revenue_excl_gst
-    or cancelled_revenue_excl_gst, falling back to placement gross ex-GST) for
-    events in period; gift cards excluded
+  human_readable: 'Sum of per-line return/cancel revenue deductions (returned_revenue_excl_gst or cancelled_revenue_excl_gst,
+    falling back to placement gross ex-GST) for events in period; gift cards excluded
+
+    '
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -21,15 +21,29 @@ aggregation: additive
 unit: currency
 currency_default: INR
 grain: order
-supported_dimensions: [brand_id, event_date]
-supported_filters: [date_range, brand_id]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- event_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "Revenue lost to returns and cancellations last month"
-    request: {measures: [return_cancel_revenue], time_range: {preset: last_month}}
+- question: Revenue lost to returns and cancellations last month
+  request:
+    measures:
+    - return_cancel_revenue
+    time_range:
+      preset: last_month
 validation_tests:
-  - "reconciles to dashboard Return / Cancel Rev card for closed periods (sign-flipped)"
+- reconciles to dashboard Return / Cancel Rev card for closed periods (sign-flipped)
 deprecated_aliases: []

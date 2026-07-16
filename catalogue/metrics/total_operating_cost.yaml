@@ -1,0 +1,39 @@
+id: total_operating_cost
+display_name: Total Operating Cost (Shopify-only)
+category: finance
+status: certified
+description: >
+  FE §13 Total Operating Cost — identical to Net COGS (product + ship + pack +
+  gateway + RTO). Prefer this id when the user says "Total Operating Cost";
+  net_cogs when they say Net COGS. Same underlying value; exposed as its own
+  Cube measure so results include a total_operating_cost column.
+  Scope: Shopify-only (does not include Amazon SP product cost or platform fees).
+formula:
+  human_readable: SUM(net_cogs)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.total_operating_cost
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed: [exec, finance]
+  scopes: [metrics:read]
+examples:
+  - question: Total Operating Cost for June 2026
+    request:
+      measures: [total_operating_cost]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
+validation_tests:
+  - equals net_cogs for the same slice
+  - June 2026 brand 20 ≈ ₹15,85,787.92
+deprecated_aliases: []

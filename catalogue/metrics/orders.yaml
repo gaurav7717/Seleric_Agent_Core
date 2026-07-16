@@ -1,12 +1,13 @@
 id: orders
-display_name: Orders
+display_name: Orders (Shopify-only)
 category: commerce
 status: certified
-description: >
-  Shopify placement order count from serve.commerce_orders. Excludes test and
-  revenue-adjustment orders; includes later-cancelled and voided placements.
+description: 'Shopify placement order count from serve.commerce_orders. Excludes test and revenue-adjustment
+  orders; includes later-cancelled and voided placements. Scope: Shopify-only (Historical Analytics /
+  commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use
+  total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: "Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)"
+  human_readable: Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -14,15 +15,43 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
-supported_filters: [date_range, brand_id, payment_method, utm_source, shipping_country, shipping_region, shipping_city]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- utm_source
+- shipping_country
+- shipping_region
+- shipping_city
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "Orders by payment method last 30 days"
-    request: {measures: [orders], dimensions: [payment_method], time_range: {preset: last_30d}}
+- question: Orders by payment method last 30 days
+  request:
+    measures:
+    - orders
+    dimensions:
+    - payment_method
+    time_range:
+      preset: last_30d
 validation_tests:
-  - "orders >= active_orders for any slice"
-deprecated_aliases: [daily_pnl.orders_created, daily_pnl.total_orders]
+- orders >= active_orders for any slice
+deprecated_aliases:
+- daily_pnl.orders_created
+- daily_pnl.total_orders

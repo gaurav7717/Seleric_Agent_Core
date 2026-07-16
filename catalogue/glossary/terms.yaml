@@ -10,6 +10,16 @@ terms:
     canonical_id: commerce_net_revenue_daily
   - term: net sales
     canonical_id: commerce_net_revenue_daily
+    definition: >
+      Shopify-only Net Sales (dashboard parity). Does not include Amazon SP.
+  - term: net sales (ex-gst)
+    canonical_id: commerce_net_revenue_daily
+  - term: net sales ex-gst
+    canonical_id: commerce_net_revenue_daily
+  - term: net sales (shopify-only)
+    canonical_id: commerce_net_revenue_daily
+  - term: shopify net sales
+    canonical_id: commerce_net_revenue_daily
   - term: revenue
     canonical_id: commerce_net_revenue_daily
   - term: commerce net revenue
@@ -25,7 +35,25 @@ terms:
   - term: average order value
     canonical_id: aov
   - term: order volume
+    canonical_id: total_orders
+    definition: >
+      Defaults to Total Orders (all channels). For Shopify-only ask for
+      "shopify orders".
+  - term: total orders
+    canonical_id: total_orders
+  - term: order count
+    canonical_id: total_orders
+  - term: orders
+    canonical_id: total_orders
+    definition: >
+      Defaults to Total Orders (all channels = Shopify + Amazon non-canceled).
+      For Shopify-only use "shopify orders".
+  - term: shopify orders
     canonical_id: orders
+  - term: shopify order count
+    canonical_id: orders
+  - term: amazon orders
+    canonical_id: amazon_orders
   - term: units sold
     canonical_id: units_sold
   - term: units
@@ -55,9 +83,20 @@ terms:
   - term: gross sales
     canonical_id: gross_sales
     definition: >
-      Placement revenue ex-GST before discounts (includes cancelled/voided
-      placement orders — dashboard Gross Sales card definition).
+      Shopify-only Gross Sales (ex-GST, pre-discount). Does not include Amazon SP.
+  - term: gross sales (ex-gst)
+    canonical_id: gross_sales
+  - term: gross sales ex-gst
+    canonical_id: gross_sales
+  - term: gross sales (shopify-only)
+    canonical_id: gross_sales
+  - term: shopify gross sales
+    canonical_id: gross_sales
   - term: discounts
+    canonical_id: discounts
+  - term: discount
+    canonical_id: discounts
+  - term: discounts (shopify-only)
     canonical_id: discounts
   - term: coupons
     canonical_id: discounts
@@ -66,32 +105,99 @@ terms:
   - term: returns / cancels
     canonical_id: returns_cancels
   - term: return revenue
-    canonical_id: return_cancel_revenue
+    canonical_id: return_revenue
+  - term: returns revenue
+    canonical_id: return_revenue
+  - term: returns
+    canonical_id: return_revenue
+    definition: >
+      P&L Returns card = return revenue ex-GST on event date. For order counts
+      ask for "returned orders" / refunded_orders.
   - term: revenue lost to returns
     canonical_id: return_cancel_revenue
+  - term: cancelled
+    canonical_id: cancel_revenue
+  - term: cancelled revenue
+    canonical_id: cancel_revenue
+  - term: cancel revenue
+    canonical_id: cancel_revenue
   - term: RTO
-    canonical_id: null
+    canonical_id: rto_cost
     definition: >
-      Return to Origin — an order returned before/at delivery. Not a
-      standalone catalogued metric in the current commerce/product set.
+      Return to Origin logistics cost arm of Net COGS (FE §13 RTO Logistics Cost).
+  - term: rto logistics cost
+    canonical_id: rto_cost
+  - term: rto cost
+    canonical_id: rto_cost
   - term: bottom line
     canonical_id: net_profit
   - term: profit
     canonical_id: net_profit
   - term: net profit
     canonical_id: net_profit
+    definition: >
+      Shopify-only Net Profit (Net Sales − Net COGS − Meta+Google spend).
+  - term: net profit (shopify-only)
+    canonical_id: net_profit
+  - term: shopify net profit
+    canonical_id: net_profit
+  - term: net profit blended
+    canonical_id: net_profit_blended
+  - term: net profit (all platforms)
+    canonical_id: net_profit_blended
   - term: COGS
     canonical_id: net_cogs
   - term: company COGS
     canonical_id: net_cogs
   - term: net cogs
     canonical_id: net_cogs
+  - term: net cogs (shopify-only)
+    canonical_id: net_cogs
   - term: cost of goods
     canonical_id: net_cogs
+  - term: product cost
+    canonical_id: product_cost
+  - term: product cost (shopify-only)
+    canonical_id: product_cost
   - term: product COGS
     canonical_id: product_cogs
+  - term: total operating cost
+    canonical_id: total_operating_cost
+  - term: total operating cost (shopify-only)
+    canonical_id: total_operating_cost
+  - term: operating cost
+    canonical_id: total_operating_cost
+    definition: >
+      On the P&L Metrics page this means Total Operating Cost (= Net COGS),
+      Shopify-only. For the non-product breakdown only, use metric operating_cost.
+  - term: packaging cost
+    canonical_id: packaging_cost
+  - term: shipping cost
+    canonical_id: shipping_cost
+  - term: shipping cost (courier)
+    canonical_id: shipping_cost
+  - term: payment gateway fees
+    canonical_id: payment_gateway_fees
+  - term: taxes
+    canonical_id: taxes_on_net_sales
+  - term: taxes (18% on shopify net)
+    canonical_id: taxes_on_net_sales
+  - term: taxes 18%
+    canonical_id: taxes_on_net_sales
+  - term: gst on net sales
+    canonical_id: taxes_on_net_sales
+  - term: amazon platform fees
+    canonical_id: amazon_platform_fees
+  - term: amazon fees
+    canonical_id: amazon_platform_fees
+  - term: amazon marketplace fees
+    canonical_id: amazon_platform_fees
   - term: gross margin
-    canonical_id: product_gross_margin_pct
+    canonical_id: gross_margin_pct
+  - term: gross margin %
+    canonical_id: gross_margin_pct
+  - term: gross profit
+    canonical_id: gross_profit
   - term: MER
     canonical_id: mer
   - term: marketing efficiency ratio
@@ -118,13 +224,37 @@ terms:
   - term: return on ad spend
     canonical_id: net_roas
   - term: ad spend
-    canonical_id: shopify_ad_spend
+    canonical_id: total_ad_spend
+    definition: >
+      Defaults to Total Ad Spend (all platforms) = Total Performance Marketing
+      (Meta+Google+Amazon). For Shopify-only Historical card use shopify_ad_spend.
   - term: total ad spend
-    canonical_id: shopify_ad_spend
+    canonical_id: total_ad_spend
+  - term: total ad spend (all platforms)
+    canonical_id: total_ad_spend
+  - term: total adspend
+    canonical_id: total_ad_spend
   - term: marketing spend
-    canonical_id: shopify_ad_spend
+    canonical_id: total_ad_spend
+  - term: marketing & sales
+    canonical_id: total_ad_spend
+    definition: >
+      P&L Marketing & Sales section total = Total Ad Spend (all platforms) =
+      Total Performance Marketing (Meta+Google+Amazon).
+  - term: total performance marketing
+    canonical_id: total_ad_spend
+  - term: performance marketing
+    canonical_id: total_ad_spend
   - term: blended ad spend
     canonical_id: total_ad_spend
+  - term: shopify ad spend
+    canonical_id: shopify_ad_spend
+  - term: total ad spend (shopify-only)
+    canonical_id: shopify_ad_spend
+  - term: total ad spend shopify
+    canonical_id: shopify_ad_spend
+  - term: meta ads
+    canonical_id: meta_spend
   - term: meta spend
     canonical_id: meta_spend
   - term: meta impressions
@@ -141,6 +271,8 @@ terms:
     canonical_id: meta_hook_rate
   - term: meta thruplay
     canonical_id: meta_thruplays
+  - term: google ads
+    canonical_id: google_spend
   - term: google spend
     canonical_id: google_spend
   - term: google impressions
@@ -149,6 +281,8 @@ terms:
     canonical_id: google_clicks
   - term: google CTR
     canonical_id: google_ctr
+  - term: amazon ads
+    canonical_id: amazon_ads_spend
   - term: amazon spend
     canonical_id: amazon_ads_spend
   - term: amazon ads spend
@@ -172,44 +306,11 @@ terms:
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
   - term: LTV
-    canonical_id: avg_ltv
-    definition: >
-      Realized (to-date) average lifetime net revenue ex-GST per customer
-      (CustomerIntelligence / customer_ltv). Not predicted LTV.
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: lifetime value
-    canonical_id: avg_ltv
-  - term: average LTV
-    canonical_id: avg_ltv
-  - term: customers
-    canonical_id: customers
-  - term: unique customers
-    canonical_id: customers
-  - term: repeat customers
-    canonical_id: repeat_customers
-  - term: returning customers
-    canonical_id: repeat_customers
-  - term: repeat rate
-    canonical_id: repeat_rate
-  - term: repeat purchase rate
-    canonical_id: repeat_rate
-  - term: lifetime orders
-    canonical_id: lifetime_orders
-  - term: lifetime revenue
-    canonical_id: lifetime_net_revenue
-  - term: lifetime net revenue
-    canonical_id: lifetime_net_revenue
-  - term: avg orders per customer
-    canonical_id: avg_orders_per_customer
-  - term: purchase frequency
-    canonical_id: avg_days_between_orders
-  - term: days between orders
-    canonical_id: avg_days_between_orders
-  - term: first orders
-    canonical_id: first_orders
-  - term: repeat orders
-    canonical_id: repeat_orders
-  - term: repeat order share
-    canonical_id: repeat_order_share
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
   - term: attributed revenue
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
@@ -256,6 +357,16 @@ terms:
     definition: Platform-reported Google CPA — not certified in PaidMedia V1.
   - term: total sales
     canonical_id: total_sales
+    definition: >
+      Shopify-only Total Sales including GST. Does not include Amazon SP.
+  - term: total sales (including gst)
+    canonical_id: total_sales
+  - term: total sales including gst
+    canonical_id: total_sales
+  - term: total sales (shopify-only)
+    canonical_id: total_sales
+  - term: shopify total sales
+    canonical_id: total_sales
   - term: gross units
     canonical_id: gross_units_ordered
   - term: cancelled orders
@@ -264,7 +375,7 @@ terms:
     canonical_id: cancelled_orders
   - term: refunded orders
     canonical_id: refunded_orders
-  - term: returns
+  - term: returned orders
     canonical_id: refunded_orders
   - term: COD orders
     canonical_id: cod_orders

@@ -1,12 +1,13 @@
 id: prepaid_orders
-display_name: Prepaid / Online Orders
+display_name: Prepaid Orders (Shopify-only)
 category: commerce
 status: certified
-description: >
-  Online (prepaid) payment bucket from serve.commerce_orders. Residual after COD,
-  paytm card machine, and manual buckets. Excludes test, revenue-adjustment, draft.
+description: 'Online (prepaid) payment bucket from serve.commerce_orders. Residual after COD, paytm card
+  machine, and manual buckets. Excludes test, revenue-adjustment, draft. Scope: Shopify-only (Historical
+  Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform
+  ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
-  human_readable: "Count of orders in online payment bucket"
+  human_readable: Count of orders in online payment bucket
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -14,15 +15,35 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions: [brand_id, order_date, order_created_at_ist, payment_method, payment_bucket]
-supported_filters: [date_range, brand_id, payment_method, payment_bucket]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- order_created_at_ist
+- payment_method
+- payment_bucket
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- payment_bucket
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: "Prepaid vs COD mix this month"
-    request: {measures: [prepaid_orders, cod_orders], time_range: {preset: this_month}}
+- question: Prepaid vs COD mix this month
+  request:
+    measures:
+    - prepaid_orders
+    - cod_orders
+    time_range:
+      preset: this_month
 validation_tests:
-  - "prepaid_orders + cod_orders <= orders for payment-eligible slice"
+- prepaid_orders + cod_orders <= orders for payment-eligible slice
 deprecated_aliases: []
