@@ -43,32 +43,45 @@ views:
     freshness:
       source: serve.meta_ads_breakdown_daily (VIEW over gold.mart_meta_ad_breakdown_daily FINAL)
       expected_cadence: "5-min gold sync after dbt orchestrator; platform account day"
-  - name: canonical_pnl
-    title: Canonical P&L Daily (Serve)
-    date_dimension: report_date
-    freshness:
-      source: serve.canonical_pnl (VIEW composing commerce oracle + fct_daily_pnl + certified paid-media spend)
-      expected_cadence: "hourly after gold sync, IST"
   - name: order_attribution
     title: Order Attribution (Serve, last-touch)
     date_dimension: order_date
     freshness:
-      source: serve.order_attribution
-      expected_cadence: "hourly after gold sync, IST"
+      source: serve.order_attribution (VIEW over gold.fct_order_attribution FINAL)
+      expected_cadence: "hourly after gold sync, IST; order_date older than 3 days final"
   - name: meta_ad_attribution
     title: Meta Ad Attribution Daily (Serve, last-touch)
     date_dimension: report_date
     freshness:
-      source: serve.meta_ad_attribution_daily
+      source: serve.meta_ad_attribution_daily (VIEW over gold.mart_meta_ad_daily_attribution FINAL)
       expected_cadence: "hourly after gold sync, IST"
   - name: customer_ltv
     title: Customer LTV (Serve)
+    date_dimension: last_order_at
     freshness:
-      source: serve.customer_ltv (lifetime snapshot, no date_dimension — not a period rollup)
+      source: serve.customer_ltv (VIEW over gold.fct_orders FINAL + dim_customers)
       expected_cadence: "hourly after gold sync, IST"
   - name: purchase_sequence
     title: Purchase Sequence (Serve)
     date_dimension: order_date
     freshness:
-      source: serve.purchase_sequence (uses ClickHouse window functions — row_number/lagInFrame)
+      source: serve.purchase_sequence (VIEW over gold.fct_orders FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: canonical_pnl
+    title: Canonical P&L Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.canonical_pnl (commerce oracle + fct_daily_pnl costs + meta/google/amazon ads spend)
+      expected_cadence: "hourly after gold sync; costs lag ~1 day (is_final = report_date <= today-3)"
+  - name: refund_events
+    title: Refund Events (Serve)
+    date_dimension: refund_date
+    freshness:
+      source: serve.refund_events (VIEW over gold.fct_refunds FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: return_lifecycle
+    title: Return Lifecycle (Serve)
+    date_dimension: refund_date
+    freshness:
+      source: serve.return_lifecycle (VIEW over gold.fct_refund_line_items FINAL)
       expected_cadence: "hourly after gold sync, IST"

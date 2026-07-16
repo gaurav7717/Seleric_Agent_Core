@@ -138,11 +138,13 @@ CONTRACT_BY_VIEW = {
     "meta_ad_breakdown_performance": "paid_media_meta_breakdown_contract_v1",
     "google_ad_performance": "paid_media_google_contract_v1",
     "amazon_ad_performance": "paid_media_amazon_contract_v1",
-    "canonical_pnl": "canonical_pnl_contract_v1",
-    "order_attribution": "order_attribution_contract_v1",
-    "meta_ad_attribution": "meta_ad_attribution_contract_v1",
+    "order_attribution": "attribution_order_contract_v1",
+    "meta_ad_attribution": "attribution_meta_ad_contract_v1",
     "customer_ltv": "customer_ltv_contract_v1",
     "purchase_sequence": "purchase_sequence_contract_v1",
+    "canonical_pnl": "canonical_pnl_contract_v1",
+    "refund_events": "refund_events_contract_v1",
+    "return_lifecycle": "return_lifecycle_contract_v1",
 }
 
 

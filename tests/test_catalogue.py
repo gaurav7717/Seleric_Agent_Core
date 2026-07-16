@@ -16,6 +16,8 @@ def test_loads_seed(catalogue):
     assert "amazon_ads_spend" in catalogue.cat.metrics
     assert catalogue.version
     assert catalogue.cat.openmetadata is not None
+    # 5 original (Commerce/Product/Meta/Google/AmazonAds) + Attribution/Customer/
+    # Finance/Operations added 2026-07 — keep in step with registry.yaml.
     assert len(catalogue.cat.openmetadata.data_products) == 9
     assert len(catalogue.cat.openmetadata.metrics) == len(catalogue.cat.metrics)
     assert catalogue.cat.openmetadata.contracts

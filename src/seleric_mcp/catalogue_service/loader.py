@@ -134,7 +134,9 @@ class OpenMetadataDataProduct(BaseModel):
     owner_team: str
     primary_serve_table: str
     contract: str
+    secondary_contracts: list[str] = Field(default_factory=list)
     cube_views: list[str] = Field(default_factory=list)
+    platforms: list[str] = Field(default_factory=list)
     notes: str | None = None
 
 
@@ -165,6 +167,8 @@ class OpenMetadataContract(BaseModel):
     attribution_boundary: str | None = None
     notes: str | None = None
     program: str | None = None
+    pii_rule: str | None = None
+    composition_rule: str | None = None
 
 
 class OpenMetadataOntology(BaseModel):

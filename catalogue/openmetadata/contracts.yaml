@@ -84,102 +84,6 @@ contracts:
       - google_clicks
       - is_final
 
-  canonical_pnl_contract_v1:
-    serve_table: clickhouse.default.serve.canonical_pnl
-    data_product: CanonicalPnl
-    domain: Finance
-    grain: [brand_id, report_date]
-    time_dimension: report_date
-    currency: INR
-    required_columns:
-      - brand_id
-      - report_date
-      - net_sales
-      - net_profit
-      - total_ad_spend
-    quality_tests:
-      - composite_key_unique
-      - freshness_within_sla
-    notes: >
-      Composed view — no independent ingestion. MER/margins are ratio-of-aggregates
-      except cost_coverage_pct (revenue-weighted).
-
-  order_attribution_contract_v1:
-    serve_table: clickhouse.default.serve.order_attribution
-    data_product: MarketingAttribution
-    domain: Attribution
-    grain: [brand_id, order_id]
-    time_dimension: order_date
-    currency: INR
-    required_columns:
-      - brand_id
-      - order_id
-      - order_date
-      - net_revenue_excl_tax
-      - attribution_method
-    quality_tests:
-      - order_key_unique
-      - freshness_within_sla
-    attribution_boundary: >
-      Last-touch only. Multi-touch/view-through fail closed, not approximated.
-
-  meta_ad_attribution_contract_v1:
-    serve_table: clickhouse.default.serve.meta_ad_attribution_daily
-    data_product: MarketingAttribution
-    domain: Attribution
-    grain: [brand_id, report_date, campaign_id, adset_id, ad_id]
-    time_dimension: report_date
-    currency: INR
-    attribution_boundary: >
-      First-party Shopify revenue only. Never mix with Meta platform-reported
-      purchase_value on serve.meta_ads_daily.
-    required_columns:
-      - brand_id
-      - report_date
-      - campaign_id
-      - attributed_orders
-      - attributed_net_revenue_excl_tax
-    quality_tests:
-      - composite_key_unique
-      - freshness_within_sla
-
-  customer_ltv_contract_v1:
-    serve_table: clickhouse.default.serve.customer_ltv
-    data_product: CustomerIntelligence
-    domain: Customer
-    grain: [brand_id, customer_id]
-    currency: INR
-    required_columns:
-      - brand_id
-      - customer_id
-      - lifetime_net_revenue_excl_tax
-      - lifetime_order_count
-      - is_repeat_customer
-    quality_tests:
-      - customer_key_unique
-      - freshness_within_sla
-    notes: >
-      Lifetime snapshot, one row per customer — no time_dimension, not a period
-      rollup. Hashed PII only (email_hash), no raw email/phone.
-
-  purchase_sequence_contract_v1:
-    serve_table: clickhouse.default.serve.purchase_sequence
-    data_product: PurchaseSequence
-    domain: Customer
-    grain: [brand_id, order_id]
-    time_dimension: order_date
-    currency: INR
-    required_columns:
-      - brand_id
-      - order_id
-      - customer_id
-      - order_seq
-      - is_first_order
-    quality_tests:
-      - order_key_unique
-      - freshness_within_sla
-    notes: Uses ClickHouse window functions (row_number/lagInFrame) per customer.
-
   paid_media_amazon_contract_v1:
     serve_table: clickhouse.default.serve.amazon_ads_daily
     data_product: AmazonAdsPerformance
@@ -195,3 +99,117 @@ contracts:
       - amazon_ads_impressions
       - amazon_ads_clicks
       - is_final
+
+  attribution_order_contract_v1:
+    serve_table: clickhouse.default.serve.order_attribution
+    data_product: MarketingAttribution
+    domain: Attribution
+    grain: [brand_id, order_id]
+    time_dimension: order_date
+    currency: INR
+    attribution_boundary: >
+      Last-touch, first-party revenue only; Meta/Google touchpoints → Shopify
+      orders. Amazon ad→order attribution = V2 port; platform-attributed
+      sales/ACOS excluded.
+    required_columns:
+      - brand_id
+      - order_id
+      - order_date
+      - lt_platform
+      - lt_channel
+      - attribution_method
+      - attribution_confidence
+      - net_revenue_excl_tax
+      - attribution_model
+      - is_final
+
+  attribution_meta_ad_contract_v1:
+    serve_table: clickhouse.default.serve.meta_ad_attribution_daily
+    data_product: MarketingAttribution
+    domain: Attribution
+    grain: [brand_id, report_date, campaign_id, adset_id, ad_id]
+    time_dimension: report_date
+    currency: INR
+    notes: Secondary port; Meta ad-day rollup of first-party attributed revenue.
+
+  customer_ltv_contract_v1:
+    serve_table: clickhouse.default.serve.customer_ltv
+    data_product: CustomerIntelligence
+    domain: Customer
+    grain: [brand_id, customer_id]
+    time_dimension: null   # customer grain; recency via last_order_at
+    currency: INR
+    pii_rule: hashed identifiers only (email_hash, phone_hash)
+    required_columns:
+      - brand_id
+      - customer_id
+      - lifetime_order_count
+      - lifetime_net_revenue_excl_tax
+      - is_repeat_customer
+      - first_order_at
+      - last_order_at
+
+  purchase_sequence_contract_v1:
+    serve_table: clickhouse.default.serve.purchase_sequence
+    data_product: CustomerIntelligence
+    domain: Customer
+    grain: [brand_id, order_id]
+    time_dimension: order_date
+    currency: INR
+    notes: Secondary port; order-grain purchase sequencing (order_seq, is_first_order).
+
+  canonical_pnl_contract_v1:
+    serve_table: clickhouse.default.serve.canonical_pnl
+    data_product: CanonicalPnl
+    domain: Finance
+    grain: [brand_id, report_date]
+    time_dimension: report_date
+    currency: INR
+    composition_rule: >
+      fct_daily_pnl contributes COST columns only (its spend columns are
+      broken); spend comes from certified Meta/Google/Amazon Ads serve views;
+      net sales = Shopify commerce oracle (Amazon marketplace revenue = V2).
+    required_columns:
+      - brand_id
+      - report_date
+      - orders
+      - net_sales_excl_tax
+      - net_cogs
+      - operating_cost
+      - meta_spend
+      - google_spend
+      - amazon_spend
+      - total_ad_spend
+      - gross_profit
+      - contribution_margin
+      - net_profit
+      - is_final
+
+  refund_events_contract_v1:
+    serve_table: clickhouse.default.serve.refund_events
+    data_product: ReturnsRefunds
+    domain: Operations
+    grain: [brand_id, refund_id]
+    time_dimension: refund_date
+    currency: INR
+    notes: >
+      Shopify refunds only; Amazon returns (fct_amazon_return_items /
+      fct_amazon_returns_daily) = V2 port, separate grain.
+    required_columns:
+      - brand_id
+      - refund_id
+      - order_id
+      - refund_date
+      - pnl_refund_class
+      - refund_total_amount_excl_tax
+      - returns_excl_tax
+      - is_final
+
+  return_lifecycle_contract_v1:
+    serve_table: clickhouse.default.serve.return_lifecycle
+    data_product: ReturnsRefunds
+    domain: Operations
+    grain: [brand_id, refund_line_item_id]
+    time_dimension: refund_date
+    currency: INR
+    notes: Secondary port; line-level returns with recovered cost components.

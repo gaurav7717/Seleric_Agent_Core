@@ -18,18 +18,27 @@ data_products:
     primary_serve_table: clickhouse.default.serve.commerce_orders
     contract: commerce_performance_contract_v1
     cube_views: [commerce_orders, commerce_performance]
+    platforms: [Shopify]
+    notes: >
+      Shopify-only by frozen dashboard-oracle policy. Amazon marketplace orders
+      (gold.fct_amazon_sp_orders / gold.fct_amazon_order_items) = V2 port.
   - name: ProductPerformance
     domain: Product
     owner_team: commerce-data-team
     primary_serve_table: clickhouse.default.serve.product_performance
     contract: product_performance_contract_v1
     cube_views: [product_performance]
+    platforms: [Shopify]
+    notes: >
+      Amazon SP order lines and listings (gold.fct_amazon_order_items,
+      gold.dim_amazon_listings) = V2 port.
   - name: MetaAdsPerformance
     domain: PaidMedia
     owner_team: growth-paid-media
     primary_serve_table: clickhouse.default.serve.meta_ads_daily
     contract: paid_media_meta_contract_v1
     cube_views: [meta_ad_performance, meta_ad_breakdown_performance]
+    platforms: [Meta]
     notes: >
       Delivery + video engagement only. Platform-reported purchases/ROAS stay in
       gold as diagnostics — not certified (attribution boundary).
@@ -39,50 +48,64 @@ data_products:
     primary_serve_table: clickhouse.default.serve.google_ads_daily
     contract: paid_media_google_contract_v1
     cube_views: [google_ad_performance]
+    platforms: [GoogleAds]
   - name: AmazonAdsPerformance
     domain: PaidMedia
     owner_team: growth-paid-media
     primary_serve_table: clickhouse.default.serve.amazon_ads_daily
     contract: paid_media_amazon_contract_v1
     cube_views: [amazon_ad_performance]
-    notes: Sponsored Products (SP) campaign daily grain only.
+    platforms: [AmazonAds]
+    notes: >
+      Sponsored Products (SP) campaign daily grain only — SB/SD/DSP not ingested.
+      No attributed sales/ACOS/ROAS (attribution boundary).
+  - name: MarketingAttribution
+    domain: Attribution
+    owner_team: growth-attribution
+    primary_serve_table: clickhouse.default.serve.order_attribution
+    contract: attribution_order_contract_v1
+    secondary_contracts: [attribution_meta_ad_contract_v1]
+    cube_views: [order_attribution, meta_ad_attribution]
+    platforms: [Shopify, Meta, GoogleAds]
+    notes: >
+      Last-touch, Shopify orders + Meta/Google touchpoints, first-party revenue
+      only. Amazon ad→order linkage (gold.fct_amazon_ads_ad_order_attribution)
+      = V2 port; platform-attributed sales/ACOS excluded.
+  - name: CustomerIntelligence
+    domain: Customer
+    owner_team: growth-retention
+    primary_serve_table: clickhouse.default.serve.customer_ltv
+    contract: customer_ltv_contract_v1
+    secondary_contracts: [purchase_sequence_contract_v1]
+    cube_views: [customer_ltv, purchase_sequence]
+    platforms: [Shopify]
+    notes: >
+      Hashed PII only. Amazon SP-API exposes no durable buyer identity —
+      Amazon orders cannot join LTV (permanent boundary, not V2).
   - name: CanonicalPnl
     domain: Finance
-    owner_team: finance-data-team
+    owner_team: finance-team
     primary_serve_table: clickhouse.default.serve.canonical_pnl
     contract: canonical_pnl_contract_v1
     cube_views: [canonical_pnl]
+    platforms: [Shopify, Meta, GoogleAds, AmazonAds]
     notes: >
-      Brand x day P&L oracle: commerce oracle net sales - fully-loaded COGS
-      (fct_daily_pnl) - operating cost - certified ad spend. MER uses first-party
-      net sales, never platform-reported ROAS.
-  - name: MarketingAttribution
-    domain: Attribution
-    owner_team: growth-paid-media
-    primary_serve_table: clickhouse.default.serve.order_attribution
-    contract: order_attribution_contract_v1
-    cube_views: [order_attribution, meta_ad_attribution]
+      Composed: commerce oracle net sales + fct_daily_pnl COST columns only +
+      certified Meta/Google/Amazon Ads spend (serve.*_ads_daily). Amazon
+      marketplace revenue/fees (gold.fct_amazon_daily_pnl,
+      gold.fct_amazon_sp_order_pnl) = V2 port — v1 net sales are Shopify only.
+  - name: ReturnsRefunds
+    domain: Operations
+    owner_team: ops-team
+    primary_serve_table: clickhouse.default.serve.refund_events
+    contract: refund_events_contract_v1
+    secondary_contracts: [return_lifecycle_contract_v1]
+    cube_views: [refund_events, return_lifecycle]
+    platforms: [Shopify]
     notes: >
-      Order-grain last-touch attribution only. Multi-touch/view-through fail
-      closed — not modeled, not approximated.
-  - name: CustomerIntelligence
-    domain: Customer
-    owner_team: growth-crm
-    primary_serve_table: clickhouse.default.serve.customer_ltv
-    contract: customer_ltv_contract_v1
-    cube_views: [customer_ltv]
-    notes: >
-      Customer-grain lifetime snapshot (hashed PII only, no raw email/phone).
-      Not a period rollup — do not apply date_range filters.
-  - name: PurchaseSequence
-    domain: Customer
-    owner_team: growth-crm
-    primary_serve_table: clickhouse.default.serve.purchase_sequence
-    contract: purchase_sequence_contract_v1
-    cube_views: [purchase_sequence]
-    notes: >
-      Order-grain repeat-purchase cohort model (order_seq, first-order flag,
-      days since previous order). Uses ClickHouse window functions.
+      Return REVENUE oracle remains Commerce (commerce_order_events). Amazon
+      returns (gold.fct_amazon_return_items, gold.fct_amazon_returns_daily,
+      gold.int_amazon_return_reconciliation) = V2 port, separate grain.
 
 views:
   commerce_orders:
@@ -120,15 +143,6 @@ views:
     gold_inputs:
       - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
       - clickhouse.default.gold.dim_amazon_ads_campaigns
-  canonical_pnl:
-    data_product: CanonicalPnl
-    serve_table: clickhouse.default.serve.canonical_pnl
-    gold_inputs:
-      - clickhouse.default.serve.commerce_performance_daily
-      - clickhouse.default.gold.fct_daily_pnl
-      - clickhouse.default.serve.meta_ads_daily
-      - clickhouse.default.serve.google_ads_daily
-      - clickhouse.default.serve.amazon_ads_daily
   order_attribution:
     data_product: MarketingAttribution
     serve_table: clickhouse.default.serve.order_attribution
@@ -136,16 +150,37 @@ views:
   meta_ad_attribution:
     data_product: MarketingAttribution
     serve_table: clickhouse.default.serve.meta_ad_attribution_daily
-    contract: meta_ad_attribution_contract_v1
-    gold_inputs: [clickhouse.default.serve.order_attribution, clickhouse.default.serve.meta_ads_daily]
+    contract: attribution_meta_ad_contract_v1
+    gold_inputs: [clickhouse.default.gold.mart_meta_ad_daily_attribution]
   customer_ltv:
     data_product: CustomerIntelligence
     serve_table: clickhouse.default.serve.customer_ltv
-    gold_inputs: [clickhouse.default.gold.dim_customers, clickhouse.default.gold.fct_orders]
+    gold_inputs:
+      - clickhouse.default.gold.fct_orders
+      - clickhouse.default.gold.dim_customers
   purchase_sequence:
-    data_product: PurchaseSequence
+    data_product: CustomerIntelligence
     serve_table: clickhouse.default.serve.purchase_sequence
+    contract: purchase_sequence_contract_v1
     gold_inputs: [clickhouse.default.gold.fct_orders]
+  canonical_pnl:
+    data_product: CanonicalPnl
+    serve_table: clickhouse.default.serve.canonical_pnl
+    gold_inputs:
+      - clickhouse.default.serve.commerce_performance_daily
+      - clickhouse.default.gold.fct_daily_pnl   # cost columns ONLY (its spend columns are broken)
+      - clickhouse.default.serve.meta_ads_daily
+      - clickhouse.default.serve.google_ads_daily
+      - clickhouse.default.serve.amazon_ads_daily
+  refund_events:
+    data_product: ReturnsRefunds
+    serve_table: clickhouse.default.serve.refund_events
+    gold_inputs: [clickhouse.default.gold.fct_refunds]
+  return_lifecycle:
+    data_product: ReturnsRefunds
+    serve_table: clickhouse.default.serve.return_lifecycle
+    contract: return_lifecycle_contract_v1
+    gold_inputs: [clickhouse.default.gold.fct_refund_line_items]
 
 # catalogue metric crosswalk lives in openmetadata/metrics.yaml (76 metrics).
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
@@ -158,12 +193,14 @@ glossaries:
   - name: Paid Media
     domain: PaidMedia
     terms: [Spend, CTR, CPC, CPM, ReportDate, IsFinal, HookRate(Meta), ThruPlay, SponsoredProducts(SP)]
-  - name: Finance
-    domain: Finance
-    terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage]
   - name: Attribution
     domain: Attribution
     terms: [AttributedOrder, AttributedNetRevenue, AttributionRate, LastTouch]
   - name: Customer
     domain: Customer
     terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel]
+  - name: Finance
+    domain: Finance
+    terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage]
+  - name: Operations
+    domain: Operations

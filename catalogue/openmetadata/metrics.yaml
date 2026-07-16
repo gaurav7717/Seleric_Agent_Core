@@ -63,49 +63,49 @@ metrics:
   attributed_aov:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: attributedAov
   attributed_gross_revenue:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: attributedGrossRevenue
   attributed_net_revenue:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: attributedNetRevenue
   attributed_new_customer_orders:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributedOrder
     om_name: attributedNewCustomerOrders
   attributed_orders:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributedOrder
     om_name: attributedOrders
   attributed_refund_amount:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: attributedRefundAmount
   attribution_rate:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributionRate
     om_name: attributionRate
@@ -119,7 +119,7 @@ metrics:
   avg_attribution_confidence:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.LastTouch
     om_name: avgAttributionConfidence
@@ -336,49 +336,49 @@ metrics:
   meta_attr_aov:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttrAov
   meta_attr_gross_revenue:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttrGrossRevenue
   meta_attr_net_revenue:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttrNetRevenue
   meta_attr_new_customer_orders:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedOrder
     om_name: metaAttrNewCustomerOrders
   meta_attr_new_customer_revenue:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttrNewCustomerRevenue
   meta_attr_orders:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedOrder
     om_name: metaAttrOrders
   meta_attr_refund_amount:
     category: attribution
     cube_view: meta_ad_attribution
-    contract: meta_ad_attribution_contract_v1
+    contract: attribution_meta_ad_contract_v1
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttrRefundAmount
@@ -843,7 +843,7 @@ metrics:
   touch_attributed_orders:
     category: attribution
     cube_view: order_attribution
-    contract: order_attribution_contract_v1
+    contract: attribution_order_contract_v1
     glossary:
     - Attribution.AttributionRate
     om_name: touchAttributedOrders

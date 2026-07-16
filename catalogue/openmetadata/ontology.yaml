@@ -27,41 +27,50 @@ domains:
       - amazon_ad_performance
     grain: Daily
     date_axes: [report_date]
-    notes: Delivery metrics only — platform attribution excluded from certified ports.
+    notes: >
+      Delivery metrics only — platform attribution excluded from certified ports.
+      Amazon = Sponsored Products (SP) campaign daily only; SB/SD/DSP not ingested.
+  Attribution:
+    om_glossary: Attribution
+    owner_team: growth-attribution
+    data_product: MarketingAttribution
+    cube_views: [order_attribution, meta_ad_attribution]
+    grain: Order (+ Meta ad-day rollup)
+    date_axes: [order_date, report_date]
+    notes: >
+      Last-touch, first-party revenue, Shopify orders + Meta/Google touchpoints.
+      Amazon ad→order linkage (gold.fct_amazon_ads_ad_order_attribution) = V2 port.
+  Customer:
+    om_glossary: Customer
+    owner_team: growth-retention
+    data_product: CustomerIntelligence
+    cube_views: [customer_ltv, purchase_sequence]
+    grain: Customer (+ Order sequence port)
+    date_axes: [last_order_at, order_date]
+    notes: >
+      Hashed PII only; Shopify customers only — Amazon SP-API exposes no durable
+      buyer identity (permanent boundary).
   Finance:
     om_glossary: Finance
-    owner_team: finance-data-team
+    owner_team: finance-team
     data_product: CanonicalPnl
     cube_views: [canonical_pnl]
     grain: Daily
     date_axes: [report_date]
     notes: >
-      Composed brand x day P&L oracle, not an independent ingestion. MER is
-      first-party net sales / total ad spend — never platform-reported ROAS.
-  Attribution:
-    om_glossary: Attribution
-    owner_team: growth-paid-media
-    data_product: MarketingAttribution
-    cube_views: [order_attribution, meta_ad_attribution]
-    grain: Order
-    date_axes: [order_date]
-    notes: Last-touch only. Multi-touch/view-through fail closed, not modeled.
-  Customer:
-    om_glossary: Customer
-    owner_team: growth-crm
-    data_product: CustomerIntelligence
-    cube_views: [customer_ltv]
-    grain: Customer
-    date_axes: []
-    notes: Lifetime snapshot, not a period rollup. Hashed PII only.
-  PurchaseSequence:
-    om_glossary: Customer
-    owner_team: growth-crm
-    data_product: PurchaseSequence
-    cube_views: [purchase_sequence]
-    grain: Order
-    date_axes: [order_date]
-    notes: Order-grain repeat-purchase cohort model; uses window functions.
+      Net sales = Shopify commerce oracle; spend = certified Meta + Google +
+      Amazon Ads serve views; fct_daily_pnl contributes cost columns only.
+      Amazon marketplace revenue/fees (fct_amazon_daily_pnl) = V2 port.
+  Operations:
+    om_glossary: Operations
+    owner_team: ops-team
+    data_product: ReturnsRefunds
+    cube_views: [refund_events, return_lifecycle]
+    grain: RefundEvent (+ RefundLine port)
+    date_axes: [refund_date]
+    notes: >
+      Shopify refunds/returns only; Amazon returns tables in gold
+      (fct_amazon_return_items, fct_amazon_returns_daily) = V2 port.
 
 entity_clusters:
   commerce_order:
@@ -88,6 +97,11 @@ entity_clusters:
     glossary: Paid Media.Spend
     related: [Paid Media.CTR, Paid Media.CPC, Paid Media.CPM, Paid Media.ReportDate, Paid Media.IsFinal]
     catalogue_metrics: [meta_spend, google_spend, amazon_ads_spend]
+  pnl_spend:
+    glossary: Finance.Canonical P&L
+    related: [Paid Media.Spend, Paid Media.SponsoredProducts(SP)]
+    cube_members: [canonical_pnl.meta_spend, canonical_pnl.google_spend, canonical_pnl.amazon_spend, canonical_pnl.total_ad_spend]
+    notes: amazon_spend sources serve.amazon_ads_daily (SP delivery spend, INR).
   paid_video_meta:
     glossary: Paid Media.HookRate(Meta)
     related: [Paid Media.ThruPlay, Paid Media.HoldRate(Meta)]
@@ -168,5 +182,6 @@ attribution_boundary:
   om_glossary_term: Paid Media.Platform-ReportedConversion
   agent_policy: >
     Never answer ROAS/CPA/attributed revenue from platform-reported fields.
-    Use certified delivery spend + commerce_net_revenue separately, or state
-    attribution product is not yet in the agent catalogue.
+    Use the certified MarketingAttribution product (order_attribution /
+    meta_ad_attribution — first-party revenue, last-touch, Meta/Google only)
+    for attributed revenue; Amazon attributed sales/ACOS remain excluded.
