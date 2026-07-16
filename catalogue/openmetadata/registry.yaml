@@ -1,0 +1,97 @@
+# OpenMetadata governance crosswalk for Seleric Agent Core.
+# Numbers execute in Cube; OM holds owners, contracts, lineage, DQ, glossary.
+# Spec source of truth: mage-ai/openmetadata/ + mage-ai/infra/openmetadata/owned_assets.py
+
+instance:
+  base_url: http://127.0.0.1:8585
+  version: "1.13.1"
+  auth_env: OM_JWT_OR_PAT
+
+agent_ready_tag: DataProduct.AgentReady
+release_status_tag: ReleaseStatus.Certified
+currency: INR
+
+data_products:
+  - name: CommercePerformance
+    domain: Commerce
+    owner_team: commerce-data-team
+    primary_serve_table: clickhouse.default.serve.commerce_orders
+    contract: commerce_performance_contract_v1
+    cube_views: [commerce_orders, commerce_performance]
+  - name: ProductPerformance
+    domain: Product
+    owner_team: commerce-data-team
+    primary_serve_table: clickhouse.default.serve.product_performance
+    contract: product_performance_contract_v1
+    cube_views: [product_performance]
+  - name: MetaAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    primary_serve_table: clickhouse.default.serve.meta_ads_daily
+    contract: paid_media_meta_contract_v1
+    cube_views: [meta_ad_performance, meta_ad_breakdown_performance]
+    notes: >
+      Delivery + video engagement only. Platform-reported purchases/ROAS stay in
+      gold as diagnostics — not certified (attribution boundary).
+  - name: GoogleAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    primary_serve_table: clickhouse.default.serve.google_ads_daily
+    contract: paid_media_google_contract_v1
+    cube_views: [google_ad_performance]
+  - name: AmazonAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    primary_serve_table: clickhouse.default.serve.amazon_ads_daily
+    contract: paid_media_amazon_contract_v1
+    cube_views: [amazon_ad_performance]
+    notes: Sponsored Products (SP) campaign daily grain only.
+
+views:
+  commerce_orders:
+    data_product: CommercePerformance
+    serve_table: clickhouse.default.serve.commerce_orders
+    gold_inputs: [clickhouse.default.gold.fct_orders, clickhouse.default.gold.dim_customers]
+  commerce_performance:
+    data_product: CommercePerformance
+    serve_table: clickhouse.default.serve.commerce_performance_daily
+    gold_inputs: [clickhouse.default.serve.commerce_orders, clickhouse.default.serve.commerce_order_events]
+  product_performance:
+    data_product: ProductPerformance
+    serve_table: clickhouse.default.serve.product_performance
+    gold_inputs:
+      - clickhouse.default.gold.fct_order_items
+      - clickhouse.default.gold.fct_product_variant_cost_history
+  meta_ad_performance:
+    data_product: MetaAdsPerformance
+    serve_table: clickhouse.default.serve.meta_ads_daily
+    gold_inputs: [clickhouse.default.gold.fct_meta_ads_daily]
+  meta_ad_breakdown_performance:
+    data_product: MetaAdsPerformance
+    serve_table: clickhouse.default.serve.meta_ads_breakdown_daily
+    contract: paid_media_meta_breakdown_contract_v1
+    gold_inputs:
+      - clickhouse.default.gold.fct_meta_ads_breakdown_daily
+      - clickhouse.default.gold.mart_meta_ad_breakdown_daily
+  google_ad_performance:
+    data_product: GoogleAdsPerformance
+    serve_table: clickhouse.default.serve.google_ads_daily
+    gold_inputs: [clickhouse.default.gold.fct_google_ads_daily]
+  amazon_ad_performance:
+    data_product: AmazonAdsPerformance
+    serve_table: clickhouse.default.serve.amazon_ads_daily
+    gold_inputs:
+      - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
+      - clickhouse.default.gold.dim_amazon_ads_campaigns
+
+# catalogue metric crosswalk lives in openmetadata/metrics.yaml (76 metrics).
+# Regenerate: py scripts/sync_openmetadata_catalogue.py
+
+glossaries:
+  - name: Commerce
+    domain: Commerce
+  - name: Product
+    domain: Product
+  - name: Paid Media
+    domain: PaidMedia
+    terms: [Spend, CTR, CPC, CPM, ReportDate, IsFinal, HookRate(Meta), ThruPlay, SponsoredProducts(SP)]

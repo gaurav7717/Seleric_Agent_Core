@@ -56,3 +56,9 @@ chat:
   max_tool_rounds: 1100
   web_port: 8766
   tool_preview_chars: 4000
+
+# OpenMetadata sidecar (metadata only — not used for metric math).
+# Auth token: OM_JWT_OR_PAT in .env / .env.local
+openmetadata:
+  base_url: http://127.0.0.1:8585
+  registry_file: catalogue/openmetadata/registry.yaml

@@ -1,0 +1,534 @@
+# Auto-generated metric crosswalk (catalogue id -> OM entity + glossary).
+# Regenerate: py scripts/sync_openmetadata_catalogue.py
+
+generated_by: scripts/sync_openmetadata_catalogue.py
+count: 76
+metrics:
+  active_orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.ActiveOrder
+  amazon_ads_clicks:
+    category: paid_media
+    cube_view: amazon_ad_performance
+    contract: paid_media_amazon_contract_v1
+    glossary:
+    - Paid Media.SponsoredProducts(SP)
+    om_name: amazonAdsClicks
+  amazon_ads_cpc:
+    category: paid_media
+    cube_view: amazon_ad_performance
+    contract: paid_media_amazon_contract_v1
+    glossary:
+    - Paid Media.CPC
+    om_name: amazonAdsCpc
+  amazon_ads_cpm:
+    category: paid_media
+    cube_view: amazon_ad_performance
+    contract: paid_media_amazon_contract_v1
+    glossary:
+    - Paid Media.CPM
+    om_name: amazonAdsCpm
+  amazon_ads_ctr:
+    category: paid_media
+    cube_view: amazon_ad_performance
+    contract: paid_media_amazon_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: amazonAdsCtr
+  amazon_ads_impressions:
+    category: paid_media
+    cube_view: amazon_ad_performance
+    contract: paid_media_amazon_contract_v1
+    glossary:
+    - Paid Media.SponsoredProducts(SP)
+    om_name: amazonAdsImpressions
+  amazon_ads_spend:
+    category: paid_media
+    cube_view: amazon_ad_performance
+    contract: paid_media_amazon_contract_v1
+    glossary:
+    - Paid Media.Spend
+    - Paid Media.SponsoredProducts(SP)
+    om_name: amazonAdsSpend
+  aov:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.AverageOrderValue
+    om_name: aov
+  average_selling_price:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.AverageSellingPrice
+    om_name: averageSellingPrice
+  cancelled_orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.CancelledOrder
+    om_name: cancelledOrders
+  cod_orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.CashonDelivery
+    om_name: codOrders
+  commerce_net_revenue:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.NetSales
+    om_name: commerceNetRevenue
+  discounts:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.Discounts
+    om_name: discounts
+  google_clicks:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: googleClicks
+  google_cpc:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.CPC
+    om_name: googleCpc
+  google_cpm:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.CPM
+    om_name: googleCpm
+  google_ctr:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: googleCtr
+  google_impressions:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: googleImpressions
+  google_interaction_rate:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: googleInteractionRate
+  google_interactions:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: googleInteractions
+  google_spend:
+    category: paid_media
+    cube_view: google_ad_performance
+    contract: paid_media_google_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: googleSpend
+  gross_sales:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.GrossSales
+    om_name: grossSales
+  gross_units_ordered:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.GrossUnitsOrdered
+    om_name: grossUnitsOrdered
+  meta_breakdown_clicks:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownClicks
+  meta_breakdown_cpc:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownCpc
+  meta_breakdown_cpm:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownCpm
+  meta_breakdown_ctr:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownCtr
+  meta_breakdown_hook_rate:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownHookRate
+  meta_breakdown_impressions:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownImpressions
+  meta_breakdown_landing_page_views:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownLandingPageViews
+  meta_breakdown_link_clicks:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownLinkClicks
+  meta_breakdown_spend:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownSpend
+  meta_breakdown_thruplays:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownThruplays
+  meta_breakdown_video_completion_rate:
+    category: paid_media
+    cube_view: meta_ad_breakdown_performance
+    contract: paid_media_meta_breakdown_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaBreakdownVideoCompletionRate
+  meta_clicks:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: metaClicks
+  meta_cost_per_landing_page_view:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaCostPerLandingPageView
+  meta_cost_per_link_click:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaCostPerLinkClick
+  meta_cost_per_thruplay:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaCostPerThruplay
+  meta_cpc:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.CPC
+    om_name: metaCpc
+  meta_cpm:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.CPM
+    om_name: metaCpm
+  meta_ctr:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: metaCtr
+  meta_frequency:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaFrequency
+  meta_hold_rate_15s:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.HoldRate(Meta)
+  meta_hook_rate:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.HookRate(Meta)
+    om_name: metaHookRate
+  meta_impressions:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaImpressions
+  meta_landing_page_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: metaLandingPageViews
+  meta_link_clicks:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.CTR
+    om_name: metaLinkClicks
+  meta_reach:
+    category: paid_media_diagnostic
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaReach
+  meta_spend:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaSpend
+  meta_thruplays:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.ThruPlay
+    om_name: metaThruplays
+  meta_video_100_pct_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.HoldRate(Meta)
+  meta_video_25_pct_rate:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo25PctRate
+  meta_video_25_pct_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo25PctViews
+  meta_video_30s_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo30SViews
+  meta_video_3s_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.HookRate(Meta)
+  meta_video_50_pct_rate:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo50PctRate
+  meta_video_50_pct_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo50PctViews
+  meta_video_75_pct_rate:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo75PctRate
+  meta_video_75_pct_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo75PctViews
+  meta_video_95_pct_views:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideo95PctViews
+  meta_video_completion_rate:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.HoldRate(Meta)
+    om_name: metaVideoCompletionRate
+  meta_video_plays:
+    category: paid_media
+    cube_view: meta_ad_performance
+    contract: paid_media_meta_contract_v1
+    glossary:
+    - Paid Media.Spend
+    om_name: metaVideoPlays
+  new_customer_orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.CommerceOrder
+  orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.TotalOrders
+    om_name: orders
+  prepaid_orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.PrepaidOrder
+    om_name: prepaidOrders
+  product_cogs:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductCOGS
+    om_name: productCogs
+  product_gross_margin_pct:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductGrossMargin
+    om_name: productGrossMarginPct
+  product_gross_profit:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductGrossProfit
+    om_name: productGrossProfit
+  product_net_revenue:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductNetRevenue
+    om_name: productNetRevenue
+  product_orders:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductOrder
+    om_name: productOrders
+  refunded_orders:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.ReturnedOrder
+    om_name: returnedOrders
+  return_cancel_revenue:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.ReturnCancelRevenue
+    om_name: returnCancelRevenue
+  returns_cancels:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.returnsCancels
+    om_name: returnsCancels
+  total_sales:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.TotalSales
+    om_name: totalSales
+  units_per_order:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.AverageUnitsperOrder
+    om_name: unitsPerOrder
+  units_sold:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.UnitsSold
+    om_name: unitsSold

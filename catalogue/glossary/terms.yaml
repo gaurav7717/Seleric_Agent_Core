@@ -94,16 +94,68 @@ terms:
     definition: Not catalogued in the current commerce/product metric set.
   - term: ROAS
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: >
+      Platform-reported ROAS is not in the certified catalogue (attribution
+      boundary). Use delivery metrics (meta_spend, google_spend, amazon_ads_spend)
+      and certified commerce revenue separately.
   - term: return on ad spend
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: >
+      Platform-reported ROAS is not certified. See deprecations for
+      meta_roas/google_roas/amazon_ads_roas.
   - term: ad spend
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: >
+      Ambiguous across platforms — resolve to meta_spend, google_spend, or
+      amazon_ads_spend from context (default: sum all certified delivery spend).
   - term: marketing spend
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: >
+      Ambiguous — certified delivery spend is meta_spend + google_spend +
+      amazon_ads_spend (no blended totalAdSpend metric in the agent catalogue yet).
+  - term: meta spend
+    canonical_id: meta_spend
+  - term: meta impressions
+    canonical_id: meta_impressions
+  - term: meta clicks
+    canonical_id: meta_clicks
+  - term: meta CTR
+    canonical_id: meta_ctr
+  - term: meta CPC
+    canonical_id: meta_cpc
+  - term: meta CPM
+    canonical_id: meta_cpm
+  - term: meta hook rate
+    canonical_id: meta_hook_rate
+  - term: meta thruplay
+    canonical_id: meta_thruplays
+  - term: google spend
+    canonical_id: google_spend
+  - term: google impressions
+    canonical_id: google_impressions
+  - term: google clicks
+    canonical_id: google_clicks
+  - term: google CTR
+    canonical_id: google_ctr
+  - term: amazon spend
+    canonical_id: amazon_ads_spend
+  - term: amazon ads spend
+    canonical_id: amazon_ads_spend
+  - term: amazon clicks
+    canonical_id: amazon_ads_clicks
+  - term: amazon CTR
+    canonical_id: amazon_ads_ctr
+  - term: meta purchases
+    canonical_id: null
+    definition: >
+      Platform-reported Meta purchases are non-canonical (attribution boundary).
+      Not queryable on the certified serve surface.
+  - term: meta CPA
+    canonical_id: null
+    definition: Platform-reported Meta CPA — not certified in PaidMedia V1.
+  - term: meta purchase value
+    canonical_id: null
+    definition: Platform-reported Meta purchase value — not certified in PaidMedia V1.
   - term: contribution
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
@@ -123,27 +175,6 @@ terms:
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
   - term: attributed orders
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta impressions
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta clicks
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta CTR
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta CPC
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta purchases
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta CPA
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
-  - term: meta purchase value
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
   - term: product views
@@ -169,10 +200,66 @@ terms:
     definition: Not catalogued in the current commerce/product metric set.
   - term: google conversions
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: >
+      Platform-reported Google conversions are non-canonical on the certified
+      serve surface. Use google_clicks / google_interactions for delivery.
   - term: google conversion value
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: Platform-reported Google conversion value — not certified in PaidMedia V1.
   - term: google CPA
     canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    definition: Platform-reported Google CPA — not certified in PaidMedia V1.
+  - term: total sales
+    canonical_id: total_sales
+  - term: gross units
+    canonical_id: gross_units_ordered
+  - term: cancelled orders
+    canonical_id: cancelled_orders
+  - term: cancellations
+    canonical_id: cancelled_orders
+  - term: refunded orders
+    canonical_id: refunded_orders
+  - term: returns
+    canonical_id: refunded_orders
+  - term: COD orders
+    canonical_id: cod_orders
+  - term: cash on delivery
+    canonical_id: cod_orders
+  - term: prepaid orders
+    canonical_id: prepaid_orders
+  - term: active orders
+    canonical_id: active_orders
+  - term: new customer orders
+    canonical_id: new_customer_orders
+  - term: product orders
+    canonical_id: product_orders
+  - term: units per order
+    canonical_id: units_per_order
+  - term: meta reach
+    canonical_id: meta_reach
+  - term: meta frequency
+    canonical_id: meta_frequency
+  - term: meta link clicks
+    canonical_id: meta_link_clicks
+  - term: meta landing page views
+    canonical_id: meta_landing_page_views
+  - term: meta video completion rate
+    canonical_id: meta_video_completion_rate
+  - term: meta hold rate
+    canonical_id: meta_hold_rate_15s
+  - term: meta breakdown spend
+    canonical_id: meta_breakdown_spend
+  - term: meta breakdown CTR
+    canonical_id: meta_breakdown_ctr
+  - term: meta breakdown hook rate
+    canonical_id: meta_breakdown_hook_rate
+  - term: google interactions
+    canonical_id: google_interactions
+  - term: google interaction rate
+    canonical_id: google_interaction_rate
+  - term: amazon impressions
+    canonical_id: amazon_ads_impressions
+  - term: amazon CPC
+    canonical_id: amazon_ads_cpc
+  - term: amazon CPM
+    canonical_id: amazon_ads_cpm

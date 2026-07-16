@@ -128,6 +128,64 @@ class Deprecation(BaseModel):
     reason: str
 
 
+class OpenMetadataDataProduct(BaseModel):
+    name: str
+    domain: str
+    owner_team: str
+    primary_serve_table: str
+    contract: str
+    cube_views: list[str] = Field(default_factory=list)
+    notes: str | None = None
+
+
+class OpenMetadataViewLink(BaseModel):
+    data_product: str
+    serve_table: str
+    gold_inputs: list[str] = Field(default_factory=list)
+    contract: str | None = None
+
+
+class OpenMetadataMetricLink(BaseModel):
+    om_name: str | None = None
+    glossary: list[str] = Field(default_factory=list)
+    category: str | None = None
+    cube_view: str | None = None
+    contract: str | None = None
+
+
+class OpenMetadataContract(BaseModel):
+    serve_table: str
+    data_product: str
+    domain: str
+    grain: list[str] = Field(default_factory=list)
+    time_dimension: str | None = None
+    currency: str = "INR"
+    required_columns: list[str] = Field(default_factory=list)
+    quality_tests: list[str] = Field(default_factory=list)
+    attribution_boundary: str | None = None
+    notes: str | None = None
+    program: str | None = None
+
+
+class OpenMetadataOntology(BaseModel):
+    domains: dict = Field(default_factory=dict)
+    entity_clusters: dict = Field(default_factory=dict)
+    attribution_boundary: dict = Field(default_factory=dict)
+
+
+class OpenMetadataRegistry(BaseModel):
+    instance: dict = Field(default_factory=dict)
+    agent_ready_tag: str = "DataProduct.AgentReady"
+    release_status_tag: str = "ReleaseStatus.Certified"
+    currency: str = "INR"
+    data_products: list[OpenMetadataDataProduct] = Field(default_factory=list)
+    views: dict[str, OpenMetadataViewLink] = Field(default_factory=dict)
+    metrics: dict[str, OpenMetadataMetricLink] = Field(default_factory=list)
+    contracts: dict[str, OpenMetadataContract] = Field(default_factory=dict)
+    ontology: OpenMetadataOntology | None = None
+    glossaries: list[dict] = Field(default_factory=list)
+
+
 class Catalogue(BaseModel):
     version: str
     metrics: dict[str, MetricDef]
@@ -136,6 +194,7 @@ class Catalogue(BaseModel):
     views: dict[str, ViewDef]
     actions: dict[str, ActionContractDef]
     deprecations: list[Deprecation]
+    openmetadata: OpenMetadataRegistry | None = None
 
 
 def _read_yaml(path: Path) -> dict:
@@ -185,6 +244,22 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         for raw in _read_yaml(catalogue_dir / "deprecations.yaml").get("deprecations", [])
     ]
 
+    om_registry: OpenMetadataRegistry | None = None
+    om_path = catalogue_dir / "openmetadata" / "registry.yaml"
+    if om_path.exists():
+        om_raw = _read_yaml(om_path)
+        metrics_path = catalogue_dir / "openmetadata" / "metrics.yaml"
+        if metrics_path.exists():
+            metrics_doc = _read_yaml(metrics_path)
+            om_raw["metrics"] = metrics_doc.get("metrics", {})
+        contracts_path = catalogue_dir / "openmetadata" / "contracts.yaml"
+        if contracts_path.exists():
+            om_raw["contracts"] = _read_yaml(contracts_path).get("contracts", {})
+        ontology_path = catalogue_dir / "openmetadata" / "ontology.yaml"
+        if ontology_path.exists():
+            om_raw["ontology"] = _read_yaml(ontology_path)
+        om_registry = OpenMetadataRegistry.model_validate(om_raw)
+
     cat = Catalogue(
         version=version,
         metrics=metrics,
@@ -193,6 +268,7 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         views=views,
         actions=actions,
         deprecations=deprecations,
+        openmetadata=om_registry,
     )
     _check_integrity(cat)
     return cat
@@ -222,5 +298,39 @@ def _check_integrity(cat: Catalogue) -> None:
     for t in cat.glossary:
         if t.canonical_id is not None and t.canonical_id not in cat.metrics:
             problems.append(f"glossary term '{t.term}': unknown canonical_id {t.canonical_id}")
+    if cat.openmetadata:
+        for view_name, link in cat.openmetadata.views.items():
+            if view_name not in cat.views:
+                problems.append(f"openmetadata.views.{view_name}: unknown catalogue view")
+            if link.data_product not in {dp.name for dp in cat.openmetadata.data_products}:
+                problems.append(
+                    f"openmetadata.views.{view_name}: unknown data_product {link.data_product}"
+                )
+        for metric_id in cat.openmetadata.metrics:
+            if metric_id not in cat.metrics:
+                problems.append(f"openmetadata.metrics.{metric_id}: unknown catalogue metric")
+        if len(cat.openmetadata.metrics) != len(cat.metrics):
+            problems.append(
+                f"openmetadata.metrics: expected {len(cat.metrics)} entries, "
+                f"got {len(cat.openmetadata.metrics)}"
+            )
+        for contract_id, dp_names in _contract_dp_refs(cat).items():
+            if contract_id not in cat.openmetadata.contracts:
+                problems.append(f"openmetadata: missing contract definition for {contract_id}")
+            elif cat.openmetadata.contracts[contract_id].data_product not in dp_names:
+                problems.append(
+                    f"openmetadata.contracts.{contract_id}: data_product mismatch"
+                )
     if problems:
         raise ValueError("Catalogue integrity check failed:\n" + "\n".join(problems))
+
+
+def _contract_dp_refs(cat: Catalogue) -> dict[str, set[str]]:
+    refs: dict[str, set[str]] = {}
+    for dp in cat.openmetadata.data_products:  # type: ignore[union-attr]
+        refs.setdefault(dp.contract, set()).add(dp.name)
+    for link in cat.openmetadata.views.values():  # type: ignore[union-attr]
+        if link.contract:
+            dp = link.data_product
+            refs.setdefault(link.contract, set()).add(dp)
+    return refs

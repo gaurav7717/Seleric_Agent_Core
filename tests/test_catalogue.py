@@ -7,14 +7,31 @@ from seleric_mcp.catalogue_service.service import (
 
 
 def test_loads_seed(catalogue):
-    # Platform slimmed 2026-07-14 to the two certified products (commerce +
-    # product) — pin to "at least the known baseline" so metric additions
-    # don't need edits here.
+    # Commerce + Product + Paid Media certified surfaces — pin to baseline minimum.
     assert len(catalogue.cat.metrics) >= 23
     assert "commerce_net_revenue" in catalogue.cat.metrics
     assert "product_net_revenue" in catalogue.cat.metrics
-    assert "orders" in catalogue.cat.metrics
+    assert "meta_spend" in catalogue.cat.metrics
+    assert "google_spend" in catalogue.cat.metrics
+    assert "amazon_ads_spend" in catalogue.cat.metrics
     assert catalogue.version
+    assert catalogue.cat.openmetadata is not None
+    assert len(catalogue.cat.openmetadata.data_products) == 5
+    assert len(catalogue.cat.openmetadata.metrics) == len(catalogue.cat.metrics)
+    assert catalogue.cat.openmetadata.contracts
+    assert catalogue.cat.openmetadata.ontology is not None
+
+
+def test_openmetadata_orders_om_name(catalogue):
+    link = catalogue.cat.openmetadata.metrics["orders"]
+    assert link.om_name == "orders"
+    assert "Commerce.TotalOrders" in link.glossary
+
+
+def test_search_paid_media_glossary(catalogue):
+    result = catalogue.search("meta spend")
+    assert result.matches
+    assert result.matches[0].id == "meta_spend"
 
 
 def test_search_glossary_term(catalogue):

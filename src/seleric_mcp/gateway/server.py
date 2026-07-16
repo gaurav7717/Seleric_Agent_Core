@@ -495,6 +495,98 @@ def build_server(settings: Settings) -> FastMCP:
         lines.append(f"\n_catalogue version {ctx.catalogue.version}_")
         return "\n".join(lines)
 
+    @mcp.resource("catalogue://openmetadata")
+    def openmetadata_registry_resource() -> str:
+        """OM governance crosswalk: data products, serve FQNs, metric ↔ glossary links."""
+        om = ctx.catalogue.cat.openmetadata
+        if om is None:
+            return "OpenMetadata registry not loaded (missing catalogue/openmetadata/registry.yaml)."
+        lines = [
+            "# OpenMetadata registry (governance crosswalk)",
+            "",
+            f"Instance: {om.instance.get('base_url', 'n/a')} ({om.instance.get('version', '')})",
+            f"Agent-ready tag: `{om.agent_ready_tag}`",
+            "",
+            "## Data products",
+        ]
+        for dp in om.data_products:
+            views = ", ".join(f"`{v}`" for v in dp.cube_views)
+            lines.append(
+                f"- **{dp.name}** ({dp.domain}) — serve `{dp.primary_serve_table}` "
+                f"— contract `{dp.contract}` — cube views: {views}"
+            )
+            if dp.notes:
+                lines.append(f"  _{dp.notes.strip()}_")
+        lines.append("\n## View → serve table")
+        for view_name, link in sorted(om.views.items()):
+            lines.append(
+                f"- `{view_name}` → `{link.serve_table}` (DP: {link.data_product})"
+            )
+        lines.append("\n## Metric → OM entity")
+        for mid, mlink in sorted(om.metrics.items()):
+            gloss = ", ".join(f"`{g}`" for g in mlink.glossary) if mlink.glossary else "—"
+            om_entity = mlink.om_name or "(breakdown-only)"
+            lines.append(f"- `{mid}` → OM `{om_entity}` — glossary: {gloss}")
+        lines.append(f"\n_catalogue version {ctx.catalogue.version}_")
+        return "\n".join(lines)
+
+    @mcp.resource("catalogue://contracts")
+    def contracts_resource() -> str:
+        """Data contract summaries: grain, required columns, DQ tests per certified DP."""
+        om = ctx.catalogue.cat.openmetadata
+        if om is None or not om.contracts:
+            return "Contracts not loaded (missing catalogue/openmetadata/contracts.yaml)."
+        lines = ["# Data contracts (agent-certified surfaces)", ""]
+        for cid, c in sorted(om.contracts.items()):
+            grain = ", ".join(f"`{g}`" for g in c.grain) if c.grain else "—"
+            lines.append(f"## {cid}")
+            lines.append(f"- Serve: `{c.serve_table}` — DP: **{c.data_product}** ({c.domain})")
+            lines.append(f"- Grain: {grain} — time: `{c.time_dimension or 'n/a'}` — currency: {c.currency}")
+            if c.required_columns:
+                cols = ", ".join(f"`{col}`" for col in c.required_columns)
+                lines.append(f"- Required columns: {cols}")
+            if c.quality_tests:
+                lines.append(f"- DQ tests: {', '.join(c.quality_tests)}")
+            if c.attribution_boundary:
+                lines.append(f"- Attribution: _{c.attribution_boundary.strip()}_")
+            if c.notes:
+                lines.append(f"- Notes: _{c.notes.strip()}_")
+            lines.append("")
+        lines.append(f"_catalogue version {ctx.catalogue.version}_")
+        return "\n".join(lines)
+
+    @mcp.resource("catalogue://ontology")
+    def ontology_resource() -> str:
+        """Business ontology: domains, entity clusters, attribution boundary."""
+        om = ctx.catalogue.cat.openmetadata
+        if om is None or om.ontology is None:
+            return "Ontology not loaded (missing catalogue/openmetadata/ontology.yaml)."
+        onto = om.ontology
+        lines = ["# Business ontology", ""]
+        lines.append("## Domains")
+        for domain, spec in sorted(onto.domains.items()):
+            gloss = spec.get("om_glossary", "—")
+            lines.append(f"- **{domain}** — OM glossary `{gloss}`")
+            if spec.get("cube_views"):
+                views = ", ".join(f"`{v}`" for v in spec["cube_views"])
+                lines.append(f"  Cube views: {views}")
+        lines.append("\n## Entity clusters")
+        for cluster, spec in sorted(onto.entity_clusters.items()):
+            gloss = spec.get("glossary", "—")
+            metrics = spec.get("catalogue_metrics", [])
+            mlist = ", ".join(f"`{m}`" for m in metrics) if metrics else "—"
+            lines.append(f"- **{cluster}** — `{gloss}` — metrics: {mlist}")
+        ab = onto.attribution_boundary
+        if ab:
+            lines.append("\n## Attribution boundary")
+            excluded = ab.get("excluded_from_certified", [])
+            if excluded:
+                lines.append("- Excluded: " + ", ".join(f"`{x}`" for x in excluded))
+            if ab.get("agent_policy"):
+                lines.append(f"- Policy: _{ab['agent_policy'].strip()}_")
+        lines.append(f"\n_catalogue version {ctx.catalogue.version}_")
+        return "\n".join(lines)
+
     @mcp.resource("catalogue://cubes/{view}")
     def cube_view_resource(view: str) -> str:
         """Schema of one serve view: catalogued metrics and dimensions."""

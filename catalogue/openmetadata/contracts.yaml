@@ -1,0 +1,101 @@
+# Data contract summaries for agent-certified surfaces (mirrors mage-ai/openmetadata/contracts/).
+# Cube executes; OM governs contract approval + DQ test suites.
+
+contracts:
+  commerce_performance_contract_v1:
+    serve_table: clickhouse.default.serve.commerce_orders
+    data_product: CommercePerformance
+    domain: Commerce
+    grain: [brand_id, order_id]
+    time_dimension: order_date
+    currency: INR
+    required_columns:
+      - brand_id
+      - order_id
+      - order_date
+      - is_eligible_order
+      - total_sales_incl_tax
+      - dashboard_net_sales_excl_tax
+    quality_tests:
+      - order_key_unique
+      - order_id_not_null
+      - freshness_within_sla
+
+  product_performance_contract_v1:
+    serve_table: clickhouse.default.serve.product_performance
+    data_product: ProductPerformance
+    domain: Product
+    grain: [brand_id, order_id, line_item_id]
+    time_dimension: order_date
+    currency: INR
+    required_columns:
+      - brand_id
+      - order_id
+      - line_item_id
+      - variant_id
+      - net_line_revenue_ex_gst
+      - net_quantity
+    quality_tests:
+      - line_key_unique
+      - freshness_within_sla
+
+  paid_media_meta_contract_v1:
+    serve_table: clickhouse.default.serve.meta_ads_daily
+    data_product: MetaAdsPerformance
+    domain: PaidMedia
+    grain: [brand_id, ad_account_id, report_date, campaign_id, adset_id, ad_id]
+    time_dimension: report_date
+    currency: INR
+    attribution_boundary: >
+      No platform-reported purchases, purchase_value, or ROAS on certified surface.
+    required_columns:
+      - brand_id
+      - report_date
+      - meta_spend
+      - meta_impressions
+      - meta_clicks
+      - is_final
+    quality_tests:
+      - composite_key_unique
+      - serve_totals_equal_gold_totals
+      - freshness_within_sla
+
+  paid_media_meta_breakdown_contract_v1:
+    serve_table: clickhouse.default.serve.meta_ads_breakdown_daily
+    data_product: MetaAdsPerformance
+    domain: PaidMedia
+    grain: [brand_id, report_date, ad_id, breakdown_type, breakdown_dimension_1]
+    time_dimension: report_date
+    currency: INR
+    notes: Secondary port; video + breakdown dimensions.
+
+  paid_media_google_contract_v1:
+    serve_table: clickhouse.default.serve.google_ads_daily
+    data_product: GoogleAdsPerformance
+    domain: PaidMedia
+    grain: [brand_id, report_date, campaign_id]
+    time_dimension: report_date
+    currency: INR
+    required_columns:
+      - brand_id
+      - report_date
+      - google_spend
+      - google_impressions
+      - google_clicks
+      - is_final
+
+  paid_media_amazon_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_ads_daily
+    data_product: AmazonAdsPerformance
+    domain: PaidMedia
+    grain: [brand_id, report_date, campaign_id]
+    time_dimension: report_date
+    currency: INR
+    program: Sponsored Products (SP) only
+    required_columns:
+      - brand_id
+      - report_date
+      - amazon_ads_spend
+      - amazon_ads_impressions
+      - amazon_ads_clicks
+      - is_final

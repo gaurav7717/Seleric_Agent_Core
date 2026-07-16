@@ -1,7 +1,6 @@
 # Pre-migration names -> current canonical surface.
-# Platform slimmed 2026-07-14 to the two certified data products
-# (Commerce.CommercePerformance + Product.ProductPerformance); every other
-# view/metric family was removed from the semantic layer.
+# Certified data products (OpenMetadata): CommercePerformance, ProductPerformance,
+# MetaAdsPerformance, GoogleAdsPerformance, AmazonAdsPerformance.
 deprecations:
   - old: canonical_pnl
     new: commerce_performance (order/net-sales scope only)

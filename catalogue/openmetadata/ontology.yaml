@@ -1,0 +1,72 @@
+# Business ontology crosswalk (agent catalogue ↔ OpenMetadata glossaries).
+# Full OM specs: mage-ai/openmetadata/glossary/*.yml
+
+domains:
+  Commerce:
+    om_glossary: Commerce
+    owner_team: commerce-data-team
+    data_product: CommercePerformance
+    cube_views: [commerce_orders, commerce_performance]
+    grain: Order
+    date_axes: [placement, event]
+  Product:
+    om_glossary: Product
+    owner_team: commerce-data-team
+    data_product: ProductPerformance
+    cube_views: [product_performance]
+    grain: OrderLine
+    date_axes: [placement]
+  PaidMedia:
+    om_glossary: Paid Media
+    owner_team: growth-paid-media
+    data_products: [MetaAdsPerformance, GoogleAdsPerformance, AmazonAdsPerformance]
+    cube_views:
+      - meta_ad_performance
+      - meta_ad_breakdown_performance
+      - google_ad_performance
+      - amazon_ad_performance
+    grain: Daily
+    date_axes: [report_date]
+    notes: Delivery metrics only — platform attribution excluded from certified ports.
+
+entity_clusters:
+  commerce_order:
+    glossary: Commerce.CommerceOrder
+    related: [Commerce.EligibleOrder, Commerce.ActiveOrder, Commerce.CancelledOrder, Commerce.ReturnedOrder]
+    catalogue_metrics: [orders, active_orders, new_customer_orders]
+  commerce_revenue:
+    glossary: Commerce.NetSales
+    related: [Commerce.GrossSales, Commerce.TotalSales, Commerce.Discounts, Commerce.ReturnCancelRevenue]
+    catalogue_metrics: [commerce_net_revenue, gross_sales, total_sales, discounts, return_cancel_revenue]
+  commerce_events:
+    glossary: Commerce.EventAxis
+    related: [Commerce.CancelledOrder, Commerce.ReturnedOrder, Commerce.returnsCancels]
+    catalogue_metrics: [cancelled_orders, refunded_orders, returns_cancels]
+  product_line:
+    glossary: Product.ProductOrder
+    related: [Product.UnitsSold, Product.ProductNetRevenue, Product.ProductCOGS]
+    catalogue_metrics: [product_orders, units_sold, product_net_revenue, product_cogs]
+  product_margin:
+    glossary: Product.ProductGrossProfit
+    related: [Product.ProductGrossMargin, Product.AverageSellingPrice]
+    catalogue_metrics: [product_gross_profit, product_gross_margin_pct, average_selling_price]
+  paid_delivery:
+    glossary: Paid Media.Spend
+    related: [Paid Media.CTR, Paid Media.CPC, Paid Media.CPM, Paid Media.ReportDate, Paid Media.IsFinal]
+    catalogue_metrics: [meta_spend, google_spend, amazon_ads_spend]
+  paid_video_meta:
+    glossary: Paid Media.HookRate(Meta)
+    related: [Paid Media.ThruPlay, Paid Media.HoldRate(Meta)]
+    catalogue_metrics: [meta_hook_rate, meta_thruplays, meta_video_completion_rate, meta_hold_rate_15s]
+
+attribution_boundary:
+  excluded_from_certified:
+    - platform_reported_purchases
+    - platform_reported_roas
+    - platform_reported_conversion_value
+    - amazon_acos
+  om_glossary_term: Paid Media.Platform-ReportedConversion
+  agent_policy: >
+    Never answer ROAS/CPA/attributed revenue from platform-reported fields.
+    Use certified delivery spend + commerce_net_revenue separately, or state
+    attribution product is not yet in the agent catalogue.
