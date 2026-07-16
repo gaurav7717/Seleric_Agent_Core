@@ -198,7 +198,7 @@ glossaries:
     terms: [AttributedOrder, AttributedNetRevenue, AttributionRate, LastTouch]
   - name: Customer
     domain: Customer
-    terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel]
+    terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel, PurchaseSequence, HashedPII]
   - name: Finance
     domain: Finance
     terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage]

@@ -172,11 +172,44 @@ terms:
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
   - term: LTV
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: avg_ltv
+    definition: >
+      Realized (to-date) average lifetime net revenue ex-GST per customer
+      (CustomerIntelligence / customer_ltv). Not predicted LTV.
   - term: lifetime value
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: avg_ltv
+  - term: average LTV
+    canonical_id: avg_ltv
+  - term: customers
+    canonical_id: customers
+  - term: unique customers
+    canonical_id: customers
+  - term: repeat customers
+    canonical_id: repeat_customers
+  - term: returning customers
+    canonical_id: repeat_customers
+  - term: repeat rate
+    canonical_id: repeat_rate
+  - term: repeat purchase rate
+    canonical_id: repeat_rate
+  - term: lifetime orders
+    canonical_id: lifetime_orders
+  - term: lifetime revenue
+    canonical_id: lifetime_net_revenue
+  - term: lifetime net revenue
+    canonical_id: lifetime_net_revenue
+  - term: avg orders per customer
+    canonical_id: avg_orders_per_customer
+  - term: purchase frequency
+    canonical_id: avg_days_between_orders
+  - term: days between orders
+    canonical_id: avg_days_between_orders
+  - term: first orders
+    canonical_id: first_orders
+  - term: repeat orders
+    canonical_id: repeat_orders
+  - term: repeat order share
+    canonical_id: repeat_order_share
   - term: attributed revenue
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.

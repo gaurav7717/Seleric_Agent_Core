@@ -18,7 +18,7 @@ Local OM: **http://127.0.0.1:8585** (OpenMetadata 1.13.1). Governance specs live
 Never compute business metrics from OpenMetadata. OM metric descriptions are
 formulas for governance only — Cube executes.
 
-## Certified data products (5)
+## Certified data products (9)
 
 | OM data product | Domain | Primary serve table | Cube view(s) |
 |-----------------|--------|---------------------|--------------|
@@ -27,13 +27,17 @@ formulas for governance only — Cube executes.
 | `MetaAdsPerformance` | PaidMedia | `clickhouse.default.serve.meta_ads_daily` | `meta_ad_performance`, `meta_ad_breakdown_performance` |
 | `GoogleAdsPerformance` | PaidMedia | `clickhouse.default.serve.google_ads_daily` | `google_ad_performance` |
 | `AmazonAdsPerformance` | PaidMedia | `clickhouse.default.serve.amazon_ads_daily` | `amazon_ad_performance` |
+| `MarketingAttribution` | Attribution | `clickhouse.default.serve.order_attribution` | `order_attribution`, `meta_ad_attribution` |
+| `CustomerIntelligence` | Customer | `clickhouse.default.serve.customer_ltv` | `customer_ltv`, `purchase_sequence` |
+| `CanonicalPnl` | Finance | `clickhouse.default.serve.canonical_pnl` | `canonical_pnl` |
+| `ReturnsRefunds` | Operations | `clickhouse.default.serve.refund_events` | `refund_events`, `return_lifecycle` |
 
 Agent catalogue crosswalk:
 
 | File | Purpose |
 |------|---------|
 | `catalogue/openmetadata/registry.yaml` | Instance, data products, view→serve FQN |
-| `catalogue/openmetadata/metrics.yaml` | All 76 metrics → OM entity + glossary |
+| `catalogue/openmetadata/metrics.yaml` | All catalogue metrics → OM entity + glossary |
 | `catalogue/openmetadata/contracts.yaml` | Grain, required columns, DQ tests |
 | `catalogue/openmetadata/ontology.yaml` | Domains, entity clusters, attribution boundary |
 
@@ -84,6 +88,12 @@ OM_JWT_OR_PAT=<paste token>
 - “Is `serve.meta_ads_daily` certified and what contract applies?”
 - “What glossary terms apply to `metaSpend` and `amazonAdsSpend`?”
 - “Why is platform ROAS excluded from MetaAdsPerformance?” (attribution boundary)
+
+**Customer**
+
+- “Who owns CustomerIntelligence and is `serve.customer_ltv` AgentReady?”
+- “What is the PII rule on `customer_ltv_contract_v1`?”
+- “Which Cube views and contracts belong to CustomerIntelligence?”
 
 ## Attribution boundary (Paid Media)
 

@@ -151,7 +151,7 @@ entity_clusters:
       - meta_attr_aov
   customer_ltv:
     glossary: Customer.LifetimeValue
-    related: [Customer.RepeatCustomer, Customer.AcquisitionChannel]
+    related: [Customer.RepeatCustomer, Customer.AcquisitionChannel, Customer.HashedPII]
     catalogue_metrics:
       - customers
       - repeat_customers
@@ -163,8 +163,8 @@ entity_clusters:
       - avg_orders_per_customer
       - avg_days_since_last_order
   purchase_sequence:
-    glossary: Customer.RepeatCustomer
-    related: [Customer.LifetimeValue]
+    glossary: Customer.PurchaseSequence
+    related: [Customer.LifetimeValue, Customer.RepeatCustomer]
     catalogue_metrics:
       - repeat_purchase_orders
       - first_orders
