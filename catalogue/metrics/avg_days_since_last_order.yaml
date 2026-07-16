@@ -1,0 +1,48 @@
+id: avg_days_since_last_order
+display_name: Average Days Since Last Order
+category: customer
+status: certified
+description: Average recency (days since last order) across customers. A live snapshot
+  as of query time.
+formula:
+  human_readable: AVG(days_since_last_order)
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.avg_days_since_last_order
+aggregation: ratio
+unit: days
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Average Days Since Last Order by acquisition channel
+  request:
+    measures:
+    - avg_days_since_last_order
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []

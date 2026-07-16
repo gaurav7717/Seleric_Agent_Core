@@ -28,6 +28,40 @@ domains:
     grain: Daily
     date_axes: [report_date]
     notes: Delivery metrics only — platform attribution excluded from certified ports.
+  Finance:
+    om_glossary: Finance
+    owner_team: finance-data-team
+    data_product: CanonicalPnl
+    cube_views: [canonical_pnl]
+    grain: Daily
+    date_axes: [report_date]
+    notes: >
+      Composed brand x day P&L oracle, not an independent ingestion. MER is
+      first-party net sales / total ad spend — never platform-reported ROAS.
+  Attribution:
+    om_glossary: Attribution
+    owner_team: growth-paid-media
+    data_product: MarketingAttribution
+    cube_views: [order_attribution, meta_ad_attribution]
+    grain: Order
+    date_axes: [order_date]
+    notes: Last-touch only. Multi-touch/view-through fail closed, not modeled.
+  Customer:
+    om_glossary: Customer
+    owner_team: growth-crm
+    data_product: CustomerIntelligence
+    cube_views: [customer_ltv]
+    grain: Customer
+    date_axes: []
+    notes: Lifetime snapshot, not a period rollup. Hashed PII only.
+  PurchaseSequence:
+    om_glossary: Customer
+    owner_team: growth-crm
+    data_product: PurchaseSequence
+    cube_views: [purchase_sequence]
+    grain: Order
+    date_axes: [order_date]
+    notes: Order-grain repeat-purchase cohort model; uses window functions.
 
 entity_clusters:
   commerce_order:
@@ -37,7 +71,7 @@ entity_clusters:
   commerce_revenue:
     glossary: Commerce.NetSales
     related: [Commerce.GrossSales, Commerce.TotalSales, Commerce.Discounts, Commerce.ReturnCancelRevenue]
-    catalogue_metrics: [commerce_net_revenue, gross_sales, total_sales, discounts, return_cancel_revenue]
+    catalogue_metrics: [commerce_net_revenue, commerce_net_revenue_daily, gross_sales, total_sales, discounts, return_cancel_revenue]
   commerce_events:
     glossary: Commerce.EventAxis
     related: [Commerce.CancelledOrder, Commerce.ReturnedOrder, Commerce.returnsCancels]
@@ -58,6 +92,72 @@ entity_clusters:
     glossary: Paid Media.HookRate(Meta)
     related: [Paid Media.ThruPlay, Paid Media.HoldRate(Meta)]
     catalogue_metrics: [meta_hook_rate, meta_thruplays, meta_video_completion_rate, meta_hold_rate_15s]
+  finance_pnl:
+    glossary: Finance.NetProfit
+    related: [Finance.GrossProfit, Finance.ContributionMargin, Finance.MER, Finance.NetCogs, Finance.CostCoverage]
+    catalogue_metrics:
+      - net_cogs
+      - shipping_cost
+      - packaging_cost
+      - payment_gateway_fees
+      - rto_cost
+      - operating_cost
+      - total_ad_spend
+      - gross_profit
+      - contribution_margin
+      - net_profit
+      - gross_margin_pct
+      - contribution_margin_pct
+      - net_margin_pct
+      - mer
+      - cost_coverage_pct
+  order_attribution:
+    glossary: Attribution.AttributedOrder
+    related: [Attribution.AttributedNetRevenue, Attribution.AttributionRate, Attribution.LastTouch]
+    catalogue_metrics:
+      - attributed_orders
+      - attributed_net_revenue
+      - attributed_gross_revenue
+      - attributed_refund_amount
+      - attributed_new_customer_orders
+      - touch_attributed_orders
+      - attribution_rate
+      - avg_attribution_confidence
+      - attributed_aov
+  meta_ad_attribution:
+    glossary: Attribution.AttributedOrder
+    related: [Attribution.AttributedNetRevenue, Attribution.LastTouch]
+    catalogue_metrics:
+      - meta_attr_orders
+      - meta_attr_net_revenue
+      - meta_attr_gross_revenue
+      - meta_attr_refund_amount
+      - meta_attr_new_customer_orders
+      - meta_attr_new_customer_revenue
+      - meta_attr_aov
+  customer_ltv:
+    glossary: Customer.LifetimeValue
+    related: [Customer.RepeatCustomer, Customer.AcquisitionChannel]
+    catalogue_metrics:
+      - customers
+      - repeat_customers
+      - lifetime_net_revenue
+      - lifetime_gross_revenue
+      - lifetime_orders
+      - avg_ltv
+      - repeat_rate
+      - avg_orders_per_customer
+      - avg_days_since_last_order
+  purchase_sequence:
+    glossary: Customer.RepeatCustomer
+    related: [Customer.LifetimeValue]
+    catalogue_metrics:
+      - repeat_purchase_orders
+      - first_orders
+      - repeat_orders
+      - repeat_purchase_net_revenue
+      - repeat_order_share
+      - avg_days_between_orders
 
 attribution_boundary:
   excluded_from_certified:

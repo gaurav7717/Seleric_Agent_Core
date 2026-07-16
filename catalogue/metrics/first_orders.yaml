@@ -1,0 +1,48 @@
+id: first_orders
+display_name: First Orders
+category: customer
+status: certified
+description: Count of orders that are a customer's first (order_seq = 1).
+formula:
+  human_readable: COUNT(order_id) WHERE is_first_order = 1
+  authoritative_source: cube
+cube_mapping:
+  view: purchase_sequence
+  measure: purchase_sequence.first_orders
+aggregation: additive
+unit: count
+grain: order (eligible orders, per-customer sequenced)
+supported_dimensions:
+- brand_id
+- order_date
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+supported_filters:
+- date_range
+- brand_id
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: First Orders for June 2026
+  request:
+    measures:
+    - first_orders
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []

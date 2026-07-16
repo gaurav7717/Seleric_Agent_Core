@@ -1,0 +1,41 @@
+id: commerce_net_revenue_daily
+display_name: Net Sales (Dashboard Parity)
+category: commerce
+status: certified
+description: >
+  Brand x day Net Sales, ex-GST, from the serve.commerce_performance_daily
+  rollup. Deducts returns/cancels on the event date they occur rather than
+  the original order's placement date — this is the exact basis of the
+  Reports dashboard's Net Sales card. Use this for topline/period totals.
+  Use commerce_net_revenue instead when the query needs order-grain
+  breakdowns (city, UTM, payment method) that only exist on commerce_orders;
+  that metric is placement-axis and will not reconcile to the dashboard card
+  for periods with cross-period returns/cancels.
+formula:
+  human_readable: "Sum of net_sales_excl_tax from the daily commerce performance rollup, by report_date"
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_performance
+  measure: commerce_performance.commerce_net_revenue
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: "Commerce Ops"
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: "Net sales for June 2026"
+    request:
+      measures: [commerce_net_revenue_daily]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
+validation_tests:
+  - "commerce_net_revenue_daily period total reconciles exactly to the dashboard Net Sales card for the same brand and period"
+deprecated_aliases: []

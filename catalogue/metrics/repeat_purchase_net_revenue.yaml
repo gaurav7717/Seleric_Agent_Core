@@ -1,0 +1,49 @@
+id: repeat_purchase_net_revenue
+display_name: Sequenced Net Revenue
+category: customer
+status: certified
+description: Net revenue (ex-GST) at order grain from the purchase-sequence model.
+formula:
+  human_readable: SUM(net_revenue_excl_tax)
+  authoritative_source: cube
+cube_mapping:
+  view: purchase_sequence
+  measure: purchase_sequence.net_revenue
+aggregation: additive
+unit: currency
+grain: order (eligible orders, per-customer sequenced)
+supported_dimensions:
+- brand_id
+- order_date
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+supported_filters:
+- date_range
+- brand_id
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Sequenced Net Revenue for June 2026
+  request:
+    measures:
+    - repeat_purchase_net_revenue
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []
+currency_default: INR

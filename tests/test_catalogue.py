@@ -16,7 +16,7 @@ def test_loads_seed(catalogue):
     assert "amazon_ads_spend" in catalogue.cat.metrics
     assert catalogue.version
     assert catalogue.cat.openmetadata is not None
-    assert len(catalogue.cat.openmetadata.data_products) == 5
+    assert len(catalogue.cat.openmetadata.data_products) == 9
     assert len(catalogue.cat.openmetadata.metrics) == len(catalogue.cat.metrics)
     assert catalogue.cat.openmetadata.contracts
     assert catalogue.cat.openmetadata.ontology is not None
@@ -37,7 +37,7 @@ def test_search_paid_media_glossary(catalogue):
 def test_search_glossary_term(catalogue):
     result = catalogue.search("topline")
     assert result.matches
-    assert result.matches[0].id == "commerce_net_revenue"
+    assert result.matches[0].id == "commerce_net_revenue_daily"
     assert result.matches[0].matched_on.startswith("glossary")
 
 

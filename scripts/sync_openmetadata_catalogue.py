@@ -23,6 +23,7 @@ OUT = ROOT / "catalogue" / "openmetadata" / "metrics.yaml"
 HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     # Commerce
     "commerce_net_revenue": ("commerceNetRevenue", ["Commerce.NetSales"]),
+    "commerce_net_revenue_daily": ("commerceNetRevenueDaily", ["Commerce.NetSales"]),
     "total_sales": ("totalSales", ["Commerce.TotalSales"]),
     "gross_sales": ("grossSales", ["Commerce.GrossSales"]),
     "discounts": ("discounts", ["Commerce.Discounts"]),
@@ -77,6 +78,56 @@ HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     "amazon_ads_ctr": ("amazonAdsCtr", ["Paid Media.CTR"]),
     "amazon_ads_cpc": ("amazonAdsCpc", ["Paid Media.CPC"]),
     "amazon_ads_cpm": ("amazonAdsCpm", ["Paid Media.CPM"]),
+    # Finance (canonical_pnl)
+    "net_cogs": ("netCogs", ["Finance.NetCogs"]),
+    "shipping_cost": ("shippingCost", ["Finance.NetCogs"]),
+    "packaging_cost": ("packagingCost", ["Finance.NetCogs"]),
+    "payment_gateway_fees": ("paymentGatewayFees", ["Finance.NetCogs"]),
+    "rto_cost": ("rtoCost", ["Finance.NetCogs"]),
+    "operating_cost": ("operatingCost", ["Finance.NetCogs"]),
+    "total_ad_spend": ("totalAdSpend", ["Finance.NetCogs"]),
+    "gross_profit": ("grossProfit", ["Finance.GrossProfit"]),
+    "contribution_margin": ("contributionMargin", ["Finance.ContributionMargin"]),
+    "net_profit": ("netProfit", ["Finance.NetProfit"]),
+    "gross_margin_pct": ("grossMarginPct", ["Finance.GrossProfit"]),
+    "contribution_margin_pct": ("contributionMarginPct", ["Finance.ContributionMargin"]),
+    "net_margin_pct": ("netMarginPct", ["Finance.NetProfit"]),
+    "mer": ("mer", ["Finance.MER"]),
+    "cost_coverage_pct": ("costCoveragePct", ["Finance.CostCoverage"]),
+    # Attribution (order_attribution)
+    "attributed_orders": ("attributedOrders", ["Attribution.AttributedOrder"]),
+    "attributed_net_revenue": ("attributedNetRevenue", ["Attribution.AttributedNetRevenue"]),
+    "attributed_gross_revenue": ("attributedGrossRevenue", ["Attribution.AttributedNetRevenue"]),
+    "attributed_refund_amount": ("attributedRefundAmount", ["Attribution.AttributedNetRevenue"]),
+    "attributed_new_customer_orders": ("attributedNewCustomerOrders", ["Attribution.AttributedOrder"]),
+    "touch_attributed_orders": ("touchAttributedOrders", ["Attribution.AttributionRate"]),
+    "attribution_rate": ("attributionRate", ["Attribution.AttributionRate"]),
+    "avg_attribution_confidence": ("avgAttributionConfidence", ["Attribution.LastTouch"]),
+    "attributed_aov": ("attributedAov", ["Attribution.AttributedNetRevenue"]),
+    "meta_attr_orders": ("metaAttrOrders", ["Attribution.AttributedOrder"]),
+    "meta_attr_net_revenue": ("metaAttrNetRevenue", ["Attribution.AttributedNetRevenue"]),
+    "meta_attr_gross_revenue": ("metaAttrGrossRevenue", ["Attribution.AttributedNetRevenue"]),
+    "meta_attr_refund_amount": ("metaAttrRefundAmount", ["Attribution.AttributedNetRevenue"]),
+    "meta_attr_new_customer_orders": ("metaAttrNewCustomerOrders", ["Attribution.AttributedOrder"]),
+    "meta_attr_new_customer_revenue": ("metaAttrNewCustomerRevenue", ["Attribution.AttributedNetRevenue"]),
+    "meta_attr_aov": ("metaAttrAov", ["Attribution.AttributedNetRevenue"]),
+    # Customer (customer_ltv)
+    "customers": ("customers", ["Customer.LifetimeValue"]),
+    "repeat_customers": ("repeatCustomers", ["Customer.RepeatCustomer"]),
+    "lifetime_net_revenue": ("lifetimeNetRevenue", ["Customer.LifetimeValue"]),
+    "lifetime_gross_revenue": ("lifetimeGrossRevenue", ["Customer.LifetimeValue"]),
+    "lifetime_orders": ("lifetimeOrders", ["Customer.LifetimeValue"]),
+    "avg_ltv": ("avgLtv", ["Customer.LifetimeValue"]),
+    "repeat_rate": ("repeatRate", ["Customer.RepeatCustomer"]),
+    "avg_orders_per_customer": ("avgOrdersPerCustomer", ["Customer.LifetimeValue"]),
+    "avg_days_since_last_order": ("avgDaysSinceLastOrder", ["Customer.RepeatCustomer"]),
+    # Customer (purchase_sequence)
+    "repeat_purchase_orders": ("repeatPurchaseOrders", ["Customer.RepeatCustomer"]),
+    "first_orders": ("firstOrders", ["Customer.RepeatCustomer"]),
+    "repeat_orders": ("repeatOrders", ["Customer.RepeatCustomer"]),
+    "repeat_purchase_net_revenue": ("repeatPurchaseNetRevenue", ["Customer.LifetimeValue"]),
+    "repeat_order_share": ("repeatOrderShare", ["Customer.RepeatCustomer"]),
+    "avg_days_between_orders": ("avgDaysBetweenOrders", ["Customer.RepeatCustomer"]),
 }
 
 CONTRACT_BY_VIEW = {
@@ -87,6 +138,11 @@ CONTRACT_BY_VIEW = {
     "meta_ad_breakdown_performance": "paid_media_meta_breakdown_contract_v1",
     "google_ad_performance": "paid_media_google_contract_v1",
     "amazon_ad_performance": "paid_media_amazon_contract_v1",
+    "canonical_pnl": "canonical_pnl_contract_v1",
+    "order_attribution": "order_attribution_contract_v1",
+    "meta_ad_attribution": "meta_ad_attribution_contract_v1",
+    "customer_ltv": "customer_ltv_contract_v1",
+    "purchase_sequence": "purchase_sequence_contract_v1",
 }
 
 

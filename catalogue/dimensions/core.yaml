@@ -5,6 +5,12 @@ dimensions:
     description: Brand identifier; filter when data spans multiple brands.
     views:
       commerce_orders: commerce_orders.brand_id
+      commerce_performance: commerce_performance.brand_id
+      canonical_pnl: canonical_pnl.brand_id
+      order_attribution: order_attribution.brand_id
+      meta_ad_attribution: meta_ad_attribution.brand_id
+      customer_ltv: customer_ltv.brand_id
+      purchase_sequence: purchase_sequence.brand_id
       product_performance: product_performance.brand_id
       meta_ad_performance: meta_ad_performance.brand_id
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
@@ -16,6 +22,8 @@ dimensions:
     is_time: true
     views:
       commerce_orders: commerce_orders.order_date
+      order_attribution: order_attribution.order_date
+      purchase_sequence: purchase_sequence.order_date
       product_performance: product_performance.order_date
   - id: order_created_at_ist
     display_name: Order Created At (IST)
@@ -25,6 +33,124 @@ dimensions:
     is_time: true
     views:
       commerce_orders: commerce_orders.order_created_at_ist
+  # ---- Attribution (2026-07-16): Attribution.MarketingAttribution ----
+  - id: lt_platform
+    display_name: Last-touch Platform
+    description: Last-touch attributed platform (meta/google/organic/...). Resolved, not raw UTM.
+    views:
+      order_attribution: order_attribution.lt_platform
+  - id: lt_channel
+    display_name: Last-touch Channel
+    description: Last-touch attributed channel (ig_feed/fb_feed/google_pmax/...). Resolved, not raw UTM.
+    views:
+      order_attribution: order_attribution.lt_channel
+  - id: lt_utm_source
+    display_name: Last-touch UTM Source
+    description: Attribution-resolved UTM source. Distinct from utm_source (raw/unresolved).
+    views:
+      order_attribution: order_attribution.lt_utm_source
+  - id: lt_utm_medium
+    display_name: Last-touch UTM Medium
+    views:
+      order_attribution: order_attribution.lt_utm_medium
+  - id: lt_utm_campaign
+    display_name: Last-touch UTM Campaign
+    description: Attribution-resolved UTM campaign string. Distinct from utm_campaign (raw/unresolved) and lt_campaign_name (ad-platform campaign name).
+    views:
+      order_attribution: order_attribution.lt_utm_campaign
+  - id: lt_campaign_id
+    display_name: Last-touch Campaign ID
+    description: Attribution-resolved campaign ID. Distinct from utm_campaign (raw/unresolved).
+    views:
+      order_attribution: order_attribution.lt_campaign_id
+  - id: lt_campaign_name
+    display_name: Last-touch Campaign Name
+    views:
+      order_attribution: order_attribution.lt_campaign_name
+  - id: lt_adset_name
+    display_name: Last-touch Adset Name
+    views:
+      order_attribution: order_attribution.lt_adset_name
+  - id: lt_ad_name
+    display_name: Last-touch Ad Name
+    views:
+      order_attribution: order_attribution.lt_ad_name
+  - id: attribution_method
+    display_name: Attribution Method
+    description: How the order's touchpoint was resolved (or 'unattributed').
+    views:
+      order_attribution: order_attribution.attribution_method
+  - id: attribution_model
+    display_name: Attribution Model
+    description: Explicit attribution model applied (e.g. last-touch).
+    views:
+      order_attribution: order_attribution.attribution_model
+      meta_ad_attribution: meta_ad_attribution.attribution_model
+  - id: identity_resolution_method
+    display_name: Identity Resolution Method
+    views:
+      order_attribution: order_attribution.identity_resolution_method
+  - id: is_cod
+    display_name: Is COD
+    views:
+      order_attribution: order_attribution.is_cod
+      purchase_sequence: purchase_sequence.is_cod
+  - id: source_name
+    display_name: Order Source Name
+    views:
+      order_attribution: order_attribution.source_name
+  # ---- Customer LTV (2026-07-16): Customer.CustomerIntelligence ----
+  - id: acquisition_platform
+    display_name: Acquisition Platform
+    description: Platform that acquired the customer on their first order.
+    views:
+      customer_ltv: customer_ltv.acquisition_platform
+  - id: acquisition_channel
+    display_name: Acquisition Channel
+    views:
+      customer_ltv: customer_ltv.acquisition_channel
+  - id: acquisition_campaign
+    display_name: Acquisition Campaign
+    views:
+      customer_ltv: customer_ltv.acquisition_campaign
+  - id: is_repeat_customer
+    display_name: Is Repeat Customer
+    views:
+      customer_ltv: customer_ltv.is_repeat_customer
+  - id: lifetime_order_count_band
+    display_name: Lifetime Order Count Band
+    allowed_values: ["1", "2", "3-5", "6+"]
+    views:
+      customer_ltv: customer_ltv.lifetime_order_count_band
+  - id: customer_default_city
+    display_name: Customer Default City
+    description: Customer's default address city (distinct from shipping_city, which is per-order).
+    views:
+      customer_ltv: customer_ltv.default_city
+  - id: customer_default_province
+    display_name: Customer Default Province
+    description: Customer's default address province/state (distinct from shipping_region, which is per-order).
+    views:
+      customer_ltv: customer_ltv.default_province
+  # ---- Purchase Sequence (2026-07-16): Customer.CustomerIntelligence port #2 ----
+  - id: order_status
+    display_name: Order Status
+    views:
+      purchase_sequence: purchase_sequence.order_status
+  - id: order_seq
+    display_name: Order Sequence Number
+    description: This order's 1-indexed position in the customer's purchase history.
+    views:
+      purchase_sequence: purchase_sequence.order_seq
+  - id: order_seq_band
+    display_name: Order Sequence Band
+    allowed_values: ["1st", "2nd", "3rd", "4th+"]
+    views:
+      purchase_sequence: purchase_sequence.order_seq_band
+  - id: is_first_order
+    display_name: Is First Order
+    views:
+      purchase_sequence: purchase_sequence.is_first_order
   - id: event_date
     display_name: Event Date
     description: >
@@ -80,6 +206,7 @@ dimensions:
     description: Whether this was the customer's first order.
     views:
       commerce_orders: commerce_orders.is_new_customer
+      order_attribution: order_attribution.is_new_customer
   - id: sku
     display_name: SKU
     views:
@@ -109,6 +236,8 @@ dimensions:
     is_time: true
     views:
       commerce_performance: commerce_performance.report_date
+      canonical_pnl: canonical_pnl.report_date
+      meta_ad_attribution: meta_ad_attribution.report_date
       meta_ad_performance: meta_ad_performance.report_date
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.report_date
       google_ad_performance: google_ad_performance.report_date
@@ -118,6 +247,7 @@ dimensions:
     description: Platform campaign identifier.
     views:
       meta_ad_performance: meta_ad_performance.campaign_id
+      meta_ad_attribution: meta_ad_attribution.campaign_id
       google_ad_performance: google_ad_performance.campaign_id
       amazon_ad_performance: amazon_ad_performance.campaign_id
   - id: campaign_name
@@ -126,6 +256,7 @@ dimensions:
     views:
       meta_ad_performance: meta_ad_performance.campaign_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_name
+      meta_ad_attribution: meta_ad_attribution.campaign_name
       google_ad_performance: google_ad_performance.campaign_name
       amazon_ad_performance: amazon_ad_performance.campaign_name
   - id: campaign_status
@@ -151,20 +282,24 @@ dimensions:
     display_name: Adset ID (Meta)
     views:
       meta_ad_performance: meta_ad_performance.adset_id
+      meta_ad_attribution: meta_ad_attribution.adset_id
   - id: adset_name
     display_name: Adset Name (Meta)
     views:
       meta_ad_performance: meta_ad_performance.adset_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_name
+      meta_ad_attribution: meta_ad_attribution.adset_name
   - id: ad_id
     display_name: Ad ID (Meta)
     views:
       meta_ad_performance: meta_ad_performance.ad_id
+      meta_ad_attribution: meta_ad_attribution.ad_id
   - id: ad_name
     display_name: Ad Name (Meta)
     views:
       meta_ad_performance: meta_ad_performance.ad_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_name
+      meta_ad_attribution: meta_ad_attribution.ad_name
   - id: creative_id
     display_name: Creative ID (Meta)
     views:

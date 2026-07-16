@@ -43,3 +43,32 @@ views:
     freshness:
       source: serve.meta_ads_breakdown_daily (VIEW over gold.mart_meta_ad_breakdown_daily FINAL)
       expected_cadence: "5-min gold sync after dbt orchestrator; platform account day"
+  - name: canonical_pnl
+    title: Canonical P&L Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.canonical_pnl (VIEW composing commerce oracle + fct_daily_pnl + certified paid-media spend)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: order_attribution
+    title: Order Attribution (Serve, last-touch)
+    date_dimension: order_date
+    freshness:
+      source: serve.order_attribution
+      expected_cadence: "hourly after gold sync, IST"
+  - name: meta_ad_attribution
+    title: Meta Ad Attribution Daily (Serve, last-touch)
+    date_dimension: report_date
+    freshness:
+      source: serve.meta_ad_attribution_daily
+      expected_cadence: "hourly after gold sync, IST"
+  - name: customer_ltv
+    title: Customer LTV (Serve)
+    freshness:
+      source: serve.customer_ltv (lifetime snapshot, no date_dimension — not a period rollup)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: purchase_sequence
+    title: Purchase Sequence (Serve)
+    date_dimension: order_date
+    freshness:
+      source: serve.purchase_sequence (uses ClickHouse window functions — row_number/lagInFrame)
+      expected_cadence: "hourly after gold sync, IST"

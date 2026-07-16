@@ -1,0 +1,47 @@
+id: repeat_customers
+display_name: Repeat Customers
+category: customer
+status: certified
+description: Count of customers with more than one lifetime order.
+formula:
+  human_readable: COUNT(customer_id) WHERE is_repeat_customer = 1
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.repeat_customers
+aggregation: additive
+unit: count
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Repeat Customers by acquisition channel
+  request:
+    measures:
+    - repeat_customers
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []

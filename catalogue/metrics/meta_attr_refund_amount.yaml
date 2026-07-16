@@ -1,0 +1,54 @@
+id: meta_attr_refund_amount
+display_name: Meta Attributed Refund Amount
+category: attribution
+status: certified
+description: Refund amount on orders last-touch attributed to a Meta ad.
+formula:
+  human_readable: SUM(attributed_refund_amount)
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_attribution
+  measure: meta_ad_attribution.attributed_refund_amount
+aggregation: additive
+unit: currency
+grain: daily ad grain (brand x campaign x adset x ad x day, last-touch attribution)
+supported_dimensions:
+- brand_id
+- report_date
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- attribution_model
+supported_filters:
+- date_range
+- brand_id
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Meta Attributed Refund Amount by campaign for June 2026
+  request:
+    measures:
+    - meta_attr_refund_amount
+    dimensions:
+    - campaign_name
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []
+currency_default: INR

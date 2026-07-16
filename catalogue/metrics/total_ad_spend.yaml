@@ -1,0 +1,42 @@
+id: total_ad_spend
+display_name: Total Ad Spend (Blended)
+category: finance
+status: certified
+description: Blended certified ad spend (Meta + Google + Amazon Ads) for the period.
+  The single cross-platform spend total referenced by 'ad spend'/'marketing spend'
+  when no platform is specified; per-platform breakdowns still resolve to meta_spend/google_spend/amazon_ads_spend
+  on their own views.
+formula:
+  human_readable: SUM(total_ad_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.total_ad_spend
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: Total Ad Spend (Blended) for June 2026
+  request:
+    measures:
+    - total_ad_spend
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- total_ad_spend >= 0 for any slice
+deprecated_aliases: []

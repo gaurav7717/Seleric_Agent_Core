@@ -1,0 +1,48 @@
+id: lifetime_orders
+display_name: Lifetime Orders
+category: customer
+status: certified
+description: Sum of customers' lifetime order counts. A cumulative snapshot — do not
+  filter by date_range.
+formula:
+  human_readable: SUM(lifetime_order_count)
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.lifetime_orders
+aggregation: additive
+unit: count
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Lifetime Orders by acquisition channel
+  request:
+    measures:
+    - lifetime_orders
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []

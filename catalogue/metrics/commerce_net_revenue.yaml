@@ -4,9 +4,12 @@ category: commerce
 status: certified
 description: >
   Per-order dashboard net sales (DASHBOARD_NET_SALES_O) summed on placement
-  order_date. For full Net Sales card parity (with event-date return/cancel
-  deductions) use commerce_performance.commerce_net_revenue once serve daily
-  rollup is populated.
+  order_date. Placement-axis only — does NOT deduct returns/cancels recognized
+  on a later event date, so it will NOT reconcile to the dashboard Net Sales
+  card for periods with cross-period returns/cancels. Use this only when a
+  query needs order-grain breakdowns (city, UTM, payment method). For
+  topline/period totals matching the dashboard, use
+  commerce_net_revenue_daily instead.
 formula:
   human_readable: "Sum of per-order net sales ex-GST (placement axis)"
   authoritative_source: cube

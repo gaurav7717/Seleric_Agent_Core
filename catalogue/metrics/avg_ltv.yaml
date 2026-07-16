@@ -1,0 +1,51 @@
+id: avg_ltv
+display_name: Average LTV
+category: customer
+status: certified
+description: Lifetime net revenue divided by customer count (ex-GST).
+formula:
+  human_readable: lifetime_net_revenue / customers
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.avg_ltv
+aggregation: ratio
+unit: currency
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Average LTV by acquisition channel
+  request:
+    measures:
+    - avg_ltv
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []
+currency_default: INR
+ratio_components:
+  numerator: customer_ltv.lifetime_net_revenue
+  denominator: customer_ltv.customers

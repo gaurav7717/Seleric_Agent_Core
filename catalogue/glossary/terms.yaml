@@ -2,14 +2,18 @@
 # catalogue_search_metrics("topline") resolve without guessing.
 # Only reference ids that exist under catalogue/metrics/.
 terms:
+  # Topline/period totals must match the dashboard Net Sales card, which nets
+  # returns/cancels on their event date -> commerce_net_revenue_daily.
+  # commerce_net_revenue stays placement-axis, order-grain, for breakdowns
+  # (city/UTM/payment method) that commerce_performance can't provide.
   - term: topline
-    canonical_id: commerce_net_revenue
+    canonical_id: commerce_net_revenue_daily
   - term: net sales
-    canonical_id: commerce_net_revenue
+    canonical_id: commerce_net_revenue_daily
   - term: revenue
-    canonical_id: commerce_net_revenue
+    canonical_id: commerce_net_revenue_daily
   - term: commerce net revenue
-    canonical_id: commerce_net_revenue
+    canonical_id: commerce_net_revenue_daily
   - term: revenue by city
     canonical_id: commerce_net_revenue
   - term: net revenue by city
@@ -73,25 +77,36 @@ terms:
   - term: bottom line
     canonical_id: null
     definition: >
-      Company net_profit is not in the current catalogue (commerce/product
-      metrics only). Use product_gross_profit for SKU-level profit.
+      canonical_pnl.net_profit exists but is marked draft (not queryable) —
+      its cost/spend source columns (gold.fct_daily_pnl) are known-broken;
+      cross-check found the derived value has the wrong sign vs. the dashboard's
+      Net Profit card. Use product_gross_profit for SKU-level profit until fixed.
   - term: profit
     canonical_id: null
     definition: >
-      Ambiguous — company P&L net_profit is not catalogued; for products use
-      product_gross_profit.
+      Ambiguous, and company-level net_profit is draft/not queryable (see
+      "bottom line"). For products use product_gross_profit.
+  - term: net profit
+    canonical_id: null
+    definition: >
+      canonical_pnl.net_profit exists but is marked draft (not queryable) —
+      see "bottom line" for why.
   - term: COGS
     canonical_id: product_cogs
+  - term: company COGS
+    canonical_id: null
+    definition: >
+      canonical_pnl.net_cogs exists but is marked draft (not queryable) —
+      its source (gold.fct_daily_pnl) is known-broken (~17x too low vs. the
+      dashboard's Net COGS card). Use product_cogs for SKU-level COGS.
   - term: cost of goods
     canonical_id: product_cogs
   - term: gross margin
     canonical_id: product_gross_margin_pct
   - term: MER
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: mer
   - term: marketing efficiency ratio
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: mer
   - term: ROAS
     canonical_id: null
     definition: >
@@ -104,15 +119,9 @@ terms:
       Platform-reported ROAS is not certified. See deprecations for
       meta_roas/google_roas/amazon_ads_roas.
   - term: ad spend
-    canonical_id: null
-    definition: >
-      Ambiguous across platforms — resolve to meta_spend, google_spend, or
-      amazon_ads_spend from context (default: sum all certified delivery spend).
+    canonical_id: total_ad_spend
   - term: marketing spend
-    canonical_id: null
-    definition: >
-      Ambiguous — certified delivery spend is meta_spend + google_spend +
-      amazon_ads_spend (no blended totalAdSpend metric in the agent catalogue yet).
+    canonical_id: total_ad_spend
   - term: meta spend
     canonical_id: meta_spend
   - term: meta impressions

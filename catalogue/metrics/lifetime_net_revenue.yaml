@@ -1,0 +1,49 @@
+id: lifetime_net_revenue
+display_name: Lifetime Net Revenue
+category: customer
+status: certified
+description: Sum of customers' lifetime net revenue (ex-GST). A cumulative snapshot,
+  not a period rollup — do not filter by date_range.
+formula:
+  human_readable: SUM(lifetime_net_revenue_excl_tax)
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.lifetime_net_revenue
+aggregation: additive
+unit: currency
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Lifetime Net Revenue by acquisition channel
+  request:
+    measures:
+    - lifetime_net_revenue
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []
+currency_default: INR

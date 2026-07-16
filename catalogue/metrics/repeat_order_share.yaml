@@ -1,0 +1,51 @@
+id: repeat_order_share
+display_name: Repeat Order Share
+category: customer
+status: certified
+description: Share of orders that are a repeat purchase (order_seq > 1).
+formula:
+  human_readable: repeat_orders / repeat_purchase_orders
+  authoritative_source: cube
+cube_mapping:
+  view: purchase_sequence
+  measure: purchase_sequence.repeat_order_share
+aggregation: ratio
+unit: percent
+grain: order (eligible orders, per-customer sequenced)
+supported_dimensions:
+- brand_id
+- order_date
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+supported_filters:
+- date_range
+- brand_id
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Repeat Order Share for June 2026
+  request:
+    measures:
+    - repeat_order_share
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []
+ratio_components:
+  numerator: purchase_sequence.repeat_orders
+  denominator: purchase_sequence.orders

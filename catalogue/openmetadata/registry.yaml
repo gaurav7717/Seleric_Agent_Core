@@ -46,6 +46,43 @@ data_products:
     contract: paid_media_amazon_contract_v1
     cube_views: [amazon_ad_performance]
     notes: Sponsored Products (SP) campaign daily grain only.
+  - name: CanonicalPnl
+    domain: Finance
+    owner_team: finance-data-team
+    primary_serve_table: clickhouse.default.serve.canonical_pnl
+    contract: canonical_pnl_contract_v1
+    cube_views: [canonical_pnl]
+    notes: >
+      Brand x day P&L oracle: commerce oracle net sales - fully-loaded COGS
+      (fct_daily_pnl) - operating cost - certified ad spend. MER uses first-party
+      net sales, never platform-reported ROAS.
+  - name: MarketingAttribution
+    domain: Attribution
+    owner_team: growth-paid-media
+    primary_serve_table: clickhouse.default.serve.order_attribution
+    contract: order_attribution_contract_v1
+    cube_views: [order_attribution, meta_ad_attribution]
+    notes: >
+      Order-grain last-touch attribution only. Multi-touch/view-through fail
+      closed — not modeled, not approximated.
+  - name: CustomerIntelligence
+    domain: Customer
+    owner_team: growth-crm
+    primary_serve_table: clickhouse.default.serve.customer_ltv
+    contract: customer_ltv_contract_v1
+    cube_views: [customer_ltv]
+    notes: >
+      Customer-grain lifetime snapshot (hashed PII only, no raw email/phone).
+      Not a period rollup — do not apply date_range filters.
+  - name: PurchaseSequence
+    domain: Customer
+    owner_team: growth-crm
+    primary_serve_table: clickhouse.default.serve.purchase_sequence
+    contract: purchase_sequence_contract_v1
+    cube_views: [purchase_sequence]
+    notes: >
+      Order-grain repeat-purchase cohort model (order_seq, first-order flag,
+      days since previous order). Uses ClickHouse window functions.
 
 views:
   commerce_orders:
@@ -83,6 +120,32 @@ views:
     gold_inputs:
       - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
       - clickhouse.default.gold.dim_amazon_ads_campaigns
+  canonical_pnl:
+    data_product: CanonicalPnl
+    serve_table: clickhouse.default.serve.canonical_pnl
+    gold_inputs:
+      - clickhouse.default.serve.commerce_performance_daily
+      - clickhouse.default.gold.fct_daily_pnl
+      - clickhouse.default.serve.meta_ads_daily
+      - clickhouse.default.serve.google_ads_daily
+      - clickhouse.default.serve.amazon_ads_daily
+  order_attribution:
+    data_product: MarketingAttribution
+    serve_table: clickhouse.default.serve.order_attribution
+    gold_inputs: [clickhouse.default.gold.fct_order_attribution]
+  meta_ad_attribution:
+    data_product: MarketingAttribution
+    serve_table: clickhouse.default.serve.meta_ad_attribution_daily
+    contract: meta_ad_attribution_contract_v1
+    gold_inputs: [clickhouse.default.serve.order_attribution, clickhouse.default.serve.meta_ads_daily]
+  customer_ltv:
+    data_product: CustomerIntelligence
+    serve_table: clickhouse.default.serve.customer_ltv
+    gold_inputs: [clickhouse.default.gold.dim_customers, clickhouse.default.gold.fct_orders]
+  purchase_sequence:
+    data_product: PurchaseSequence
+    serve_table: clickhouse.default.serve.purchase_sequence
+    gold_inputs: [clickhouse.default.gold.fct_orders]
 
 # catalogue metric crosswalk lives in openmetadata/metrics.yaml (76 metrics).
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
@@ -95,3 +158,12 @@ glossaries:
   - name: Paid Media
     domain: PaidMedia
     terms: [Spend, CTR, CPC, CPM, ReportDate, IsFinal, HookRate(Meta), ThruPlay, SponsoredProducts(SP)]
+  - name: Finance
+    domain: Finance
+    terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage]
+  - name: Attribution
+    domain: Attribution
+    terms: [AttributedOrder, AttributedNetRevenue, AttributionRate, LastTouch]
+  - name: Customer
+    domain: Customer
+    terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel]

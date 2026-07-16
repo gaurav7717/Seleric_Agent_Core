@@ -1,0 +1,53 @@
+id: meta_attr_new_customer_orders
+display_name: Meta Attributed New Customer Orders
+category: attribution
+status: certified
+description: New-customer orders last-touch attributed to a Meta ad.
+formula:
+  human_readable: SUM(new_customer_orders)
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_attribution
+  measure: meta_ad_attribution.new_customer_orders
+aggregation: additive
+unit: count
+grain: daily ad grain (brand x campaign x adset x ad x day, last-touch attribution)
+supported_dimensions:
+- brand_id
+- report_date
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- attribution_model
+supported_filters:
+- date_range
+- brand_id
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Meta Attributed New Customer Orders by campaign for June 2026
+  request:
+    measures:
+    - meta_attr_new_customer_orders
+    dimensions:
+    - campaign_name
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []

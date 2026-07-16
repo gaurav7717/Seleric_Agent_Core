@@ -1,0 +1,59 @@
+id: attributed_net_revenue
+display_name: Attributed Net Revenue
+category: attribution
+status: certified
+description: First-party net revenue (ex-GST) at order grain from the attribution
+  oracle. Differs from commerce_net_revenue_daily's basis — this is scoped to the
+  attribution population/window, not a period cash-basis rollup.
+formula:
+  human_readable: SUM(net_revenue_excl_tax)
+  authoritative_source: cube
+cube_mapping:
+  view: order_attribution
+  measure: order_attribution.attributed_net_revenue
+aggregation: additive
+unit: currency
+grain: order (last-touch attribution)
+supported_dimensions:
+- brand_id
+- order_date
+- lt_platform
+- lt_channel
+- lt_utm_source
+- lt_utm_medium
+- lt_utm_campaign
+- lt_campaign_id
+- lt_campaign_name
+- lt_adset_name
+- lt_ad_name
+- attribution_method
+- is_new_customer
+- is_cod
+- source_name
+- attribution_model
+supported_filters:
+- date_range
+- brand_id
+- lt_platform
+- lt_channel
+- attribution_method
+- is_new_customer
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Attributed Net Revenue for June 2026
+  request:
+    measures:
+    - attributed_net_revenue
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []
+currency_default: INR

@@ -1,0 +1,57 @@
+id: attributed_new_customer_orders
+display_name: Attributed New Customer Orders
+category: attribution
+status: certified
+description: Count of orders flagged as a new customer's first order, from the attribution
+  oracle.
+formula:
+  human_readable: COUNT(order_id) WHERE is_new_customer = 1
+  authoritative_source: cube
+cube_mapping:
+  view: order_attribution
+  measure: order_attribution.new_customer_orders
+aggregation: additive
+unit: count
+grain: order (last-touch attribution)
+supported_dimensions:
+- brand_id
+- order_date
+- lt_platform
+- lt_channel
+- lt_utm_source
+- lt_utm_medium
+- lt_utm_campaign
+- lt_campaign_id
+- lt_campaign_name
+- lt_adset_name
+- lt_ad_name
+- attribution_method
+- is_new_customer
+- is_cod
+- source_name
+- attribution_model
+supported_filters:
+- date_range
+- brand_id
+- lt_platform
+- lt_channel
+- attribution_method
+- is_new_customer
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Attributed New Customer Orders for June 2026
+  request:
+    measures:
+    - attributed_new_customer_orders
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []

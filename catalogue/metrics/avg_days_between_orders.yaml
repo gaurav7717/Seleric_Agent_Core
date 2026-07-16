@@ -1,0 +1,49 @@
+id: avg_days_between_orders
+display_name: Average Days Between Orders
+category: customer
+status: certified
+description: Average days since the previous order, computed over repeat orders only
+  (order_seq > 1).
+formula:
+  human_readable: SUM(days_since_prev_order) / repeat_orders
+  authoritative_source: cube
+cube_mapping:
+  view: purchase_sequence
+  measure: purchase_sequence.avg_days_between_orders
+aggregation: ratio
+unit: days
+grain: order (eligible orders, per-customer sequenced)
+supported_dimensions:
+- brand_id
+- order_date
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+supported_filters:
+- date_range
+- brand_id
+- order_status
+- is_cod
+- order_seq
+- order_seq_band
+- is_first_order
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Average Days Between Orders for June 2026
+  request:
+    measures:
+    - avg_days_between_orders
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []

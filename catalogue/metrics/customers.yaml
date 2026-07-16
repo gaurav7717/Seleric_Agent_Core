@@ -1,0 +1,48 @@
+id: customers
+display_name: Customers
+category: customer
+status: certified
+description: Count of distinct customers with at least one eligible order (lifetime
+  snapshot).
+formula:
+  human_readable: COUNT(customer_id)
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.customers
+aggregation: additive
+unit: count
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Customers by acquisition channel
+  request:
+    measures:
+    - customers
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []

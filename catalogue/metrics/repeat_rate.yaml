@@ -1,0 +1,50 @@
+id: repeat_rate
+display_name: Repeat Customer Rate
+category: customer
+status: certified
+description: Share of customers who placed more than one lifetime order.
+formula:
+  human_readable: repeat_customers / customers
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.repeat_rate
+aggregation: ratio
+unit: percent
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Repeat Customer Rate by acquisition channel
+  request:
+    measures:
+    - repeat_rate
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []
+ratio_components:
+  numerator: customer_ltv.repeat_customers
+  denominator: customer_ltv.customers

@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 76
+count: 123
 metrics:
   active_orders:
     category: commerce
@@ -60,6 +60,55 @@ metrics:
     glossary:
     - Commerce.AverageOrderValue
     om_name: aov
+  attributed_aov:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: attributedAov
+  attributed_gross_revenue:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: attributedGrossRevenue
+  attributed_net_revenue:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: attributedNetRevenue
+  attributed_new_customer_orders:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedOrder
+    om_name: attributedNewCustomerOrders
+  attributed_orders:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedOrder
+    om_name: attributedOrders
+  attributed_refund_amount:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: attributedRefundAmount
+  attribution_rate:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributionRate
+    om_name: attributionRate
   average_selling_price:
     category: product
     cube_view: product_performance
@@ -67,6 +116,41 @@ metrics:
     glossary:
     - Product.AverageSellingPrice
     om_name: averageSellingPrice
+  avg_attribution_confidence:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.LastTouch
+    om_name: avgAttributionConfidence
+  avg_days_between_orders:
+    category: customer
+    cube_view: purchase_sequence
+    contract: purchase_sequence_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: avgDaysBetweenOrders
+  avg_days_since_last_order:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: avgDaysSinceLastOrder
+  avg_ltv:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: avgLtv
+  avg_orders_per_customer:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: avgOrdersPerCustomer
   cancelled_orders:
     category: commerce
     cube_view: commerce_orders
@@ -88,6 +172,41 @@ metrics:
     glossary:
     - Commerce.NetSales
     om_name: commerceNetRevenue
+  commerce_net_revenue_daily:
+    category: commerce
+    cube_view: commerce_performance
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.NetSales
+    om_name: commerceNetRevenueDaily
+  contribution_margin:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.ContributionMargin
+    om_name: contributionMargin
+  contribution_margin_pct:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.ContributionMargin
+    om_name: contributionMarginPct
+  cost_coverage_pct:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.CostCoverage
+    om_name: costCoveragePct
+  customers:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: customers
   discounts:
     category: commerce
     cube_view: commerce_orders
@@ -95,6 +214,13 @@ metrics:
     glossary:
     - Commerce.Discounts
     om_name: discounts
+  first_orders:
+    category: customer
+    cube_view: purchase_sequence
+    contract: purchase_sequence_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: firstOrders
   google_clicks:
     category: paid_media
     cube_view: google_ad_performance
@@ -151,6 +277,20 @@ metrics:
     glossary:
     - Paid Media.Spend
     om_name: googleSpend
+  gross_margin_pct:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.GrossProfit
+    om_name: grossMarginPct
+  gross_profit:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.GrossProfit
+    om_name: grossProfit
   gross_sales:
     category: commerce
     cube_view: commerce_orders
@@ -165,6 +305,83 @@ metrics:
     glossary:
     - Product.GrossUnitsOrdered
     om_name: grossUnitsOrdered
+  lifetime_gross_revenue:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: lifetimeGrossRevenue
+  lifetime_net_revenue:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: lifetimeNetRevenue
+  lifetime_orders:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: lifetimeOrders
+  mer:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.MER
+    om_name: mer
+  meta_attr_aov:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttrAov
+  meta_attr_gross_revenue:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttrGrossRevenue
+  meta_attr_net_revenue:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttrNetRevenue
+  meta_attr_new_customer_orders:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedOrder
+    om_name: metaAttrNewCustomerOrders
+  meta_attr_new_customer_revenue:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttrNewCustomerRevenue
+  meta_attr_orders:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedOrder
+    om_name: metaAttrOrders
+  meta_attr_refund_amount:
+    category: attribution
+    cube_view: meta_ad_attribution
+    contract: meta_ad_attribution_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttrRefundAmount
   meta_breakdown_clicks:
     category: paid_media
     cube_view: meta_ad_breakdown_performance
@@ -435,12 +652,40 @@ metrics:
     glossary:
     - Paid Media.Spend
     om_name: metaVideoPlays
+  net_cogs:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: netCogs
+  net_margin_pct:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: netMarginPct
+  net_profit:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: netProfit
   new_customer_orders:
     category: commerce
     cube_view: commerce_orders
     contract: commerce_performance_contract_v1
     glossary:
     - Commerce.CommerceOrder
+  operating_cost:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: operatingCost
   orders:
     category: commerce
     cube_view: commerce_orders
@@ -448,6 +693,20 @@ metrics:
     glossary:
     - Commerce.TotalOrders
     om_name: orders
+  packaging_cost:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: packagingCost
+  payment_gateway_fees:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: paymentGatewayFees
   prepaid_orders:
     category: commerce
     cube_view: commerce_orders
@@ -497,6 +756,48 @@ metrics:
     glossary:
     - Commerce.ReturnedOrder
     om_name: returnedOrders
+  repeat_customers:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: repeatCustomers
+  repeat_order_share:
+    category: customer
+    cube_view: purchase_sequence
+    contract: purchase_sequence_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: repeatOrderShare
+  repeat_orders:
+    category: customer
+    cube_view: purchase_sequence
+    contract: purchase_sequence_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: repeatOrders
+  repeat_purchase_net_revenue:
+    category: customer
+    cube_view: purchase_sequence
+    contract: purchase_sequence_contract_v1
+    glossary:
+    - Customer.LifetimeValue
+    om_name: repeatPurchaseNetRevenue
+  repeat_purchase_orders:
+    category: customer
+    cube_view: purchase_sequence
+    contract: purchase_sequence_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: repeatPurchaseOrders
+  repeat_rate:
+    category: customer
+    cube_view: customer_ltv
+    contract: customer_ltv_contract_v1
+    glossary:
+    - Customer.RepeatCustomer
+    om_name: repeatRate
   return_cancel_revenue:
     category: commerce
     cube_view: commerce_orders
@@ -511,6 +812,27 @@ metrics:
     glossary:
     - Commerce.returnsCancels
     om_name: returnsCancels
+  rto_cost:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: rtoCost
+  shipping_cost:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: shippingCost
+  total_ad_spend:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: totalAdSpend
   total_sales:
     category: commerce
     cube_view: commerce_orders
@@ -518,6 +840,13 @@ metrics:
     glossary:
     - Commerce.TotalSales
     om_name: totalSales
+  touch_attributed_orders:
+    category: attribution
+    cube_view: order_attribution
+    contract: order_attribution_contract_v1
+    glossary:
+    - Attribution.AttributionRate
+    om_name: touchAttributedOrders
   units_per_order:
     category: product
     cube_view: product_performance

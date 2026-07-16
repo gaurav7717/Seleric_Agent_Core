@@ -1,0 +1,50 @@
+id: avg_orders_per_customer
+display_name: Average Orders per Customer
+category: customer
+status: certified
+description: Lifetime orders divided by customer count.
+formula:
+  human_readable: lifetime_orders / customers
+  authoritative_source: cube
+cube_mapping:
+  view: customer_ltv
+  measure: customer_ltv.avg_orders_per_customer
+aggregation: ratio
+unit: ratio
+grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+supported_dimensions:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+- customer_default_city
+- customer_default_province
+supported_filters:
+- brand_id
+- acquisition_platform
+- acquisition_channel
+- acquisition_campaign
+- is_repeat_customer
+- lifetime_order_count_band
+data_owner: Growth / CRM
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Average Orders per Customer by acquisition channel
+  request:
+    measures:
+    - avg_orders_per_customer
+    dimensions:
+    - acquisition_channel
+validation_tests: []
+deprecated_aliases: []
+ratio_components:
+  numerator: customer_ltv.lifetime_orders
+  denominator: customer_ltv.customers
