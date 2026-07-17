@@ -288,3 +288,27 @@ contracts:
     notes: >
       Secondary channel-day port. FINE channel; purchases/revenue are order-grain
       last-touch attribution — use purchases for CVR, never converted_sessions.
+
+  web_events_contract_v1:
+    serve_table: clickhouse.default.serve.web_events
+    data_product: EventStream
+    domain: WebAnalytics
+    grain: [brand_id, event_id]
+    time_dimension: event_date
+    currency: INR
+    notes: >
+      Snowplow event grain; paths + business keys only — no visitor
+      identifiers, tokens, click IDs or full URLs on serve. Server-side
+      purchase events have no session_id (NULL channel).
+
+  web_events_daily_contract_v1:
+    serve_table: clickhouse.default.serve.web_events_daily
+    data_product: EventStream
+    domain: WebAnalytics
+    grain: [brand_id, report_date, event_type, channel]
+    time_dimension: report_date
+    currency: INR
+    notes: >
+      Secondary event-type × channel day port. Counts only — rates recompute as
+      SUM/SUM; unique_visitors/unique_pages are per-row distinct counts and are
+      NOT additive across rows. Unattributed buckets have sessions = 0.

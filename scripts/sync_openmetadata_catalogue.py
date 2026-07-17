@@ -141,6 +141,14 @@ HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     "repeat_purchase_net_revenue": ("repeatPurchaseNetRevenue", ["Customer.LifetimeValue"]),
     "repeat_order_share": ("repeatOrderShare", ["Customer.RepeatCustomer"]),
     "avg_days_between_orders": ("avgDaysBetweenOrders", ["Customer.RepeatCustomer"]),
+    # Web Analytics (web_events / web_events_daily — EventStream)
+    "web_events": ("webEvents", ["Web Analytics.WebEvent"]),
+    "web_page_views": ("webPageViews", ["Web Analytics.PageView"]),
+    "product_views": ("productViews", ["Web Analytics.ProductView"]),
+    "collection_views": ("collectionViews", ["Web Analytics.WebEvent"]),
+    "add_to_cart_events": ("addToCartEvents", ["Web Analytics.WebEvent"]),
+    "site_search_events": ("siteSearchEvents", ["Web Analytics.SiteSearch"]),
+    "events_per_session": ("eventsPerSession", ["Web Analytics.EventsPerSession"]),
 }
 
 CONTRACT_BY_VIEW = {
@@ -158,6 +166,10 @@ CONTRACT_BY_VIEW = {
     "canonical_pnl": "canonical_pnl_contract_v1",
     "refund_events": "refund_events_contract_v1",
     "return_lifecycle": "return_lifecycle_contract_v1",
+    "session_funnel": "session_funnel_contract_v1",
+    "funnel_daily": "funnel_daily_contract_v1",
+    "web_events": "web_events_contract_v1",
+    "web_events_daily": "web_events_daily_contract_v1",
 }
 
 

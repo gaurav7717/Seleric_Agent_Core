@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 150
+count: 157
 metrics:
   active_orders:
     category: commerce
@@ -10,6 +10,13 @@ metrics:
     contract: commerce_performance_contract_v1
     glossary:
     - Commerce.ActiveOrder
+  add_to_cart_events:
+    category: web_analytics
+    cube_view: web_events_daily
+    contract: web_events_daily_contract_v1
+    glossary:
+    - Web Analytics.WebEvent
+    om_name: addToCartEvents
   amazon_ads_clicks:
     category: paid_media
     cube_view: amazon_ad_performance
@@ -196,7 +203,7 @@ metrics:
   bounce_rate:
     category: web_analytics
     cube_view: funnel_daily
-    contract: null
+    contract: funnel_daily_contract_v1
     glossary: []
     om_name: bounceRate
   cancel_revenue:
@@ -232,6 +239,13 @@ metrics:
     glossary:
     - Commerce.CashonDelivery
     om_name: codOrders
+  collection_views:
+    category: web_analytics
+    cube_view: web_events_daily
+    contract: web_events_daily_contract_v1
+    glossary:
+    - Web Analytics.WebEvent
+    om_name: collectionViews
   commerce_net_revenue:
     category: commerce
     cube_view: commerce_orders
@@ -287,6 +301,13 @@ metrics:
     glossary:
     - Commerce.Discounts
     om_name: discounts
+  events_per_session:
+    category: web_analytics
+    cube_view: web_events
+    contract: web_events_contract_v1
+    glossary:
+    - Web Analytics.EventsPerSession
+    om_name: eventsPerSession
   first_orders:
     category: customer
     cube_view: purchase_sequence
@@ -297,19 +318,19 @@ metrics:
   funnel_conversion_rate:
     category: web_analytics
     cube_view: funnel_daily
-    contract: null
+    contract: funnel_daily_contract_v1
     glossary: []
     om_name: funnelConversionRate
   funnel_purchases:
     category: web_analytics
     cube_view: funnel_daily
-    contract: null
+    contract: funnel_daily_contract_v1
     glossary: []
     om_name: funnelPurchases
   funnel_revenue:
     category: web_analytics
     cube_view: funnel_daily
-    contract: null
+    contract: funnel_daily_contract_v1
     glossary: []
     om_name: funnelRevenue
   google_clicks:
@@ -882,6 +903,13 @@ metrics:
     glossary:
     - Product.ProductOrder
     om_name: productOrders
+  product_views:
+    category: web_analytics
+    cube_view: web_events_daily
+    contract: web_events_daily_contract_v1
+    glossary:
+    - Web Analytics.ProductView
+    om_name: productViews
   refunded_orders:
     category: commerce
     cube_view: commerce_orders
@@ -973,6 +1001,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: shopifyAdSpend
+  site_search_events:
+    category: web_analytics
+    cube_view: web_events_daily
+    contract: web_events_daily_contract_v1
+    glossary:
+    - Web Analytics.SiteSearch
+    om_name: siteSearchEvents
   taxes_on_net_sales:
     category: finance
     cube_view: canonical_pnl
@@ -1036,9 +1071,23 @@ metrics:
     glossary:
     - Product.UnitsSold
     om_name: unitsSold
+  web_events:
+    category: web_analytics
+    cube_view: web_events_daily
+    contract: web_events_daily_contract_v1
+    glossary:
+    - Web Analytics.WebEvent
+    om_name: webEvents
+  web_page_views:
+    category: web_analytics
+    cube_view: web_events_daily
+    contract: web_events_daily_contract_v1
+    glossary:
+    - Web Analytics.PageView
+    om_name: webPageViews
   web_sessions:
     category: web_analytics
     cube_view: funnel_daily
-    contract: null
+    contract: funnel_daily_contract_v1
     glossary: []
     om_name: webSessions

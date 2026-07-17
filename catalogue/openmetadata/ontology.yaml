@@ -58,13 +58,15 @@ domains:
   WebAnalytics:
     om_glossary: Web Analytics
     owner_team: growth-analytics
-    data_product: SessionFunnel
-    cube_views: [session_funnel, funnel_daily]
-    grain: Session (+ channel-day rollup)
-    date_axes: [session_date, report_date]
+    data_products: [SessionFunnel, EventStream]
+    cube_views: [session_funnel, funnel_daily, web_events, web_events_daily]
+    grain: Session + Event (+ channel-day rollups)
+    date_axes: [session_date, event_date, report_date]
     notes: >
       Snowplow website behaviour; funnel stages are event-based and deeper
       stages can skip earlier ones. Rates are ratio-of-aggregates only.
+      EventStream is the event-grain companion (paths only, no visitor
+      identifiers); server-side purchase events have no session.
   Finance:
     om_glossary: Finance
     owner_team: finance-team

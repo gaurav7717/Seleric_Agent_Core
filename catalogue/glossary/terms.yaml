@@ -324,14 +324,38 @@ terms:
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
   - term: product views
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: product_views
+    definition: >
+      Snowplow product_view events (PDP views) on WebAnalytics.EventStream —
+      counts events, not sessions (pdp_sessions on SessionFunnel counts sessions).
+  - term: pdp views
+    canonical_id: product_views
   - term: add to carts
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: add_to_cart_events
+    definition: >
+      Snowplow add_to_cart events on WebAnalytics.EventStream — counts events,
+      not sessions (atc_sessions on SessionFunnel counts sessions). Not
+      comparable to Meta pixel ATC.
   - term: add-to-carts
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: add_to_cart_events
+  - term: atc events
+    canonical_id: add_to_cart_events
+  - term: page views
+    canonical_id: web_page_views
+  - term: pageviews
+    canonical_id: web_page_views
+  - term: website events
+    canonical_id: web_events
+  - term: web events
+    canonical_id: web_events
+  - term: collection views
+    canonical_id: collection_views
+  - term: site searches
+    canonical_id: site_search_events
+  - term: search events
+    canonical_id: site_search_events
+  - term: events per session
+    canonical_id: events_per_session
   - term: checkouts
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.

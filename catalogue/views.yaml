@@ -133,3 +133,15 @@ views:
     freshness:
       source: serve.funnel_daily (VIEW over gold.mart_funnel_daily FINAL)
       expected_cadence: "daily after dw/mart run; 26h SLA"
+  - name: web_events
+    title: Web Events (Serve)
+    date_dimension: event_date
+    freshness:
+      source: serve.web_events (VIEW over gold.fct_web_events FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: web_events_daily
+    title: Web Events Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.web_events_daily (VIEW over gold.mart_web_events_daily FINAL)
+      expected_cadence: "daily after dw/mart run; 26h SLA"

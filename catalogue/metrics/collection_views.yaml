@@ -1,0 +1,31 @@
+id: collection_views
+display_name: Collection Views
+category: web_analytics
+status: certified
+description: >
+  Snowplow collection_view events (collection / category page views) on the
+  event-type × channel day rollup.
+formula:
+  human_readable: SUM(events WHERE event_type = 'collection_view')
+  authoritative_source: cube
+cube_mapping:
+  view: web_events_daily
+  measure: web_events_daily.collection_views
+aggregation: additive
+unit: count
+grain: brand × day × fine channel
+supported_dimensions:
+  - brand_id
+  - report_date
+  - channel
+supported_filters:
+  - date_range
+  - brand_id
+  - channel
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests:
+  - collection_views >= 0
+deprecated_aliases: []

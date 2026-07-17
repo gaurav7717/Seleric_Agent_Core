@@ -24,6 +24,8 @@ dimensions:
       customer_data: customer_data.brand_id
       session_funnel: session_funnel.brand_id
       funnel_daily: funnel_daily.brand_id
+      web_events: web_events.brand_id
+      web_events_daily: web_events_daily.brand_id
   - id: order_date
     display_name: Order Date
     description: IST order placement day.
@@ -164,11 +166,14 @@ dimensions:
   - id: event_date
     display_name: Event Date
     description: >
-      IST calendar day of commerce order events (cancel/return). Use as the
-      time axis for cancelled_orders and refunded_orders — not order_date.
+      IST calendar day of commerce order events (cancel/return) on
+      commerce_orders — use as the time axis for cancelled_orders and
+      refunded_orders, not order_date. On web_events: the IST day the website
+      event fired.
     is_time: true
     views:
       commerce_orders: commerce_orders.event_date
+      web_events: web_events.event_date
   - id: payment_method
     display_name: Payment Method
     description: Payment method on the order (COD, prepaid gateways).
@@ -258,6 +263,7 @@ dimensions:
       amazon_commerce_performance: amazon_commerce_performance.report_date
       channel_attribution: channel_attribution.report_date
       funnel_daily: funnel_daily.report_date
+      web_events_daily: web_events_daily.report_date
   - id: campaign_id
     display_name: Campaign ID
     description: Platform campaign identifier.
@@ -390,6 +396,8 @@ dimensions:
       channel_attribution: channel_attribution.channel
       funnel_daily: funnel_daily.channel
       session_funnel: session_funnel.channel
+      web_events: web_events.channel
+      web_events_daily: web_events_daily.channel
   - id: source_platform
     display_name: Source Platform
     description: Originating platform of the attribution row (shopify | amazon).
@@ -438,3 +446,14 @@ dimensions:
       reached_checkout / purchased).
     views:
       session_funnel: session_funnel.funnel_stage
+  # ---- 2026-07-17: EventStream (web events) ----
+  # (event_date mapping for web_events lives on the shared event_date dim above)
+  - id: event_type
+    display_name: Event Type
+    description: >
+      Snowplow tracker event type (page_view / product_view / collection_view /
+      add_to_cart / remove_from_cart / checkout_step / checkout / purchase /
+      refund / site_search / cart).
+    views:
+      web_events: web_events.event_type
+      web_events_daily: web_events_daily.event_type

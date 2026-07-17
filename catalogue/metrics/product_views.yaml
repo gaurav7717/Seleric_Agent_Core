@@ -1,0 +1,38 @@
+id: product_views
+display_name: Product Views
+category: web_analytics
+status: certified
+description: >
+  Snowplow product_view events (product detail page views) on the event-type ×
+  channel day rollup. Counts events, not sessions — a session with three PDP
+  views contributes three. PDP-session counts live on SessionFunnel.
+formula:
+  human_readable: SUM(events WHERE event_type = 'product_view')
+  authoritative_source: cube
+cube_mapping:
+  view: web_events_daily
+  measure: web_events_daily.product_views
+aggregation: additive
+unit: count
+grain: brand × day × fine channel
+supported_dimensions:
+  - brand_id
+  - report_date
+  - channel
+supported_filters:
+  - date_range
+  - brand_id
+  - channel
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Product views by channel last 30 days
+    request:
+      measures: [product_views]
+      dimensions: [channel]
+      time_range: {preset: last_30_days}
+validation_tests:
+  - product_views >= 0
+deprecated_aliases: []

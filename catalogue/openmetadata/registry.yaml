@@ -129,6 +129,21 @@ data_products:
       purchased). No visitor identifiers on serve. FINE channel — the closed
       5-channel set is ChannelAttribution. funnel_daily purchases/revenue are
       order-grain last-touch attribution.
+  - name: EventStream
+    domain: WebAnalytics
+    owner_team: growth-analytics
+    primary_serve_table: clickhouse.default.serve.web_events
+    contract: web_events_contract_v1
+    secondary_contracts: [web_events_daily_contract_v1]
+    cube_views: [web_events, web_events_daily]
+    platforms: [Shopify]
+    notes: >
+      Snowplow website event stream (event grain) — page/product/collection
+      views, cart interactions, checkout steps, searches, purchases. Paths +
+      business keys only, no visitor identifiers or full URLs on serve. channel
+      is the session-resolved FINE channel; server-side purchase events have no
+      session ('unattributed'). Daily rollup is counts-only; its per-row
+      distinct counts (unique_visitors/unique_pages) are not additive.
   - name: CanonicalPnl
     domain: Finance
     owner_team: finance-team
