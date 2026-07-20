@@ -1,8 +1,11 @@
 id: amazon_ads_spend
-display_name: Amazon Ads Spend
+display_name: Amazon Ads Spend (Amazon-ads-only)
 category: paid_media
 status: certified
-description: Amazon Sponsored Products campaign spend (Reports daily; SP only).
+description: >
+  Amazon Sponsored Products ad spend only (not marketplace sales/fees). For
+  Amazon commerce sales use amazon_total_sales; for all-platform ads use
+  total_ad_spend.
 formula:
   human_readable: SUM(amazon_ads_spend)
   authoritative_source: cube

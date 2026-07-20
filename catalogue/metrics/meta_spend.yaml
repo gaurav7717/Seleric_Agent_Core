@@ -1,8 +1,11 @@
 id: meta_spend
-display_name: Meta Spend
+display_name: Meta Spend (Meta-only)
 category: paid_media
 status: certified
-description: Meta Ads spend (INR, account currency) billed by Meta at ad-day grain.
+description: >
+  Meta Ads spend only. For Google-only use google_spend; Amazon Ads use
+  amazon_ads_spend; Shopify Historical (Meta+Google) use shopify_ad_spend;
+  all platforms use total_ad_spend.
 formula:
   human_readable: SUM(meta_spend)
   authoritative_source: cube

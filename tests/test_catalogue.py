@@ -15,10 +15,11 @@ def test_loads_seed(catalogue):
     assert "amazon_ads_spend" in catalogue.cat.metrics
     assert catalogue.version
     assert catalogue.cat.openmetadata is not None
-    # Keep in step with openmetadata/product_registry.yml (14 products) and
-    # catalogue/openmetadata/registry.yaml — includes AmazonCommerce, ChannelAttribution,
-    # CustomerData, SessionFunnel, EventStream plus InProgress CanonicalPnl / ReturnsRefunds.
-    assert len(catalogue.cat.openmetadata.data_products) == 14
+    # Keep in step with openmetadata/product_registry.yml and
+    # catalogue/openmetadata/registry.yaml — includes AmazonCommerce,
+    # AmazonAccounts, ChannelAttribution, CustomerData, SessionFunnel,
+    # EventStream plus CanonicalPnl / ReturnsRefunds.
+    assert len(catalogue.cat.openmetadata.data_products) == 15
     assert len(catalogue.cat.openmetadata.metrics) == len(catalogue.cat.metrics)
     assert catalogue.cat.openmetadata.contracts
     assert catalogue.cat.openmetadata.ontology is not None
@@ -85,7 +86,7 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Shipping Cost (Courier)": "shipping_cost",
         "RTO Logistics Cost": "rto_cost",
         "Total Operating Cost": "total_operating_cost",
-        "Total Sales (Including GST)": "total_sales",
+        "Total Sales (Including GST)": "total_sales_all_channels",
         "Total Performance Marketing": "total_ad_spend",
         "Total Ad Spend (all platforms)": "total_ad_spend",
         "Total Ad Spend": "total_ad_spend",
@@ -105,21 +106,93 @@ def test_resolve_unknown(catalogue):
 
 
 def test_resolve_normalized_exact_match(catalogue):
-    # "total sales" (space) must resolve to total_sales (underscore) — same
-    # failure class as the chat-transcript miss that motivated
-    # confidence-banded resolution.
-    for variant in ("total sales", "Total Sales", "TOTAL-SALES"):
+    # Bare "total sales" = all channels (Shopify + Amazon) via glossary.
+    for variant in ("total sales", "Total Sales"):
         r = catalogue.resolve_term(variant)
         assert isinstance(r, ResolvedTerm), variant
-        assert r.metric_id == "total_sales"
+        assert r.metric_id == "total_sales_all_channels"
         assert r.confidence == 1.0
         assert r.auto_resolved is False
+    # Hyphen/underscore form matches the Shopify-only metric id exactly.
+    r = catalogue.resolve_term("TOTAL-SALES")
+    assert isinstance(r, ResolvedTerm)
+    assert r.metric_id == "total_sales"
+
+
+def test_resolve_channel_scoped_sales(catalogue):
+    cases = {
+        "shopify total sales": "total_sales",
+        "shopify only total sales": "total_sales",
+        "amazon total sales": "amazon_total_sales",
+        "amazon only total sales": "amazon_total_sales",
+        "total sales all channels": "total_sales_all_channels",
+        "shopify only orders": "orders",
+        "amazon only orders": "amazon_orders",
+        "amazon net sales": "amazon_net_sales",
+        "amazon gross sales": "amazon_gross_sales",
+    }
+    for term, expected in cases.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), term
+        assert r.metric_id == expected, f"{term} -> {r.metric_id}"
+
+
+def test_resolve_ad_platform_scope(catalogue):
+    cases = {
+        "ad spend": "total_ad_spend",
+        "total ad spend": "total_ad_spend",
+        "total ads": "total_ad_spend",
+        "all platforms ad spend": "total_ad_spend",
+        "performance marketing": "total_ad_spend",
+        "meta only": "meta_spend",
+        "meta only spend": "meta_spend",
+        "meta only ads": "meta_spend",
+        "google only": "google_spend",
+        "google only ads": "google_spend",
+        "amazon only ads": "amazon_ads_spend",
+        "amazon ads only": "amazon_ads_spend",
+        "amazon only spend": "amazon_ads_spend",
+        "shopify only ad spend": "shopify_ad_spend",
+        "shopify only ads": "shopify_ad_spend",
+        "meta only impressions": "meta_impressions",
+        "google only clicks": "google_clicks",
+        "amazon only CTR": "amazon_ads_ctr",
+    }
+    for term, expected in cases.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), term
+        assert r.metric_id == expected, f"{term} -> {getattr(r, 'metric_id', r)}"
+
+
+def test_resolve_attribution_scope(catalogue):
+    cases = {
+        "attributed revenue": "attributed_net_revenue",
+        "attributed sales": "attributed_net_revenue",
+        "attr sales": "attributed_net_revenue",
+        "attr revenue": "attributed_net_revenue",
+        "last-touch revenue": "attributed_net_revenue",
+        "attributed orders": "attributed_orders",
+        "attr orders": "attributed_orders",
+        "attributed gross sales": "attributed_gross_revenue",
+        "attr aov": "attributed_aov",
+        "meta attributed sales": "meta_attr_net_revenue",
+        "meta attr sales": "meta_attr_net_revenue",
+        "meta attributed orders": "meta_attr_orders",
+        "channel orders": "channel_orders",
+        "channel sales": "channel_net_revenue",
+        "sales by channel": "channel_net_revenue",
+        "channel gross revenue": "channel_gross_revenue",
+    }
+    for term, expected in cases.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), term
+        assert r.metric_id == expected, f"{term} -> {getattr(r, 'metric_id', r)}"
 
 
 def test_resolve_typo_auto_resolves_with_confidence(catalogue):
-    r = catalogue.resolve_term("total salez")
+    r = catalogue.resolve_term("ordr volume")
     assert isinstance(r, ResolvedTerm)
-    assert r.metric_id == "total_sales"
+    assert r.metric_id == "total_orders"
     assert r.auto_resolved is True
     assert r.confidence >= 0.85
 

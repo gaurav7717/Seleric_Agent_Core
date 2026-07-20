@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 157
+count: 161
 metrics:
   active_orders:
     category: commerce
@@ -67,6 +67,13 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: amazonGrossRevenue
+  amazon_gross_sales:
+    category: commerce
+    cube_view: sales_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonGrossSales
   amazon_marketplace_fees:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -81,6 +88,13 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: amazonNetPayout
+  amazon_net_sales:
+    category: commerce
+    cube_view: sales_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonNetSales
   amazon_orders:
     category: commerce
     cube_view: orders_all_channels
@@ -95,6 +109,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: amazonPlatformFees
+  amazon_total_sales:
+    category: commerce
+    cube_view: sales_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonTotalSales
   aov:
     category: commerce
     cube_view: commerce_orders
@@ -220,6 +241,12 @@ metrics:
     glossary:
     - Commerce.CancelledOrder
     om_name: cancelledOrders
+  channel_gross_revenue:
+    category: attribution
+    cube_view: channel_attribution
+    contract: null
+    glossary: []
+    om_name: channelGrossRevenue
   channel_net_revenue:
     category: attribution
     cube_view: channel_attribution

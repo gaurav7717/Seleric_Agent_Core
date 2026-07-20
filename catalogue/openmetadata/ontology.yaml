@@ -70,14 +70,14 @@ domains:
   Finance:
     om_glossary: Finance
     owner_team: finance-team
-    data_product: CanonicalPnl
+    data_products: [CanonicalPnl, AmazonAccounts]
     cube_views: [canonical_pnl]
-    grain: Daily
+    grain: Daily (+ Settlement + OrderItem)
     date_axes: [report_date]
-    agent_ready: false
     notes: >
-      OM InProgress. Net sales = Shopify commerce oracle; spend = certified ads;
-      additive amazon_* marketplace block on CanonicalPnl v3.
+      CanonicalPnl InProgress. AmazonAccounts is ACTUAL_ONLY settlement/item/
+      daily P&L (OM-governed; Cube ports not in agent catalogue yet) — never
+      mix with AmazonCommercePerformance placement estimates.
   Operations:
     om_glossary: Operations
     owner_team: ops-team

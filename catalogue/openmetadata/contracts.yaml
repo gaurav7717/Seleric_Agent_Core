@@ -312,3 +312,39 @@ contracts:
       Secondary event-type × channel day port. Counts only — rates recompute as
       SUM/SUM; unique_visitors/unique_pages are per-row distinct counts and are
       NOT additive across rows. Unattributed buckets have sessions = 0.
+
+  amazon_settlement_reconciliation_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_settlement_reconciliation
+    data_product: AmazonAccounts
+    domain: Finance
+    grain: [brand_id, account_id, settlement_key, currency_code]
+    time_dimension: report_date
+    currency: INR
+    notes: ACTUAL_ONLY reconciled settlements — never mix with placement estimates.
+
+  amazon_order_item_pnl_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_order_item_pnl
+    data_product: AmazonAccounts
+    domain: Finance
+    grain: [brand_id, amazon_order_id, order_item_id]
+    time_dimension: report_date
+    currency: INR
+    notes: ACTUAL item P&L; flat 18% reverse-GST estimate only.
+
+  amazon_daily_pnl_actual_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_daily_pnl_actual
+    data_product: AmazonAccounts
+    domain: Finance
+    grain: [brand_id, report_date, currency_code]
+    time_dimension: report_date
+    currency: INR
+    notes: Secondary daily ACTUAL port of AmazonAccounts.
+
+  amazon_accounts_exceptions_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_accounts_exceptions
+    data_product: AmazonAccounts
+    domain: Finance
+    grain: [brand_id, exception_domain, reference_key]
+    time_dimension: report_date
+    currency: INR
+    notes: Close-queue exceptions for ACTUAL settlements.

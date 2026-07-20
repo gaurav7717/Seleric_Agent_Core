@@ -1,0 +1,42 @@
+id: channel_gross_revenue
+display_name: Channel Gross Revenue
+category: attribution
+status: certified
+description: >
+  Gross revenue by closed channel set (meta / google / organic_shopify / amazon /
+  organic_amazon). Shopify rows are ex-GST-compatible first-party; Amazon rows
+  use marketplace incl-GST basis — check revenue_basis. For Shopify-only net
+  by channel prefer channel_net_revenue.
+formula:
+  human_readable: SUM(gross_revenue) by channel
+  authoritative_source: cube
+cube_mapping:
+  view: channel_attribution
+  measure: channel_attribution.gross_revenue
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: brand × day × channel
+supported_dimensions:
+  - brand_id
+  - report_date
+  - channel
+  - source_platform
+  - revenue_basis
+supported_filters:
+  - date_range
+  - brand_id
+  - channel
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Gross revenue by channel last 30 days
+    request:
+      measures: [channel_gross_revenue]
+      dimensions: [channel]
+      time_range: {preset: last_30_days}
+validation_tests:
+  - channel_gross_revenue >= 0
+deprecated_aliases: []

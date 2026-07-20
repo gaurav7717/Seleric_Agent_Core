@@ -3,9 +3,8 @@ display_name: Total Sales (Shopify-only, incl. GST)
 category: commerce
 status: certified
 description: 'Pre-discount checkout value including GST on eligible placement orders (gross_revenue +
-  total_discounts). Shopify-only Commerce Performance. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+  total_discounts). Shopify-only. Use when the user says Shopify-only. For Total / all channels
+  use total_sales_all_channels; for Amazon-only use amazon_total_sales.'
 formula:
   human_readable: Sum of gross_revenue + total_discounts per eligible order
   authoritative_source: cube

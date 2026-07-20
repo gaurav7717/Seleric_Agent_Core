@@ -227,10 +227,17 @@ terms:
     canonical_id: total_ad_spend
     definition: >
       Defaults to Total Ad Spend (all platforms) = Total Performance Marketing
-      (Meta+Google+Amazon). For Shopify-only Historical card use shopify_ad_spend.
+      (Meta+Google+Amazon). For Meta-only / Google-only / Amazon-ads-only say
+      that platform. For Shopify Historical card (Meta+Google) use shopify_ad_spend.
   - term: total ad spend
     canonical_id: total_ad_spend
   - term: total ad spend (all platforms)
+    canonical_id: total_ad_spend
+  - term: total ads
+    canonical_id: total_ad_spend
+  - term: all platforms ad spend
+    canonical_id: total_ad_spend
+  - term: all platforms ads
     canonical_id: total_ad_spend
   - term: total adspend
     canonical_id: total_ad_spend
@@ -253,19 +260,44 @@ terms:
     canonical_id: shopify_ad_spend
   - term: total ad spend shopify
     canonical_id: shopify_ad_spend
+  - term: shopify only ad spend
+    canonical_id: shopify_ad_spend
+  - term: shopify only ads
+    canonical_id: shopify_ad_spend
   - term: meta ads
     canonical_id: meta_spend
   - term: meta spend
     canonical_id: meta_spend
+  - term: meta only
+    canonical_id: meta_spend
+    definition: Meta Ads spend (platform-only). For Meta delivery metrics say meta impressions/clicks/CTR.
+  - term: meta only spend
+    canonical_id: meta_spend
+  - term: meta only ads
+    canonical_id: meta_spend
+  - term: meta ads only
+    canonical_id: meta_spend
+  - term: meta only ad spend
+    canonical_id: meta_spend
   - term: meta impressions
+    canonical_id: meta_impressions
+  - term: meta only impressions
     canonical_id: meta_impressions
   - term: meta clicks
     canonical_id: meta_clicks
+  - term: meta only clicks
+    canonical_id: meta_clicks
   - term: meta CTR
+    canonical_id: meta_ctr
+  - term: meta only CTR
     canonical_id: meta_ctr
   - term: meta CPC
     canonical_id: meta_cpc
+  - term: meta only CPC
+    canonical_id: meta_cpc
   - term: meta CPM
+    canonical_id: meta_cpm
+  - term: meta only CPM
     canonical_id: meta_cpm
   - term: meta hook rate
     canonical_id: meta_hook_rate
@@ -275,21 +307,65 @@ terms:
     canonical_id: google_spend
   - term: google spend
     canonical_id: google_spend
+  - term: google only
+    canonical_id: google_spend
+    definition: Google Ads spend (platform-only).
+  - term: google only spend
+    canonical_id: google_spend
+  - term: google only ads
+    canonical_id: google_spend
+  - term: google ads only
+    canonical_id: google_spend
+  - term: google only ad spend
+    canonical_id: google_spend
   - term: google impressions
+    canonical_id: google_impressions
+  - term: google only impressions
     canonical_id: google_impressions
   - term: google clicks
     canonical_id: google_clicks
+  - term: google only clicks
+    canonical_id: google_clicks
   - term: google CTR
     canonical_id: google_ctr
+  - term: google only CTR
+    canonical_id: google_ctr
+  - term: google CPC
+    canonical_id: google_cpc
+  - term: google only CPC
+    canonical_id: google_cpc
+  - term: google CPM
+    canonical_id: google_cpm
+  - term: google only CPM
+    canonical_id: google_cpm
   - term: amazon ads
     canonical_id: amazon_ads_spend
   - term: amazon spend
     canonical_id: amazon_ads_spend
+    definition: >
+      Amazon Ads spend (not marketplace sales). For Amazon commerce sales/orders
+      say "amazon total sales" / "amazon orders".
   - term: amazon ads spend
+    canonical_id: amazon_ads_spend
+  - term: amazon only ads
+    canonical_id: amazon_ads_spend
+  - term: amazon ads only
+    canonical_id: amazon_ads_spend
+  - term: amazon only ad spend
+    canonical_id: amazon_ads_spend
+  - term: amazon only spend
     canonical_id: amazon_ads_spend
   - term: amazon clicks
     canonical_id: amazon_ads_clicks
+  - term: amazon only clicks
+    canonical_id: amazon_ads_clicks
+  - term: amazon ads clicks
+    canonical_id: amazon_ads_clicks
   - term: amazon CTR
+    canonical_id: amazon_ads_ctr
+  - term: amazon only CTR
+    canonical_id: amazon_ads_ctr
+  - term: amazon ads CTR
     canonical_id: amazon_ads_ctr
   - term: meta purchases
     canonical_id: null
@@ -312,17 +388,111 @@ terms:
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
   - term: attributed revenue
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: attributed_net_revenue
+    definition: >
+      First-party attributed net revenue (ex-GST) from order_attribution.
+      Not commerce Total/Net Sales and not platform-reported Meta purchase value.
+  - term: attributed net revenue
+    canonical_id: attributed_net_revenue
+  - term: attributed sales
+    canonical_id: attributed_net_revenue
+  - term: attr sales
+    canonical_id: attributed_net_revenue
+  - term: attr revenue
+    canonical_id: attributed_net_revenue
+  - term: attribution sales
+    canonical_id: attributed_net_revenue
+  - term: attribution revenue
+    canonical_id: attributed_net_revenue
   - term: last-touch revenue
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: attributed_net_revenue
+  - term: last touch revenue
+    canonical_id: attributed_net_revenue
+  - term: last-touch sales
+    canonical_id: attributed_net_revenue
   - term: campaign revenue
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: attributed_net_revenue
+    definition: >
+      Use attributed_net_revenue (optionally break down by lt_campaign_name).
+      Meta ad-grain campaign view → meta_attr_net_revenue.
+  - term: attributed gross revenue
+    canonical_id: attributed_gross_revenue
+  - term: attributed gross sales
+    canonical_id: attributed_gross_revenue
+  - term: attr gross sales
+    canonical_id: attributed_gross_revenue
   - term: attributed orders
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: attributed_orders
+  - term: attr orders
+    canonical_id: attributed_orders
+  - term: attribution orders
+    canonical_id: attributed_orders
+  - term: last-touch orders
+    canonical_id: attributed_orders
+  - term: attributed aov
+    canonical_id: attributed_aov
+  - term: attr aov
+    canonical_id: attributed_aov
+  - term: attributed refunds
+    canonical_id: attributed_refund_amount
+  - term: attributed refund amount
+    canonical_id: attributed_refund_amount
+  - term: attributed new customer orders
+    canonical_id: attributed_new_customer_orders
+  - term: attr new customer orders
+    canonical_id: attributed_new_customer_orders
+  - term: touch attributed orders
+    canonical_id: touch_attributed_orders
+  - term: touch-attributed orders
+    canonical_id: touch_attributed_orders
+  - term: attribution rate
+    canonical_id: attribution_rate
+  - term: attribution confidence
+    canonical_id: avg_attribution_confidence
+  - term: average attribution confidence
+    canonical_id: avg_attribution_confidence
+  - term: meta attributed revenue
+    canonical_id: meta_attr_net_revenue
+  - term: meta attributed sales
+    canonical_id: meta_attr_net_revenue
+  - term: meta attr sales
+    canonical_id: meta_attr_net_revenue
+  - term: meta attribution sales
+    canonical_id: meta_attr_net_revenue
+  - term: meta attributed net revenue
+    canonical_id: meta_attr_net_revenue
+  - term: meta attributed gross revenue
+    canonical_id: meta_attr_gross_revenue
+  - term: meta attributed gross sales
+    canonical_id: meta_attr_gross_revenue
+  - term: meta attributed orders
+    canonical_id: meta_attr_orders
+  - term: meta attr orders
+    canonical_id: meta_attr_orders
+  - term: meta attributed aov
+    canonical_id: meta_attr_aov
+  - term: meta attributed refunds
+    canonical_id: meta_attr_refund_amount
+  - term: meta attributed new customer orders
+    canonical_id: meta_attr_new_customer_orders
+  - term: meta attributed new customer revenue
+    canonical_id: meta_attr_new_customer_revenue
+  - term: channel orders
+    canonical_id: channel_orders
+  - term: channel sales
+    canonical_id: channel_net_revenue
+  - term: channel revenue
+    canonical_id: channel_net_revenue
+  - term: channel net revenue
+    canonical_id: channel_net_revenue
+  - term: channel gross revenue
+    canonical_id: channel_gross_revenue
+  - term: orders by channel
+    canonical_id: channel_orders
+  - term: sales by channel
+    canonical_id: channel_net_revenue
+  - term: revenue by channel
+    canonical_id: channel_net_revenue
   - term: product views
     canonical_id: product_views
     definition: >
@@ -380,34 +550,60 @@ terms:
     canonical_id: null
     definition: Platform-reported Google CPA — not certified in PaidMedia V1.
   - term: total sales
-    canonical_id: total_sales
+    canonical_id: total_sales_all_channels
     definition: >
-      Shopify-only Total Sales including GST. Does not include Amazon SP.
-      For All channels use total_sales_all_channels.
+      Total Sales across Shopify + Amazon (incl. GST). For Shopify-only say
+      "shopify total sales"; for Amazon-only say "amazon total sales".
   - term: total sales (including gst)
-    canonical_id: total_sales
+    canonical_id: total_sales_all_channels
   - term: total sales including gst
-    canonical_id: total_sales
-  - term: total sales (shopify-only)
-    canonical_id: total_sales
-  - term: shopify total sales
-    canonical_id: total_sales
+    canonical_id: total_sales_all_channels
   - term: total sales (all channels)
     canonical_id: total_sales_all_channels
   - term: total sales all channels
     canonical_id: total_sales_all_channels
   - term: all channels total sales
     canonical_id: total_sales_all_channels
+  - term: total sales (shopify-only)
+    canonical_id: total_sales
+  - term: shopify total sales
+    canonical_id: total_sales
+  - term: shopify only total sales
+    canonical_id: total_sales
+  - term: total sales (amazon-only)
+    canonical_id: amazon_total_sales
+  - term: amazon total sales
+    canonical_id: amazon_total_sales
+  - term: amazon only total sales
+    canonical_id: amazon_total_sales
   - term: gross sales (all channels)
     canonical_id: gross_sales_all_channels
   - term: gross sales all channels
     canonical_id: gross_sales_all_channels
+  - term: all channels gross sales
+    canonical_id: gross_sales_all_channels
+  - term: amazon gross sales
+    canonical_id: amazon_gross_sales
+  - term: amazon only gross sales
+    canonical_id: amazon_gross_sales
+  - term: gross sales (amazon-only)
+    canonical_id: amazon_gross_sales
   - term: net sales (all channels)
     canonical_id: net_sales_all_channels
   - term: net sales all channels
     canonical_id: net_sales_all_channels
   - term: all channels net sales
     canonical_id: net_sales_all_channels
+  - term: amazon net sales
+    canonical_id: amazon_net_sales
+  - term: amazon only net sales
+    canonical_id: amazon_net_sales
+  - term: net sales (amazon-only)
+    canonical_id: amazon_net_sales
+  - term: amazon only orders
+    canonical_id: amazon_orders
+  - term: shopify only orders
+    canonical_id: orders
   - term: gross units
     canonical_id: gross_units_ordered
   - term: cancelled orders

@@ -155,6 +155,23 @@ data_products:
     notes: >
       OM certification InProgress until cost-basis gates close. Net sales =
       Shopify oracle; additive amazon_* block; spend from certified ads serve.
+  - name: AmazonAccounts
+    domain: Finance
+    owner_team: finance-team
+    primary_serve_table: clickhouse.default.serve.amazon_settlement_reconciliation
+    contract: amazon_settlement_reconciliation_contract_v1
+    secondary_contracts:
+      - amazon_order_item_pnl_contract_v1
+      - amazon_daily_pnl_actual_contract_v1
+      - amazon_accounts_exceptions_contract_v1
+    cube_views: []
+    platforms: [AmazonSP]
+    notes: >
+      ACTUAL_ONLY Amazon Seller Central accounts — settlement reconciliation,
+      item/daily P&L, close exceptions. OM-governed; Cube/agent metric ports
+      not catalogued yet. Never mix with AmazonCommercePerformance placement
+      estimates. Flat 18% reverse-GST estimate only; statutory GST report not
+      modeled.
   - name: ReturnsRefunds
     domain: Operations
     owner_team: ops-team
@@ -277,6 +294,21 @@ glossaries:
     terms: [LifetimeValue, RepeatCustomer, AcquisitionChannel, PurchaseSequence, HashedPII, CustomerProfile]
   - name: Finance
     domain: Finance
-    terms: [NetCogs, GrossProfit, ContributionMargin, NetProfit, MER, CostCoverage, TotalAdSpend]
+    terms:
+      - NetCogs
+      - GrossProfit
+      - ContributionMargin
+      - NetProfit
+      - MER
+      - CostCoverage
+      - TotalAdSpend
+      - AmazonAccountsActual
+      - AmazonSettlementReconciliation
+      - AmazonSettledNetPayout
+      - AmazonSettledGrossProfit
+      - AmazonSettlementException
   - name: Operations
     domain: Operations
+  - name: Web Analytics
+    domain: WebAnalytics
+    terms: [Session, FunnelStage, Bounce, WebEvent, PageView, FineChannel]

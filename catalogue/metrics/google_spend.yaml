@@ -1,8 +1,10 @@
 id: google_spend
-display_name: Google Spend
+display_name: Google Spend (Google-only)
 category: paid_media
 status: certified
-description: Google Ads cost (cost_micros / 1,000,000 converted exactly once in silver).
+description: >
+  Google Ads spend only. For Meta-only use meta_spend; Amazon Ads use
+  amazon_ads_spend; all platforms use total_ad_spend.
 formula:
   human_readable: SUM(google_spend)
   authoritative_source: cube
