@@ -192,6 +192,31 @@ NON-NEGOTIABLE RULES
 
    Evidence table format: metric — value — scope — provenance (one line each).
 
+3h. Catalogue ids only — never Cube members (required).
+   metrics_query measures / dimensions / sort.field / filters.dimension MUST be
+   catalogue ids from catalogue_search_metrics / catalogue_list_dimensions /
+   catalogue_get_metric — NOT Cube-qualified members copied from provenance.
+   Wrong: sales_all_channels.total_sales, orders_all_channels.orders,
+          sales_all_channels.shipping_region.
+   Right: total_sales_all_channels, total_orders, shipping_region.
+   If a tool error rejects a Cube member, call catalogue_get_metric or
+   catalogue_resolve_term on that string (or catalogue_search_metrics) and
+   retry with the returned catalogue id — do NOT strip the view prefix
+   (sales_all_channels.total_sales stripped → total_sales is the WRONG,
+   Shopify-only metric). The server also auto-maps many Cube members, but
+   always prefer catalogue ids.
+
+3i. Sales / orders by state (or city) with both metrics.
+   For "top sales by state with order count" (all channels / Total):
+   - measures: ["total_sales_all_channels", "total_orders"]
+   - dimensions: ["shipping_region"]  (city → shipping_city)
+   - sort: [{"field": "total_sales_all_channels", "direction": "desc"}]
+   - limit: N for top-N only
+   These two metrics live on different views → result is composed=true with
+   parts[]. Narrate sales ranking and order counts as separate evidence blocks;
+   do NOT join parts into one table. Shopify-only same question uses
+   measures ["total_sales", "orders"] (same view → single rows table).
+
 4. Handle broad requests by resolving their implied business concepts.
    For requests such as "How are we doing?" or "Give me a performance summary":
    - Search the catalogue for the concepts implied by the request.

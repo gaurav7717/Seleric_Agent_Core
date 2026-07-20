@@ -286,3 +286,60 @@ async def test_metrics_drilldown_refuses_when_parent_view_stale(built_server_fak
     out = await fn(parent["query_id"], target_dimensions=["payment_method"])
     assert out["error"] == "stale_data"
     assert "commerce_orders" in out["stale_views"]
+
+
+async def test_catalogue_get_metric_aliases_cube_member(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metric")
+    out = fn("sales_all_channels.total_sales")
+    assert "error" not in out
+    assert out["id"] == "total_sales_all_channels"
+    assert out["query_as"] == {"measures": ["total_sales_all_channels"]}
+    assert out.get("resolved_from") == "sales_all_channels.total_sales"
+
+
+async def test_catalogue_resolve_term_aliases_cube_member(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_resolve_term")
+    out = fn("orders_all_channels.orders")
+    assert out["kind"] == "resolved"
+    assert out["metric_id"] == "total_orders"
+
+
+async def test_insights_explain_rejects_composed_parent(built_server, fake_cube):
+    from datetime import date as _date
+
+    from seleric_mcp.app.models import QueryRequest, TimeRange
+
+    mcp, ctx = built_server
+    fake_cube.by_prefix["sales_all_channels"] = [
+        {"sales_all_channels.total_sales": "100"}
+    ]
+    fake_cube.by_prefix["orders_all_channels"] = [
+        {"orders_all_channels.orders": "2"}
+    ]
+    parent = await ctx.planner.run(
+        QueryRequest(
+            measures=["total_sales_all_channels", "total_orders"],
+            time_range=TimeRange(start=_date(2026, 6, 1), end=_date(2026, 6, 30)),
+        )
+    )
+    assert parent.get("composed") is True
+    fn = _tool_fn(mcp, "insights_explain")
+    out = fn(parent["query_id"])
+    assert "error" in out
+    assert "multi-view composition" in out["error"]
+    assert out["part_query_ids"]
+
+
+async def test_scopes_apply_to_cube_member_measure_ref(built_server_no_scopes):
+    mcp, ctx = built_server_no_scopes
+    fn = _tool_fn(mcp, "metrics_query")
+    out = await fn(
+        measures=["commerce_orders.dashboard_net_sales_excl_tax"],
+        time_range={"preset": "last_7d"},
+    )
+    # Must resolve Cube member → commerce_net_revenue and still deny scopes.
+    assert "error" in out
+    assert "missing_scopes_by_metric" in out
+    assert "commerce_net_revenue" in out["missing_scopes_by_metric"]

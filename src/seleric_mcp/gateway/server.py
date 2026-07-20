@@ -1,9 +1,11 @@
 """MCP gateway: the only surface any LLM client talks to. Registers identical
 tool schemas regardless of transport (stdio or streamable-http) — no
 client-specific branches, which is what keeps this model-agnostic.
-"""
 
-from __future__ import annotations
+NOTE: Do not add ``from __future__ import annotations`` here. FastMCP 1.12
+inspects parameter annotations with ``issubclass(..., Context)`` and crashes
+when annotations are stringified (PEP 563).
+"""
 
 import json
 import re
@@ -157,9 +159,11 @@ class AppContext:
             return {}
         views_needed: dict[str, list[str]] = {}
         for mid in metric_ids:
-            m = self.catalogue.get_metric(mid)
+            resolved = self.catalogue.resolve_metric_id(mid)
+            canonical = resolved[0] if resolved else mid
+            m = self.catalogue.get_metric(canonical)
             if m is not None:
-                views_needed.setdefault(m.cube_mapping.view, []).append(mid)
+                views_needed.setdefault(m.cube_mapping.view, []).append(canonical)
         if not views_needed:
             return {}
         today_ist = datetime.now(ZoneInfo("Asia/Kolkata")).date()
@@ -223,12 +227,14 @@ def build_server(settings: Settings) -> FastMCP:
         """
         denied: dict[str, list[str]] = {}
         for mid in metric_ids:
-            m = ctx.catalogue.get_metric(mid)
+            resolved = ctx.catalogue.resolve_metric_id(mid)
+            canonical = resolved[0] if resolved else mid
+            m = ctx.catalogue.get_metric(canonical)
             if m is None:
                 continue
             missing = sorted(set(m.access_policy.scopes) - ctx.settings.caller_scopes)
             if missing:
-                denied[mid] = missing
+                denied[canonical] = missing
         if not denied:
             return None
         return {
@@ -266,26 +272,45 @@ def build_server(settings: Settings) -> FastMCP:
     @mcp.tool()
     def catalogue_get_metric(metric_id: str) -> dict:
         """Full catalogue definition for one metric id: formula, cube mapping,
-        dimensions/filters, owner, access policy, freshness, caveats."""
+        dimensions/filters, owner, access policy, freshness, caveats.
+
+        Pass a catalogue metric id (e.g. total_sales_all_channels). Cube
+        members from provenance (e.g. sales_all_channels.total_sales) are
+        accepted and remapped, but NEVER pass cube_mapping.measure into
+        metrics_query — always use the returned metric id / query_as.measures.
+        """
         _log_call("catalogue_get_metric", metric_id=metric_id)
-        m = ctx.catalogue.get_metric(metric_id)
-        if m is None:
+        resolved = ctx.catalogue.resolve_metric_id(metric_id)
+        if resolved is None:
             result = ctx.catalogue.search(metric_id)
             return {
                 "error": f"Unknown metric '{metric_id}'",
                 "suggestions": [s.id for s in result.matches] + result.suggestions,
             }
+        canonical_id, alias_notice = resolved
+        m = ctx.catalogue.get_metric(canonical_id)
+        assert m is not None
         freshness = ctx.catalogue.freshness(m.cube_mapping.view)
-        return {
+        out = {
             **m.model_dump(),
             "freshness": freshness,
             "catalogue_version": ctx.catalogue.version,
+            # Agent-facing: use these ids in metrics_query — not cube_mapping.
+            "query_as": {"measures": [m.id]},
         }
+        if alias_notice:
+            out["resolved_from"] = metric_id
+            out["resolution_notice"] = alias_notice
+        return out
 
     @mcp.tool()
     def catalogue_list_dimensions(view: str) -> dict:
         """Valid dimensions/filters for a Cube view (e.g. canonical_pnl,
-        commerce_orders, meta_ad_performance, customer_ltv)."""
+        commerce_orders, meta_ad_performance, customer_ltv).
+
+        Use each dimension's catalogue ``id`` (e.g. shipping_region) in
+        metrics_query dimensions/filters — not the views[view] Cube member.
+        """
         _log_call("catalogue_list_dimensions", view=view)
         if view not in ctx.catalogue.cat.views:
             return {
@@ -295,6 +320,7 @@ def build_server(settings: Settings) -> FastMCP:
         return {
             "view": view,
             "dimensions": [d.model_dump() for d in ctx.catalogue.list_dimensions(view)],
+            "note": "Pass dimension id (not views[*] Cube members) to metrics_query.",
             "catalogue_version": ctx.catalogue.version,
         }
 
@@ -347,7 +373,11 @@ def build_server(settings: Settings) -> FastMCP:
         limit: int | None = None,
     ) -> dict:
         """THE only path to numeric data. measures = catalogue metric ids
-        (from catalogue_search_metrics), not raw cube members. time_range is
+        (from catalogue_search_metrics), not raw cube members. Cube members
+        like sales_all_channels.total_sales are auto-mapped when possible, but
+        always prefer catalogue ids (total_sales_all_channels, total_orders).
+        dimensions / filters.dimension / sort.field are also catalogue ids
+        (e.g. shipping_region), not view.qualified members. time_range is
         {"preset": "last_30d"} (today|yesterday|last_7d|last_30d|last_90d|
         this_month|last_month) or {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}.
         filters entries: {"dimension": <id>, "operator": "equals", "values":
@@ -361,7 +391,10 @@ def build_server(settings: Settings) -> FastMCP:
         different views are run as parallel single-view queries and returned
         with composed=true and a parts[] array — narrate each part separately
         (do not join across views). Same-view metrics return the usual rows +
-        provenance. Quote provenance freshness when presenting numbers."""
+        provenance. For top sales by state with order count (all channels):
+        measures=[total_sales_all_channels, total_orders],
+        dimensions=[shipping_region], sort by total_sales_all_channels desc.
+        Quote provenance freshness when presenting numbers."""
         trace_id = _log_call("metrics_query", measures=measures)
         denial = _check_metric_scopes(measures)
         if denial:
@@ -398,7 +431,11 @@ def build_server(settings: Settings) -> FastMCP:
     ) -> dict:
         """Drill into a prior metrics_query result: same metrics, time range,
         compare mode and filters, regrouped by target_dimensions. Additional
-        filters can only narrow the parent scope, never widen it."""
+        filters can only narrow the parent scope, never widen it.
+        target_dimensions and additional_filters[].dimension are catalogue
+        dimension ids (e.g. shipping_region), not Cube view.member strings.
+        For composed multi-view parents, pass a part query_id from
+        provenance.part_query_ids — not the parent composition id."""
         trace_id = _log_call("metrics_drilldown", parent_query_id=parent_query_id)
         stored = ctx.result_store.get(parent_query_id)
         if stored is not None:
@@ -435,7 +472,8 @@ def build_server(settings: Settings) -> FastMCP:
         """Deterministic explanation of a stored metrics_query result: period
         totals, delta and % change, top movers with contribution %, and simple
         anomaly flags. All math happens here in code — narrate these numbers,
-        do not compute your own."""
+        do not compute your own. For composed multi-view results, pass a part
+        query_id from provenance.part_query_ids (not the parent composition id)."""
         _log_call("insights_explain", query_id=query_id)
         stored = ctx.result_store.get(query_id)
         if stored is None:
@@ -443,8 +481,27 @@ def build_server(settings: Settings) -> FastMCP:
                 "error": f"Query '{query_id}' not found or expired (results kept ~1h). "
                 "Re-run metrics_query first."
             }
+        try:
+            prov = json.loads(stored.provenance_json)
+        except json.JSONDecodeError:
+            prov = {}
+        if prov.get("composed"):
+            parts = ", ".join(prov.get("part_query_ids") or [])
+            return {
+                "error": (
+                    f"Query '{query_id}' is a multi-view composition. "
+                    f"Call insights_explain on a part query_id instead: {parts}"
+                ),
+                "part_query_ids": prov.get("part_query_ids") or [],
+            }
         request = QueryRequest.model_validate_json(stored.request_json)
-        metrics = [m for mid in request.measures if (m := ctx.catalogue.get_metric(mid))]
+        metrics = []
+        for mid in request.measures:
+            resolved = ctx.catalogue.resolve_metric_id(mid)
+            canonical = resolved[0] if resolved else mid
+            m = ctx.catalogue.get_metric(canonical)
+            if m is not None:
+                metrics.append(m)
         report = insight_explain(
             current=json.loads(stored.result_json),
             compare=json.loads(stored.compare_result_json) if stored.compare_result_json else None,

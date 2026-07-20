@@ -37,6 +37,8 @@ supported_dimensions:
 - shipping_state_code
 - payment_method
 - payment_gateway
+- payment_bucket
+- is_prepaid
 supported_filters:
 - date_range
 - brand_id
@@ -51,6 +53,8 @@ supported_filters:
 - shipping_state_code
 - payment_method
 - payment_gateway
+- payment_bucket
+- is_prepaid
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

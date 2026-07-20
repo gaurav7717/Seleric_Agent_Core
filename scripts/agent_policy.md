@@ -186,6 +186,29 @@ Resolve all business concepts using catalogue tools:
 When the user names multiple concepts, resolve each independently and query
 only the metric identifiers returned by the catalogue.
 
+**Never pass Cube-qualified members** (`view.measure`, `view.dimension`) into
+`metrics_query`. Those appear in provenance / Cube JSON only. Always use
+catalogue ids (`total_sales_all_channels`, `total_orders`, `shipping_region`).
+If a tool rejects a `view.member` string, call `catalogue_get_metric` /
+`catalogue_resolve_term` (or search) and retry with the returned catalogue id —
+never strip the view prefix (`sales_all_channels.total_sales` → `total_sales`
+is the wrong Shopify-only metric).
+
+### Sales by state (or city) with order count
+
+All channels / Total:
+
+- `measures: ["total_sales_all_channels", "total_orders"]`
+- `dimensions: ["shipping_region"]` (or `shipping_city`)
+- `sort: [{"field": "total_sales_all_channels", "direction": "desc"}]`
+- `limit` only for top-N
+
+Expect `composed: true` (different Cube views). Narrate each `parts[]` entry
+separately — do not join into one table.
+
+Shopify-only (joined table OK): `measures: ["total_sales", "orders"]` with the
+same dimension.
+
 ### Resolution behavior
 
 #### Resolved

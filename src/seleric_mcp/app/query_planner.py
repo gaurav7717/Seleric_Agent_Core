@@ -101,33 +101,64 @@ class QueryPlanner:
 
     # ---------- validation ----------
 
-    def _resolve_metrics(self, metric_ids: list[str]) -> list[MetricDef]:
+    def _resolve_metrics(self, metric_ids: list[str]) -> tuple[list[MetricDef], list[str]]:
+        """Resolve catalogue ids (or Cube measure members) to MetricDefs.
+
+        Returns ``(metrics, warnings)``. Cube-qualified members from provenance
+        (e.g. ``sales_all_channels.total_sales``) are mapped to catalogue ids
+        with a warning so mistaken agent calls still succeed.
+        """
         metrics: list[MetricDef] = []
+        warnings: list[str] = []
         for mid in metric_ids:
-            m = self.catalogue.get_metric(mid)
-            if m is None or not m.is_queryable:
+            resolved = self.catalogue.resolve_metric_id(mid)
+            if resolved is None:
                 result = self.catalogue.search(mid)
                 hints = [s.id for s in result.matches] + result.suggestions
+                m = self.catalogue.get_metric(mid)
                 reason = "unknown" if m is None else f"status={m.status}"
                 raise PlanError(
                     f"Metric '{mid}' is not an approved catalogue metric ({reason}). "
-                    "Use catalogue_search_metrics to find valid ids.",
+                    "Use catalogue_search_metrics to find valid ids "
+                    "(not Cube members like view.measure).",
                     suggestions=hints,
                 )
+            canonical_id, warn = resolved
+            if warn:
+                warnings.append(warn)
+            m = self.catalogue.get_metric(canonical_id)
+            assert m is not None  # resolve_metric_id only returns queryable ids
             metrics.append(m)
-        return metrics
+        return metrics, warnings
 
-    def _metrics_supporting_dimension(self, dimension_id: str, *, exclude: str | None = None) -> list[str]:
-        """Catalogue ids that declare support for dimension_id (for PlanError hints)."""
-        hints: list[str] = []
+    def _metrics_supporting_dimension(
+        self, dimension_id: str, *, exclude: str | None = None
+    ) -> list[str]:
+        """Catalogue ids that declare support for dimension_id (for PlanError hints).
+
+        Prefer same-category metrics and id-token overlap with the excluded
+        metric so e.g. cancel_revenue + shipping_region suggests
+        event_cancel_revenue ahead of unrelated product metrics.
+        """
+        exclude_metric = self.catalogue.cat.metrics.get(exclude) if exclude else None
+        exclude_cat = exclude_metric.category if exclude_metric else None
+        exclude_tokens = {
+            t for t in (exclude or "").lower().replace("-", "_").split("_") if len(t) > 2
+        }
+        scored: list[tuple[int, str]] = []
         for mid, m in self.catalogue.cat.metrics.items():
             if not m.is_queryable or mid == exclude:
                 continue
-            if dimension_id in m.supported_dimensions:
-                hints.append(mid)
-            if len(hints) >= 8:
-                break
-        return hints
+            if dimension_id not in m.supported_dimensions:
+                continue
+            score = 0
+            if exclude_cat and m.category == exclude_cat:
+                score += 3
+            mid_tokens = set(mid.lower().replace("-", "_").split("_"))
+            score += len(exclude_tokens & mid_tokens)
+            scored.append((-score, mid))
+        scored.sort()
+        return [mid for _, mid in scored[:8]]
 
     def _validate_dimensions(self, metrics: list[MetricDef], dimension_ids: list[str]) -> list[str]:
         """Returns qualified cube dimension members."""
@@ -206,6 +237,29 @@ class QueryPlanner:
                 raise PlanError(f"Filter on '{f.dimension}' requires values.")
             values, value_warnings = self._resolve_filter_values(dim, f)
             warnings.extend(value_warnings)
+            # Serve geo columns are upperUTF8-normalized across commerce /
+            # all-channels / attribution / refunds. Uppercase filter values so
+            # "Maharashtra" matches MAHARASHTRA and does not silently return 0.
+            if (
+                dim.id in {
+                    "shipping_country",
+                    "shipping_region",
+                    "shipping_city",
+                    "shipping_state_code",
+                }
+                and f.operator in ("equals", "notEquals", "contains")
+                and values
+            ):
+                normalized: list[str] = []
+                for v in values:
+                    up = v.upper()
+                    if up != v:
+                        warnings.append(
+                            f"Filter value '{v}' on '{dim.id}' uppercased to '{up}' "
+                            "(shipping geo is stored uppercased)."
+                        )
+                    normalized.append(up)
+                values = normalized
             if dim.id == "brand_id" and f.operator in ("equals", "notEquals") and values:
                 resolved_brands: list[str] = []
                 for v in values:
@@ -226,22 +280,37 @@ class QueryPlanner:
 
     def _validate_sort(self, metrics: list[MetricDef], view: str, sort: list[SortSpec]) -> dict[str, str]:
         """Returns an ordered Cube 'order' dict. A sort field must be one of
-        the requested metric ids or a dimension already valid on this view —
-        never an invented field, matching requirement 9."""
+        the requested metric ids (or their Cube measure / ratio-component
+        members) or a dimension already valid on this view — never an
+        invented field, matching requirement 9."""
         order: dict[str, str] = {}
         metric_by_id = {m.id: m for m in metrics}
+        allowed_members: dict[str, str] = {}
+        for m in metrics:
+            allowed_members[m.cube_mapping.measure] = m.cube_mapping.measure
+            if m.cube_mapping.measure_pct:
+                allowed_members[m.cube_mapping.measure_pct] = m.cube_mapping.measure_pct
+            if m.aggregation == "ratio" and m.ratio_components:
+                for comp in (m.ratio_components.numerator, m.ratio_components.denominator):
+                    allowed_members[comp] = comp
         for s in sort:
             if s.field in metric_by_id:
                 member = metric_by_id[s.field].cube_mapping.measure
+            elif s.field in allowed_members:
+                member = allowed_members[s.field]
             else:
-                dim = self.catalogue.resolve_dimension(s.field)
-                if dim is None or view not in dim.views:
-                    raise PlanError(
-                        f"Cannot sort by '{s.field}': not one of the requested measures "
-                        f"({', '.join(metric_by_id)}) and not a valid dimension on view "
-                        f"'{view}'."
-                    )
-                member = dim.views[view]
+                resolved = self.catalogue.resolve_metric_id(s.field)
+                if resolved is not None and resolved[0] in metric_by_id:
+                    member = metric_by_id[resolved[0]].cube_mapping.measure
+                else:
+                    dim = self.catalogue.resolve_dimension(s.field)
+                    if dim is None or view not in dim.views:
+                        raise PlanError(
+                            f"Cannot sort by '{s.field}': not one of the requested measures "
+                            f"({', '.join(metric_by_id)}) and not a valid dimension on view "
+                            f"'{view}'."
+                        )
+                    member = dim.views[view]
             order[member] = s.direction
         return order
 
@@ -254,7 +323,9 @@ class QueryPlanner:
         bt = [
             f
             for f in filters
-            if f.dimension == "breakdown_type" and f.operator == "equals" and len(f.values) == 1
+            if self.catalogue.resolve_dimension_id(f.dimension) == "breakdown_type"
+            and f.operator == "equals"
+            and len(f.values) == 1
         ]
         if len(bt) != 1:
             raise PlanError(
@@ -353,6 +424,9 @@ class QueryPlanner:
     ) -> dict:
         """Execute one Cube load (plus optional compare) for metrics on a single view."""
         view = metrics[0].cube_mapping.view
+        # Normalize measure refs on the request so sort fields that still use
+        # Cube members (or mixed catalogue/Cube ids) resolve cleanly.
+        request = request.model_copy(update={"measures": [m.id for m in metrics]})
         qualified_dims = self._validate_dimensions(metrics, request.dimensions)
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)
         sort_order = self._validate_sort(metrics, view, request.sort)
@@ -361,7 +435,11 @@ class QueryPlanner:
 
         # Default brand scope: without an explicit brand filter, aggregates on
         # brand-scoped views would silently mix other/test brands' rows.
-        if self.default_brand_id and not any(f.dimension == "brand_id" for f in request.filters):
+        has_brand_filter = any(
+            self.catalogue.resolve_dimension_id(f.dimension) == "brand_id"
+            for f in request.filters
+        )
+        if self.default_brand_id and not has_brand_filter:
             brand_dim = self.catalogue.cat.dimensions.get("brand_id")
             member = brand_dim.views.get(view) if brand_dim else None
             if member:
@@ -459,7 +537,24 @@ class QueryPlanner:
         parallel single-view queries (no cross-view SQL join) and returned as
         ``composed`` parts — each part has its own rows + provenance.
         """
-        metrics = self._resolve_metrics(request.measures)
+        metrics, alias_warnings = self._resolve_metrics(request.measures)
+        # Prefer catalogue ids on the stored request (even when the caller
+        # passed Cube members for measures, dimensions, or filters).
+        canon_dims: list[str] = []
+        for d in request.dimensions:
+            dim = self.catalogue.resolve_dimension(d)
+            canon_dims.append(dim.id if dim is not None else d)
+        canon_filters: list[FilterSpec] = []
+        for f in request.filters:
+            dim_id = self.catalogue.resolve_dimension_id(f.dimension) or f.dimension
+            canon_filters.append(f.model_copy(update={"dimension": dim_id}))
+        request = request.model_copy(
+            update={
+                "measures": [m.id for m in metrics],
+                "dimensions": canon_dims,
+                "filters": canon_filters,
+            }
+        )
         # Group by (view, effective time dimension): metrics on different views
         # can never share a Cube query, and metrics on the SAME view but a
         # different time axis (placement order_date vs event event_date) must
@@ -472,21 +567,39 @@ class QueryPlanner:
             by_view.setdefault(key, []).append(m)
 
         if len(by_view) == 1:
-            return await self._run_single_view(request, metrics, parent_query_id)
+            out = await self._run_single_view(request, metrics, parent_query_id)
+            if alias_warnings:
+                out["warnings"] = [*alias_warnings, *(out.get("warnings") or [])]
+            return out
 
         # Composition: one Cube query per (view, time axis), never a cross join.
         # Dimensions/filters must be valid on every participating view (validated
         # inside each _run_single_view); grain-unsafe mixes stay separate parts.
+        # When sort targets a metric on only one view, apply it only to that
+        # part; other parts keep unsorted order (do not fail the whole query).
         parent_id = "q_" + uuid.uuid4().hex[:12]
+
+        async def _part(ms: list[MetricDef]) -> dict:
+            part_ids = {m.id for m in ms}
+            part_members = {m.cube_mapping.measure for m in ms}
+            part_sort = []
+            for s in request.sort:
+                resolved = self.catalogue.resolve_metric_id(s.field)
+                if resolved and resolved[0] in part_ids:
+                    part_sort.append(s.model_copy(update={"field": resolved[0]}))
+                elif s.field in part_ids or s.field in part_members:
+                    part_sort.append(s)
+                else:
+                    dim = self.catalogue.resolve_dimension(s.field)
+                    if dim is not None and ms[0].cube_mapping.view in dim.views:
+                        part_sort.append(s)
+            part_req = request.model_copy(
+                update={"measures": [m.id for m in ms], "sort": part_sort}
+            )
+            return await self._run_single_view(part_req, ms, parent_query_id=parent_id)
+
         parts = await asyncio.gather(
-            *[
-                self._run_single_view(
-                    request.model_copy(update={"measures": [m.id for m in ms]}),
-                    ms,
-                    parent_query_id=parent_id,
-                )
-                for _, ms in sorted(by_view.items())
-            ]
+            *[_part(ms) for _, ms in sorted(by_view.items())]
         )
         part_list = list(parts)
         views = [p["provenance"]["cube_view"] for p in part_list]
@@ -514,17 +627,19 @@ class QueryPlanner:
                 ),
             )
         )
+        composed_warnings = [
+            *alias_warnings,
+            "Metrics spanned multiple Cube views or time axes (e.g. "
+            "placement order_date vs event event_date); ran one query per "
+            "group. Narrate each part with its own provenance — do not "
+            "join or sum rows across parts (grains/axes may differ).",
+        ]
         return {
             "query_id": parent_id,
             "composed": True,
             "composition": composition,
             "parts": part_list,
-            "warnings": [
-                "Metrics spanned multiple Cube views or time axes (e.g. "
-                "placement order_date vs event event_date); ran one query per "
-                "group. Narrate each part with its own provenance — do not "
-                "join or sum rows across parts (grains/axes may differ)."
-            ],
+            "warnings": composed_warnings,
             "provenance": {
                 "query_id": parent_id,
                 "parent_query_id": parent_query_id,

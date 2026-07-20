@@ -717,29 +717,55 @@ terms:
       Use total_sales or commerce_net_revenue with dimension payment_method or
       payment_bucket on commerce_orders (Shopify-only). For gateway-level detail
       use payment_gateway.
-  - term: prepaid vs cod
-    definition: >
-      Compare cod_orders and prepaid_orders counts, or break down total_sales /
-      orders by payment_bucket (cod vs online).
   - term: sales by state
+    canonical_id: total_sales_all_channels
     definition: >
-      Break down total_sales, orders, or total_orders with dimension shipping_region
-      (alias state/province). Shopify uses shipping address; Amazon uses ship_to_state.
+      Break down total_sales_all_channels (and/or total_orders) with dimension
+      shipping_region (alias state/province) — never Cube members like
+      sales_all_channels.total_sales. For "with order count" request BOTH
+      total_sales_all_channels and total_orders in one metrics_query; expect
+      composed multi-view parts — narrate separately, do not join. Shopify-only:
+      total_sales + orders on the same view. City → shipping_city. Geo values
+      are uppercased (MAHARASHTRA).
   - term: sales by city
+    canonical_id: total_sales_all_channels
     definition: >
-      Use total_sales, orders, or product_net_revenue with dimension shipping_city.
+      Use total_sales_all_channels / total_orders (or Shopify total_sales /
+      orders) with dimension shipping_city. Same composed-parts rule as sales
+      by state when both all-channel metrics are requested.
   - term: orders by pincode
+    canonical_id: total_orders
     definition: >
       Use total_orders or commerce event metrics with dimension shipping_pincode
       (Shopify shipping zip; blank on Amazon).
   - term: cancels by payment type
+    canonical_id: event_cancel_revenue
     definition: >
       Use cancelled_orders or event_cancel_revenue with payment_bucket or is_cod
       on commerce_orders (event_date axis).
   - term: returns by payment type
+    canonical_id: event_return_revenue
     definition: >
       Use refunded_orders or event_return_revenue with payment_bucket on
       commerce_orders (event_date axis).
+  - term: returns by payment
+    canonical_id: event_return_revenue
+  - term: return revenue by COD
+    canonical_id: event_return_revenue
+  - term: cancelled by COD
+    canonical_id: cancelled_orders
+  - term: prepaid vs cod
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
+  - term: cod vs prepaid
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
+  - term: COD vs prepaid
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
   - term: product cancel revenue
     canonical_id: product_cancel_revenue
   - term: product return revenue

@@ -111,6 +111,35 @@ async def test_unsupported_dimension_suggests_alternate_metrics(planner):
     assert any("product" in s.lower() or "net_revenue" in s for s in (exc.value.suggestions or []))
 
 
+async def test_pnl_cancel_revenue_geo_suggests_event_metric(planner):
+    # canonical_pnl.cancel_revenue has no geo; hint must prefer event_cancel_revenue.
+    req = QueryRequest(
+        measures=["cancel_revenue"],
+        dimensions=["shipping_region"],
+        time_range=TimeRange(preset="last_7d"),
+    )
+    with pytest.raises(PlanError) as exc:
+        await planner.run(req)
+    assert "event_cancel_revenue" in (exc.value.suggestions or [])
+
+
+async def test_shipping_region_filter_is_uppercased(planner, fake_cube):
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "10"}]
+    req = QueryRequest(
+        measures=["orders"],
+        filters=[FilterSpec(dimension="shipping_region", values=["Maharashtra"])],
+        time_range=TimeRange(preset="last_7d"),
+    )
+    out = await planner.run(req)
+    q = fake_cube.queries[0]
+    assert {
+        "member": "commerce_orders.shipping_region",
+        "operator": "equals",
+        "values": ["MAHARASHTRA"],
+    } in q["filters"]
+    assert any("uppercased" in w for w in out["warnings"])
+
+
 async def test_filter_dimension_must_be_on_view(planner):
     req = QueryRequest(
         measures=["product_net_revenue"],
@@ -332,3 +361,128 @@ async def test_all_channels_total_sales_by_state(planner, fake_cube):
     )
     assert "error" not in out
     assert fake_cube.queries[0]["dimensions"] == ["sales_all_channels.shipping_region"]
+
+
+async def test_cube_member_measure_aliases_to_catalogue_id(planner, fake_cube):
+    """Agents often paste provenance Cube members; map them to catalogue ids."""
+    fake_cube.by_prefix["sales_all_channels"] = [
+        {"sales_all_channels.total_sales": "2005553"}
+    ]
+    out = await planner.run(
+        QueryRequest(
+            measures=["sales_all_channels.total_sales"],
+            dimensions=["sales_all_channels.shipping_region"],
+            time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+            sort=[{"field": "sales_all_channels.total_sales", "direction": "desc"}],
+            limit=5,
+        )
+    )
+    assert "error" not in out
+    assert out["provenance"]["metric_ids"] == ["total_sales_all_channels"]
+    assert fake_cube.queries[0]["measures"] == ["sales_all_channels.total_sales"]
+    assert fake_cube.queries[0]["dimensions"] == ["sales_all_channels.shipping_region"]
+    assert fake_cube.queries[0]["order"] == {"sales_all_channels.total_sales": "desc"}
+    assert any("mapped to catalogue metric id" in w for w in out["warnings"])
+
+
+async def test_sales_by_state_with_order_count_composed(planner, fake_cube):
+    """Top sales by state + order count: multi-view composed, sort only on sales."""
+    fake_cube.by_prefix["sales_all_channels"] = [
+        {
+            "sales_all_channels.shipping_region": "MAHARASHTRA",
+            "sales_all_channels.total_sales": "2005553",
+        }
+    ]
+    fake_cube.by_prefix["orders_all_channels"] = [
+        {
+            "orders_all_channels.shipping_region": "MAHARASHTRA",
+            "orders_all_channels.orders": "412",
+        }
+    ]
+    out = await planner.run(
+        QueryRequest(
+            measures=["total_sales_all_channels", "total_orders"],
+            dimensions=["shipping_region"],
+            time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+            sort=[{"field": "total_sales_all_channels", "direction": "desc"}],
+            limit=5,
+        )
+    )
+    assert out["composed"] is True
+    assert out["composition"] == "multi_view"
+    assert set(out["provenance"]["metric_ids"]) == {
+        "total_sales_all_channels",
+        "total_orders",
+    }
+    assert len(fake_cube.queries) == 2
+    sales_q = next(q for q in fake_cube.queries if "sales_all_channels.total_sales" in q["measures"])
+    orders_q = next(q for q in fake_cube.queries if "orders_all_channels.orders" in q["measures"])
+    assert sales_q["order"] == {"sales_all_channels.total_sales": "desc"}
+    assert sales_q["limit"] == 5
+    # Orders part must not fail because sort targeted the other view's metric.
+    assert "order" not in orders_q or "orders_all_channels.orders" in (orders_q.get("order") or {})
+
+
+async def test_cube_member_orders_measure_aliases(planner, fake_cube):
+    fake_cube.by_prefix["orders_all_channels"] = [{"orders_all_channels.orders": "12"}]
+    out = await planner.run(
+        QueryRequest(
+            measures=["orders_all_channels.orders"],
+            dimensions=["shipping_region"],
+            time_range=TimeRange(preset="today"),
+        )
+    )
+    assert out["provenance"]["metric_ids"] == ["total_orders"]
+    assert any("mapped to catalogue metric id" in w for w in out["warnings"])
+
+
+async def test_cube_member_brand_filter_does_not_double_inject(planner, fake_cube):
+    """Cube-qualified brand_id must count as an explicit brand filter."""
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "3"}]
+    planner.default_brand_id = "20"
+    out = await planner.run(
+        QueryRequest(
+            measures=["orders"],
+            filters=[FilterSpec(dimension="commerce_orders.brand_id", values=["26"])],
+            time_range=TimeRange(preset="today"),
+        )
+    )
+    assert "error" not in out
+    brand_filters = [
+        f for f in fake_cube.queries[0]["filters"]
+        if f["member"] == "commerce_orders.brand_id"
+    ]
+    assert len(brand_filters) == 1
+    assert brand_filters[0]["values"] == ["26"]
+    assert not any("No brand filter given" in w for w in out["warnings"])
+
+
+async def test_deprecated_cube_alias_resolves(planner, fake_cube):
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "9"}]
+    out = await planner.run(
+        QueryRequest(
+            measures=["daily_pnl.orders_created"],
+            time_range=TimeRange(preset="today"),
+        )
+    )
+    assert out["provenance"]["metric_ids"] == ["orders"]
+    assert any("deprecated alias" in w for w in out["warnings"])
+
+
+async def test_sort_by_ratio_component_cube_member(planner, fake_cube):
+    fake_cube.by_prefix["customer_ltv"] = [
+        {
+            "customer_ltv.repeat_rate": "0.2",
+            "customer_ltv.repeat_customers": "10",
+            "customer_ltv.customers": "50",
+        }
+    ]
+    out = await planner.run(
+        QueryRequest(
+            measures=["repeat_rate"],
+            sort=[{"field": "customer_ltv.customers", "direction": "desc"}],
+            time_range=TimeRange(preset="last_7d"),
+        )
+    )
+    assert "error" not in out
+    assert fake_cube.queries[0]["order"] == {"customer_ltv.customers": "desc"}

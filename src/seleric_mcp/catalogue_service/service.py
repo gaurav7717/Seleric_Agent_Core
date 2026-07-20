@@ -218,6 +218,18 @@ class CatalogueService:
     ) -> ResolvedTerm | DefinitionOnlyTerm | AmbiguousTerm | UnknownTerm:
         t = text.strip().lower()
 
+        # 0. Cube-qualified measure / deprecated Cube alias pasted from
+        # provenance (preserve original case for measure match).
+        cube_hit = self.resolve_metric_id(text.strip())
+        if cube_hit is not None and cube_hit[1] is not None:
+            mid, notice = cube_hit
+            return ResolvedTerm(
+                term=text,
+                metric_id=mid,
+                matched_via="cube_member_or_alias",
+                deprecation_notice=notice,
+            )
+
         # 1. Exact lookups (raw form): glossary, metric id, deprecated alias.
         entry = self._glossary_index.get(t)
         if entry is not None:
@@ -292,8 +304,52 @@ class CatalogueService:
     def get_metric(self, metric_id: str) -> MetricDef | None:
         return self.cat.metrics.get(metric_id)
 
+    def resolve_metric_id(self, ref: str) -> tuple[str, str | None] | None:
+        """Map a catalogue metric id, deprecated alias, OR a Cube-qualified
+        measure member to a catalogue metric id.
+
+        Returns ``(metric_id, warning_or_None)`` when resolvable, else ``None``.
+        Agents sometimes pass provenance Cube members (e.g.
+        ``sales_all_channels.total_sales``) instead of catalogue ids
+        (``total_sales_all_channels``); this recovers that mistake.
+        """
+        raw = (ref or "").strip()
+        if not raw:
+            return None
+        m = self.cat.metrics.get(raw)
+        if m is not None and m.is_queryable:
+            return raw, None
+        # Deprecated aliases (may themselves be legacy Cube members).
+        alias_target = self._alias_index.get(raw.lower())
+        if alias_target and alias_target in self.cat.metrics and self.cat.metrics[alias_target].is_queryable:
+            return alias_target, (
+                f"'{raw}' is a deprecated alias; mapped to catalogue metric "
+                f"id '{alias_target}'."
+            )
+        # Exact Cube measure / measure_pct member (view.measure) → catalogue id.
+        for mid, metric in self.cat.metrics.items():
+            if not metric.is_queryable:
+                continue
+            if metric.cube_mapping.measure == raw:
+                return mid, (
+                    f"Measure '{raw}' is a Cube member; mapped to catalogue "
+                    f"metric id '{mid}'."
+                )
+            if metric.cube_mapping.measure_pct and metric.cube_mapping.measure_pct == raw:
+                return mid, (
+                    f"Measure '{raw}' is a Cube member; mapped to catalogue "
+                    f"metric id '{mid}'."
+                )
+        return None
+
+    def resolve_dimension_id(self, name: str) -> str | None:
+        """Canonical dimension id for a catalogue id, alias, or Cube member."""
+        dim = self.resolve_dimension(name)
+        return dim.id if dim is not None else None
+
     def resolve_dimension(self, name: str) -> DimensionDef | None:
-        """Resolve a dimension id, display name, or alias to the canonical DimensionDef."""
+        """Resolve a dimension id, display name, alias, or Cube-qualified
+        member (``view.dimension``) to the canonical DimensionDef."""
         raw = (name or "").strip()
         if not raw:
             return None
@@ -320,6 +376,9 @@ class CatalogueService:
                     return d
                 if _normalize(alias) == _normalize(raw):
                     return d
+            # Cube-qualified member from provenance / mistaken agent calls.
+            if raw in d.views.values():
+                return d
         return None
 
     def list_dimensions(self, view: str) -> list[DimensionDef]:
