@@ -2,15 +2,13 @@ id: total_orders
 display_name: Total Orders (all channels)
 category: commerce
 status: certified
-description: 'Historical Analytics Total Orders when All channels is selected: Shopify
-  eligible placement orders (incl. later cancelled/voided) + Amazon SP orders excluding
-  Canceled. Date axis: Shopify order_date / Amazon purchase_date. For Shopify-only
+description: 'Historical Analytics Total Orders when All channels is selected: Shopify eligible placement orders (incl. later
+  cancelled/voided) + Amazon SP orders excluding Canceled. Date axis: Shopify order_date / Amazon purchase_date. For Shopify-only
   use metric orders. Do not confuse with Total Payments.
 
   '
 formula:
-  human_readable: countDistinct(shopify eligible order_id) + countDistinct(amazon
-    non-canceled order_id)
+  human_readable: countDistinct(shopify eligible order_id) + countDistinct(amazon non-canceled order_id)
   authoritative_source: cube
 cube_mapping:
   view: orders_all_channels
@@ -27,6 +25,11 @@ supported_dimensions:
 - payment_gateway
 - is_cod
 - is_prepaid
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 supported_filters:
 - date_range
 - brand_id
@@ -36,6 +39,11 @@ supported_filters:
 - payment_gateway
 - is_cod
 - is_prepaid
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
@@ -55,6 +63,5 @@ examples:
       start: '2025-11-11'
       end: '2026-07-16'
 validation_tests:
-- June+range brand 20 All channels ≈ dashboard Total Orders 13,212 for Nov 11–Jul
-  16
+- June+range brand 20 All channels ≈ dashboard Total Orders 13,212 for Nov 11–Jul 16
 deprecated_aliases: []

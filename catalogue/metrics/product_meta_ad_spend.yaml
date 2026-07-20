@@ -1,0 +1,44 @@
+id: product_meta_ad_spend
+display_name: Product Meta Ad Spend (SKU-attributed)
+category: product
+status: certified
+description: >
+  Directional Meta ad spend allocated to each SKU/day from last-touch attributed
+  orders and campaign-day Meta spend (revenue-share within campaign). Pair with
+  product_net_revenue for ROAS. Same campaign spend can appear across many SKUs.
+formula:
+  human_readable: SUM(meta_spend_attributed) at SKU grain
+  authoritative_source: cube
+cube_mapping:
+  view: product_ad_spend
+  measure: product_ad_spend.meta_spend_attributed
+  time_dimension: product_ad_spend.report_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: brand × day × sku
+supported_dimensions:
+  - brand_id
+  - report_date
+  - sku
+  - product_title
+  - product_id
+  - variant_id
+supported_filters:
+  - date_range
+  - brand_id
+  - sku
+  - product_title
+data_owner: Growth / Product
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+examples:
+  - question: Meta ad spend by product last 30 days
+    request:
+      measures: [product_meta_ad_spend, product_net_revenue]
+      dimensions: [product_title]
+      time_range: {preset: last_30d}
+validation_tests:
+  - product_meta_ad_spend >= 0 for any slice
+deprecated_aliases: []

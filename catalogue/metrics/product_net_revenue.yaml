@@ -40,6 +40,9 @@ supported_dimensions:
 - payment_gateway
 - is_cod
 - is_prepaid
+- product_id
+- variant_id
+- pnl_refund_class
 supported_filters:
 - date_range
 - brand_id
@@ -52,6 +55,9 @@ supported_filters:
 - payment_gateway
 - is_cod
 - is_prepaid
+- product_id
+- variant_id
+- pnl_refund_class
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

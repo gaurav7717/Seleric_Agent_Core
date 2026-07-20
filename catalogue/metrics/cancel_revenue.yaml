@@ -3,9 +3,10 @@ display_name: Cancelled Revenue (Shopify-only, ex-GST)
 category: commerce
 status: certified
 description: 'Revenue deducted by cancellation/void events in the period (ex-GST), on the cancel event
-  date — FE §13 P&L Cancelled card. Not an order count (use cancelled_orders for that). Scope: Shopify-only
-  (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
-  all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+  date — FE §13 P&L Cancelled card. Period totals only (brand × day); for geo/payment/UTM breakdowns
+  use event_cancel_revenue on commerce_orders with event_date. Not an order count (use cancelled_orders).
+  Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
+  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: SUM(cancel_revenue_excl_tax)
   authoritative_source: cube

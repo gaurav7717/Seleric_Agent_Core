@@ -1,0 +1,69 @@
+id: product_cancel_revenue
+display_name: Product Cancel Revenue (ex-GST, cohort)
+category: product
+status: certified
+description: >
+  Line-level cohort cancellation revenue deduction (ex-GST) from product_performance.
+  Supports SKU/product and shipping geo breakdowns. Deductions attach to the placement
+  period (order_date), not the cancel event date.
+formula:
+  human_readable: SUM(cohort_cancel_deduction_ex_gst) on eligible lines
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.product_cancel_revenue
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order_item
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- variant_title
+- sku
+- product_type
+- vendor
+- product_id
+- variant_id
+- shipping_city
+- shipping_region
+- shipping_country
+- order_status
+- return_status
+- pnl_refund_class
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- product_type
+- vendor
+- product_id
+- variant_id
+- shipping_country
+- shipping_region
+- shipping_city
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- pnl_refund_class
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+- question: Cancel revenue by SKU and state last month
+  request:
+    measures: [product_cancel_revenue]
+    dimensions: [sku, shipping_region]
+    time_range: {preset: last_month}
+validation_tests: []
+deprecated_aliases: []

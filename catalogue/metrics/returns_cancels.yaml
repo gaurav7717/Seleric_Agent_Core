@@ -2,14 +2,13 @@ id: returns_cancels
 display_name: Returns + Cancels Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'Combined count of orders with a return or cancellation event in the period, on the event
-  date (Asia/Kolkata) — matches the dashboard Returns / Cancels card (Shopify-only). Event axis: event_date,
-  not order_date. For the split, use cancelled_orders and refunded_orders (returned leg). Scope: Shopify-only
-  (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
-  all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: 'Combined count of orders with a return or cancellation event in the period, on the event date (Asia/Kolkata)
+  — matches the dashboard Returns / Cancels card (Shopify-only). Event axis: event_date, not order_date. For the split, use
+  cancelled_orders and refunded_orders (returned leg). Scope: Shopify-only (Historical Analytics / commerce oracle). Does
+  not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
+  use net_profit_blended.'
 formula:
-  human_readable: 'Distinct orders with a cancellation or return event in period (pnl_refund_class buckets,
-    gift cards excluded)
+  human_readable: 'Distinct orders with a cancellation or return event in period (pnl_refund_class buckets, gift cards excluded)
 
     '
   authoritative_source: cube
@@ -37,6 +36,11 @@ supported_dimensions:
 - order_status
 - return_status
 - fulfillment_status
+- payment_gateway
+- is_cod
+- is_prepaid
+- financial_status
+- event_type
 supported_filters:
 - date_range
 - brand_id
@@ -54,6 +58,11 @@ supported_filters:
 - order_status
 - return_status
 - fulfillment_status
+- payment_gateway
+- is_cod
+- is_prepaid
+- financial_status
+- event_type
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

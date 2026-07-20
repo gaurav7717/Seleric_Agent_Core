@@ -47,6 +47,10 @@ HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     "product_cogs": ("productCogs", ["Product.ProductCOGS"]),
     "product_gross_profit": ("productGrossProfit", ["Product.ProductGrossProfit"]),
     "product_gross_margin_pct": ("productGrossMarginPct", ["Product.ProductGrossMargin"]),
+    "product_meta_ad_spend": ("productMetaAdSpend", ["Product.ProductPerformance"]),
+    "product_google_ad_spend": ("productGoogleAdSpend", ["Product.ProductPerformance"]),
+    "product_other_ad_spend": ("productOtherAdSpend", ["Product.ProductPerformance"]),
+    "product_total_ad_spend": ("productTotalAdSpend", ["Product.ProductPerformance"]),
     "average_selling_price": ("averageSellingPrice", ["Product.AverageSellingPrice"]),
     "units_per_order": ("unitsPerOrder", ["Product.AverageUnitsperOrder"]),
     # Paid Media — Meta
@@ -162,12 +166,19 @@ HAND_MAP: dict[str, tuple[str | None, list[str]]] = {
     "add_to_cart_events": ("addToCartEvents", ["Web Analytics.WebEvent"]),
     "site_search_events": ("siteSearchEvents", ["Web Analytics.SiteSearch"]),
     "events_per_session": ("eventsPerSession", ["Web Analytics.EventsPerSession"]),
+    "web_sessions": ("webSessions", ["Web Analytics.Session"]),
+    "refund_count": ("refundCount", ["Operations.ReturnsRefunds"]),
+    "refunded_amount_excl_tax": ("refundedAmountExclTax", ["Operations.ReturnsRefunds"]),
+    "returns_excl_tax": ("returnsExclTax", ["Operations.ReturnsRefunds"]),
+    "refund_lines": ("refundLines", ["Operations.ReturnsRefunds"]),
+    "return_recovered_cogs": ("returnRecoveredCogs", ["Operations.ReturnsRefunds"]),
 }
 
 CONTRACT_BY_VIEW = {
     "commerce_orders": "commerce_performance_contract_v1",
     "commerce_performance": "commerce_performance_contract_v1",
     "product_performance": "product_performance_contract_v1",
+    "product_ad_spend": "product_performance_contract_v1",
     "meta_ad_performance": "paid_media_meta_contract_v1",
     "meta_ad_breakdown_performance": "paid_media_meta_breakdown_contract_v1",
     "google_ad_performance": "paid_media_google_contract_v1",

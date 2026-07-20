@@ -1,37 +1,60 @@
 id: web_sessions
-display_name: Website Sessions
+display_name: Web Sessions
 category: web_analytics
 status: certified
 description: >
-  Snowplow website sessions on the channel-day funnel
-  (serve.funnel_daily, session-native counts).
+  Snowplow website sessions from serve.session_funnel with funnel stage,
+  UTM, geo, device, and landing-page breakdowns.
 formula:
-  human_readable: SUM(sessions)
+  human_readable: COUNT(session)
   authoritative_source: cube
 cube_mapping:
-  view: funnel_daily
-  measure: funnel_daily.sessions
+  view: session_funnel
+  measure: session_funnel.sessions
+  time_dimension: session_funnel.session_date
 aggregation: additive
 unit: count
-grain: brand × day × fine channel
+grain: session
 supported_dimensions:
   - brand_id
-  - report_date
+  - session_date
   - channel
+  - funnel_stage
+  - utm_source
+  - utm_medium
+  - utm_campaign
+  - campaign_name
+  - geo_city
+  - geo_region
+  - geo_country
+  - device_type
+  - browser_family
+  - os_family
+  - landing_page_path
+  - exit_page_path
+  - funnel_web_platform
 supported_filters:
   - date_range
   - brand_id
   - channel
+  - funnel_stage
+  - utm_source
+  - utm_medium
+  - utm_campaign
+  - geo_city
+  - geo_region
+  - geo_country
+  - device_type
 data_owner: Growth / Analytics
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
 examples:
-  - question: Sessions by channel last 7 days
+  - question: Sessions by UTM source last 7 days
     request:
       measures: [web_sessions]
-      dimensions: [channel]
-      time_range: {preset: last_7_days}
+      dimensions: [utm_source]
+      time_range: {preset: last_7d}
 validation_tests:
-  - web_sessions >= 0
+  - web_sessions >= 0 for any slice
 deprecated_aliases: []

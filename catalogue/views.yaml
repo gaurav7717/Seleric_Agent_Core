@@ -19,6 +19,12 @@ views:
     freshness:
       source: serve.product_performance (VIEW over gold.fct_order_items FINAL)
       expected_cadence: "hourly after gold sync, IST"
+  - name: product_ad_spend
+    title: Product Ad Spend (SKU-attributed)
+    date_dimension: report_date
+    freshness:
+      source: serve.product_ad_spend_daily
+      expected_cadence: "hourly after gold sync + paid-media, IST"
   - name: meta_ad_performance
     title: Meta Ads Performance (Serve, daily)
     date_dimension: report_date
@@ -91,6 +97,18 @@ views:
     freshness:
       source: serve.commerce_performance_daily + gold.fct_amazon_sp_order_pnl
       expected_cadence: "hourly after gold sync, IST"
+  - name: product_performance
+    title: Product / SKU Performance (Serve)
+    date_dimension: order_date
+    freshness:
+      source: serve.product_performance (VIEW over gold.fct_order_items FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: product_ad_spend
+    title: Product Ad Spend (SKU-attributed)
+    date_dimension: report_date
+    freshness:
+      source: serve.product_ad_spend_daily
+      expected_cadence: "hourly after gold sync + paid-media, IST"
   - name: refund_events
     title: Refund Events (Serve)
     date_dimension: refund_date

@@ -1,0 +1,48 @@
+id: refund_lines
+display_name: Return Refund Lines
+category: operations
+status: certified
+description: 'Line-level Shopify return/refund rows from serve.return_lifecycle with SKU and recovered cost components.
+
+  '
+formula:
+  human_readable: COUNT(refund_line_item_id)
+  authoritative_source: cube
+cube_mapping:
+  view: return_lifecycle
+  measure: return_lifecycle.refund_lines
+  time_dimension: return_lifecycle.refund_date
+aggregation: additive
+unit: count
+grain: refund line
+supported_dimensions:
+- brand_id
+- refund_date
+- order_date
+- pnl_refund_class
+- return_status
+- restock_type
+- sku
+- product_title
+- variant_title
+- is_cod
+supported_filters:
+- date_range
+- brand_id
+- pnl_refund_class
+- return_status
+- sku
+- is_cod
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- refund_lines >= 0 for any slice
+deprecated_aliases: []

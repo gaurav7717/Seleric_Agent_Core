@@ -2,8 +2,8 @@ id: attributed_orders
 display_name: Attributed Orders
 category: attribution
 status: certified
-description: Count of orders with a resolved last-touch attribution record (order-grain,
-  same population as commerce Total Orders).
+description: Count of orders with a resolved last-touch attribution record (order-grain, same population as commerce Total
+  Orders).
 formula:
   human_readable: COUNT(order_id)
   authoritative_source: cube
@@ -34,6 +34,12 @@ supported_dimensions:
 - payment_bucket
 - payment_gateway
 - is_prepaid
+- identity_resolution_method
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 supported_filters:
 - date_range
 - brand_id
@@ -46,6 +52,12 @@ supported_filters:
 - payment_gateway
 - is_cod
 - is_prepaid
+- identity_resolution_method
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:

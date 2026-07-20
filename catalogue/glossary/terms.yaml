@@ -106,13 +106,22 @@ terms:
     canonical_id: returns_cancels
   - term: return revenue
     canonical_id: return_revenue
+  - term: return revenue by state
+    canonical_id: event_return_revenue
+  - term: return revenue by region
+    canonical_id: event_return_revenue
+  - term: returns by state
+    canonical_id: refunded_orders
+  - term: returns by region
+    canonical_id: refunded_orders
   - term: returns revenue
     canonical_id: return_revenue
   - term: returns
     canonical_id: return_revenue
     definition: >
       P&L Returns card = return revenue ex-GST on event date. For order counts
-      ask for "returned orders" / refunded_orders.
+      ask for "returned orders" / refunded_orders. For geo/payment breakdowns
+      use event_return_revenue or refunded_orders with shipping_region.
   - term: revenue lost to returns
     canonical_id: return_cancel_revenue
   - term: cancelled
@@ -121,6 +130,12 @@ terms:
     canonical_id: cancel_revenue
   - term: cancel revenue
     canonical_id: cancel_revenue
+  - term: cancel revenue by state
+    canonical_id: event_cancel_revenue
+  - term: cancellations by region
+    canonical_id: cancelled_orders
+  - term: cancelled revenue by region
+    canonical_id: event_cancel_revenue
   - term: RTO
     canonical_id: rto_cost
     definition: >
@@ -679,6 +694,53 @@ terms:
     definition: >
       Compare cod_orders and prepaid_orders counts, or break down total_sales /
       orders by payment_bucket (cod vs online).
+  - term: sales by state
+    definition: >
+      Break down total_sales, orders, or total_orders with dimension shipping_region
+      (alias state/province). Shopify uses shipping address; Amazon uses ship_to_state.
+  - term: sales by city
+    definition: >
+      Use total_sales, orders, or product_net_revenue with dimension shipping_city.
+  - term: orders by pincode
+    definition: >
+      Use total_orders or commerce event metrics with dimension shipping_pincode
+      (Shopify shipping zip; blank on Amazon).
+  - term: cancels by payment type
+    definition: >
+      Use cancelled_orders or event_cancel_revenue with payment_bucket or is_cod
+      on commerce_orders (event_date axis).
+  - term: returns by payment type
+    definition: >
+      Use refunded_orders or event_return_revenue with payment_bucket on
+      commerce_orders (event_date axis).
+  - term: product cancel revenue
+    canonical_id: product_cancel_revenue
+  - term: product return revenue
+    canonical_id: product_return_revenue
+  - term: refund count
+    canonical_id: refund_count
+  - term: refunds issued
+    canonical_id: refund_count
+  - term: return refund lines
+    canonical_id: refund_lines
+  - term: web sessions
+    canonical_id: web_sessions
+  - term: sessions
+    canonical_id: web_sessions
+  - term: product ad spend
+    canonical_id: product_total_ad_spend
+  - term: ad spend by product
+    canonical_id: product_total_ad_spend
+  - term: meta spend by product
+    canonical_id: product_meta_ad_spend
+  - term: google spend by product
+    canonical_id: product_google_ad_spend
+  - term: spend on product
+    definition: >
+      Use product_total_ad_spend (all), product_meta_ad_spend, product_google_ad_spend,
+      and product_other_ad_spend with dimension product_title or sku. Pair with
+      product_net_revenue for product ROAS. Allocation is directional (campaign
+      spend shared across SKUs on attributed orders).
   - term: active orders
     canonical_id: active_orders
   - term: new customer orders

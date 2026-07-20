@@ -19,9 +19,11 @@ grain: order
 supported_dimensions:
 - brand_id
 - report_date
+- platform
 supported_filters:
 - date_range
 - brand_id
+- platform
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:

@@ -1,0 +1,38 @@
+id: product_other_ad_spend
+display_name: Product Other Ad Spend (SKU-attributed)
+category: product
+status: certified
+description: >
+  Non-Meta/non-Google SKU-level ad spend (Amazon product ads, influencers, etc.).
+  Currently zero until Amazon SKU spend is wired; use amazon_ads_spend at campaign
+  grain for Amazon totals today.
+formula:
+  human_readable: SUM(other_spend_attributed) at SKU grain
+  authoritative_source: cube
+cube_mapping:
+  view: product_ad_spend
+  measure: product_ad_spend.other_spend_attributed
+  time_dimension: product_ad_spend.report_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: brand × day × sku
+supported_dimensions:
+  - brand_id
+  - report_date
+  - sku
+  - product_title
+  - product_id
+  - variant_id
+supported_filters:
+  - date_range
+  - brand_id
+  - sku
+  - product_title
+data_owner: Growth / Product
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+validation_tests:
+  - product_other_ad_spend >= 0 for any slice
+deprecated_aliases: []

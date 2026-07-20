@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 173
+count: 186
 metrics:
   active_orders:
     category: commerce
@@ -328,6 +328,20 @@ metrics:
     glossary:
     - Commerce.Discounts
     om_name: discounts
+  event_cancel_revenue:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: eventCancelRevenue
+  event_return_revenue:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: eventReturnRevenue
   events_per_session:
     category: web_analytics
     cube_view: web_events
@@ -958,6 +972,13 @@ metrics:
     glossary:
     - Commerce.PrepaidOrder
     om_name: prepaidOrders
+  product_cancel_revenue:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.Product
+    om_name: productCancelRevenue
   product_cogs:
     category: product
     cube_view: product_performance
@@ -979,6 +1000,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: productCostAllChannels
+  product_google_ad_spend:
+    category: product
+    cube_view: product_ad_spend
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductPerformance
+    om_name: productGoogleAdSpend
   product_gross_margin_pct:
     category: product
     cube_view: product_performance
@@ -993,6 +1021,13 @@ metrics:
     glossary:
     - Product.ProductGrossProfit
     om_name: productGrossProfit
+  product_meta_ad_spend:
+    category: product
+    cube_view: product_ad_spend
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductPerformance
+    om_name: productMetaAdSpend
   product_net_revenue:
     category: product
     cube_view: product_performance
@@ -1007,6 +1042,27 @@ metrics:
     glossary:
     - Product.ProductOrder
     om_name: productOrders
+  product_other_ad_spend:
+    category: product
+    cube_view: product_ad_spend
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductPerformance
+    om_name: productOtherAdSpend
+  product_return_revenue:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.Product
+    om_name: productReturnRevenue
+  product_total_ad_spend:
+    category: product
+    cube_view: product_ad_spend
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.ProductPerformance
+    om_name: productTotalAdSpend
   product_views:
     category: web_analytics
     cube_view: web_events_daily
@@ -1014,6 +1070,27 @@ metrics:
     glossary:
     - Web Analytics.ProductView
     om_name: productViews
+  refund_count:
+    category: operations
+    cube_view: refund_events
+    contract: refund_events_contract_v1
+    glossary:
+    - Operations.ReturnsRefunds
+    om_name: refundCount
+  refund_lines:
+    category: operations
+    cube_view: return_lifecycle
+    contract: return_lifecycle_contract_v1
+    glossary:
+    - Operations.ReturnsRefunds
+    om_name: refundLines
+  refunded_amount_excl_tax:
+    category: operations
+    cube_view: refund_events
+    contract: refund_events_contract_v1
+    glossary:
+    - Operations.ReturnsRefunds
+    om_name: refundedAmountExclTax
   refunded_orders:
     category: commerce
     cube_view: commerce_orders
@@ -1070,6 +1147,13 @@ metrics:
     glossary:
     - Commerce.ReturnCancelRevenue
     om_name: returnCancelRevenue
+  return_recovered_cogs:
+    category: operations
+    cube_view: return_lifecycle
+    contract: return_lifecycle_contract_v1
+    glossary:
+    - Operations.ReturnsRefunds
+    om_name: returnRecoveredCogs
   return_revenue:
     category: commerce
     cube_view: canonical_pnl
@@ -1084,6 +1168,13 @@ metrics:
     glossary:
     - Commerce.returnsCancels
     om_name: returnsCancels
+  returns_excl_tax:
+    category: operations
+    cube_view: refund_events
+    contract: refund_events_contract_v1
+    glossary:
+    - Operations.ReturnsRefunds
+    om_name: returnsExclTax
   rto_cost:
     category: finance
     cube_view: canonical_pnl
@@ -1198,7 +1289,8 @@ metrics:
     om_name: webPageViews
   web_sessions:
     category: web_analytics
-    cube_view: funnel_daily
-    contract: funnel_daily_contract_v1
-    glossary: []
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary:
+    - Web Analytics.Session
     om_name: webSessions

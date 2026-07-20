@@ -3,7 +3,8 @@ display_name: Returns Revenue (Shopify-only, ex-GST)
 category: commerce
 status: certified
 description: 'Revenue deducted by return events in the period (ex-GST), on the return event date — FE
-  §13 P&L Returns card / half of Return/Cancel Rev. Not an order count (use refunded_orders for that).
+  §13 P&L Returns card / half of Return/Cancel Rev. Period totals only (brand × day); for geo/payment/UTM
+  breakdowns use event_return_revenue on commerce_orders with event_date. Not an order count (use refunded_orders).
   Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
   sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:

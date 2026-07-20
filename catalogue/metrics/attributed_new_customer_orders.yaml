@@ -2,8 +2,7 @@ id: attributed_new_customer_orders
 display_name: Attributed New Customer Orders
 category: attribution
 status: certified
-description: Count of orders flagged as a new customer's first order, from the attribution
-  oracle.
+description: Count of orders flagged as a new customer's first order, from the attribution oracle.
 formula:
   human_readable: COUNT(order_id) WHERE is_new_customer = 1
   authoritative_source: cube
@@ -34,6 +33,12 @@ supported_dimensions:
 - payment_bucket
 - payment_gateway
 - is_prepaid
+- identity_resolution_method
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 supported_filters:
 - date_range
 - brand_id
@@ -46,6 +51,12 @@ supported_filters:
 - payment_gateway
 - is_cod
 - is_prepaid
+- identity_resolution_method
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:

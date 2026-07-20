@@ -1,23 +1,26 @@
-id: cancelled_orders
-display_name: Cancelled Orders (Shopify-only)
+id: event_cancel_revenue
+display_name: Cancel Revenue by Event (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: 'Orders cancelled on event date (Asia/Kolkata) from serve.commerce_order_events. Filter on event_date — not order_date.
-  Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
-  all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >
+  Cancellation revenue deducted on the cancel event date (ex-GST), order-grain with
+  full shipping geo and payment mix. Use this — not cancel_revenue on canonical_pnl —
+  for "cancelled revenue by state/region/COD/prepaid". Event axis: event_date.
 formula:
-  human_readable: Distinct orders with cancellation event in period
+  human_readable: SUM(cancel_revenue_excl_tax) WHERE event_type = cancellation
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
-  measure: commerce_orders.cancelled_orders
+  measure: commerce_orders.cancel_revenue_excl_tax
   time_dimension: commerce_orders.event_date
 aggregation: additive
-unit: count
-grain: order
+unit: currency
+currency_default: INR
+grain: order event
 supported_dimensions:
 - brand_id
 - event_date
+- event_type
 - payment_method
 - payment_bucket
 - utm_source
@@ -36,10 +39,10 @@ supported_dimensions:
 - is_cod
 - is_prepaid
 - financial_status
-- event_type
 supported_filters:
 - date_range
 - brand_id
+- event_type
 - payment_method
 - payment_bucket
 - utm_source
@@ -58,24 +61,16 @@ supported_filters:
 - is_cod
 - is_prepaid
 - financial_status
-- event_type
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed:
-  - exec
-  - finance
-  - growth_lead
-  - analyst
-  - ops
-  scopes:
-  - metrics:read
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
 examples:
-- question: Cancelled orders last 30 days
+- question: Cancelled revenue by state last month
   request:
-    measures:
-    - cancelled_orders
-    time_range:
-      preset: last_30d
+    measures: [event_cancel_revenue]
+    dimensions: [shipping_region]
+    time_range: {preset: last_month}
 validation_tests:
-- reconciles to dashboard Cancellations card for closed periods
+- reconciles to cancel_revenue on canonical_pnl when grouped by day only
 deprecated_aliases: []

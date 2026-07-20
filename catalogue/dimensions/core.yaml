@@ -19,6 +19,7 @@ dimensions:
       customer_ltv: customer_ltv.brand_id
       purchase_sequence: purchase_sequence.brand_id
       product_performance: product_performance.brand_id
+      product_ad_spend: product_ad_spend.brand_id
       meta_ad_performance: meta_ad_performance.brand_id
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
       google_ad_performance: google_ad_performance.brand_id
@@ -31,6 +32,8 @@ dimensions:
       funnel_daily: funnel_daily.brand_id
       web_events: web_events.brand_id
       web_events_daily: web_events_daily.brand_id
+      refund_events: refund_events.brand_id
+      return_lifecycle: return_lifecycle.brand_id
   - id: order_date
     display_name: Order Date
     description: IST order placement day.
@@ -40,6 +43,8 @@ dimensions:
       order_attribution: order_attribution.order_date
       purchase_sequence: purchase_sequence.order_date
       product_performance: product_performance.order_date
+      refund_events: refund_events.order_date
+      return_lifecycle: return_lifecycle.order_date
   - id: order_created_at_ist
     display_name: Order Created At (IST)
     description: >
@@ -48,6 +53,7 @@ dimensions:
     is_time: true
     views:
       commerce_orders: commerce_orders.order_created_at_ist
+      purchase_sequence: purchase_sequence.order_created_at_ist
   # ---- Attribution (2026-07-16): Attribution.MarketingAttribution ----
   - id: lt_platform
     display_name: Last-touch Platform
@@ -116,6 +122,8 @@ dimensions:
       product_performance: product_performance.is_cod
       orders_all_channels: orders_all_channels.is_cod
       sales_all_channels: sales_all_channels.is_cod
+      refund_events: refund_events.is_cod
+      return_lifecycle: return_lifecycle.is_cod
   - id: is_prepaid
     display_name: Is Prepaid
     description: True when the order is prepaid/online (non-COD bucket).
@@ -178,6 +186,7 @@ dimensions:
       commerce_orders: commerce_orders.order_status
       product_performance: product_performance.order_status
       purchase_sequence: purchase_sequence.order_status
+      refund_events: refund_events.order_status
   - id: return_status
     display_name: Return Status
     description: Return lifecycle status on the order / line.
@@ -185,6 +194,8 @@ dimensions:
     views:
       commerce_orders: commerce_orders.return_status
       product_performance: product_performance.return_status
+      refund_events: refund_events.return_status
+      return_lifecycle: return_lifecycle.return_status
   - id: fulfillment_status
     display_name: Fulfillment Status
     description: Shopify fulfillment_status (fulfilled, partial, unfulfilled, …).
@@ -233,6 +244,7 @@ dimensions:
       product_performance: product_performance.payment_method
       orders_all_channels: orders_all_channels.payment_method
       sales_all_channels: sales_all_channels.payment_method
+      refund_events: refund_events.payment_method
   - id: payment_gateway
     display_name: Payment Gateway
     description: Raw payment gateway string on the order.
@@ -244,6 +256,7 @@ dimensions:
       product_performance: product_performance.payment_gateway
       orders_all_channels: orders_all_channels.payment_gateway
       sales_all_channels: sales_all_channels.payment_gateway
+      refund_events: refund_events.payment_gateway
   - id: payment_bucket
     display_name: Payment Bucket
     description: >
@@ -265,12 +278,16 @@ dimensions:
     aliases: [utm source, source utm]
     views:
       commerce_orders: commerce_orders.utm_source
+      session_funnel: session_funnel.utm_source
+      web_events: web_events.utm_source
   - id: utm_medium
     display_name: UTM Medium
     description: Landing UTM medium on the order.
     aliases: [utm medium, medium]
     views:
       commerce_orders: commerce_orders.utm_medium
+      session_funnel: session_funnel.utm_medium
+      web_events: web_events.utm_medium
   - id: utm_campaign
     display_name: UTM Campaign
     description: >
@@ -281,6 +298,8 @@ dimensions:
     aliases: [utm campaign, campaign utm]
     views:
       commerce_orders: commerce_orders.utm_campaign
+      session_funnel: session_funnel.utm_campaign
+      web_events: web_events.utm_campaign
   - id: shipping_country
     display_name: Shipping Country
     description: Destination country on the order shipping address.
@@ -289,6 +308,10 @@ dimensions:
       commerce_orders: commerce_orders.shipping_country
       product_performance: product_performance.shipping_country
       sales_all_channels: sales_all_channels.shipping_country
+      orders_all_channels: orders_all_channels.shipping_country
+      order_attribution: order_attribution.shipping_country
+      purchase_sequence: purchase_sequence.shipping_country
+      refund_events: refund_events.shipping_country
   - id: shipping_region
     display_name: Shipping Region / State / Province
     description: >
@@ -308,6 +331,10 @@ dimensions:
       commerce_orders: commerce_orders.shipping_region
       product_performance: product_performance.shipping_region
       sales_all_channels: sales_all_channels.shipping_region
+      orders_all_channels: orders_all_channels.shipping_region
+      order_attribution: order_attribution.shipping_region
+      purchase_sequence: purchase_sequence.shipping_region
+      refund_events: refund_events.shipping_region
   - id: shipping_city
     display_name: Shipping City
     description: Destination city on the order shipping address.
@@ -316,18 +343,30 @@ dimensions:
       commerce_orders: commerce_orders.shipping_city
       product_performance: product_performance.shipping_city
       sales_all_channels: sales_all_channels.shipping_city
+      orders_all_channels: orders_all_channels.shipping_city
+      order_attribution: order_attribution.shipping_city
+      purchase_sequence: purchase_sequence.shipping_city
+      refund_events: refund_events.shipping_city
   - id: shipping_state_code
     display_name: Shipping State Code
     description: ISO/Shopify province code (MH, KA, DL, …) on Shopify shipping address.
     aliases: [state code, province code, shipping_province_code]
     views:
       commerce_orders: commerce_orders.shipping_state_code
+      orders_all_channels: orders_all_channels.shipping_state_code
+      order_attribution: order_attribution.shipping_state_code
+      purchase_sequence: purchase_sequence.shipping_state_code
+      refund_events: refund_events.shipping_state_code
   - id: shipping_pincode
     display_name: Shipping Pincode
     description: Destination postal / PIN code on the order shipping address.
     aliases: [pincode, pin code, postal code, zip, zipcode, shipping zip]
     views:
       commerce_orders: commerce_orders.shipping_pincode
+      orders_all_channels: orders_all_channels.shipping_pincode
+      order_attribution: order_attribution.shipping_pincode
+      purchase_sequence: purchase_sequence.shipping_pincode
+      refund_events: refund_events.shipping_pincode
   - id: is_new_customer
     display_name: New Customer Flag
     description: Whether this was the customer's first order.
@@ -340,16 +379,35 @@ dimensions:
     aliases: [SKU, product sku]
     views:
       product_performance: product_performance.sku
+      return_lifecycle: return_lifecycle.sku
+      web_events: web_events.sku
+      product_ad_spend: product_ad_spend.sku
+  - id: product_id
+    display_name: Product ID
+    description: Shopify product identifier (stable key).
+    views:
+      product_performance: product_performance.product_id
+      web_events: web_events.product_id
+      product_ad_spend: product_ad_spend.product_id
+  - id: variant_id
+    display_name: Variant ID
+    description: Shopify variant identifier (stable key).
+    views:
+      product_performance: product_performance.variant_id
+      product_ad_spend: product_ad_spend.variant_id
   - id: product_title
     display_name: Product Title
     aliases: [product, product name]
     views:
       product_performance: product_performance.product_title
+      return_lifecycle: return_lifecycle.product_title
+      product_ad_spend: product_ad_spend.product_title
   - id: variant_title
     display_name: Variant Title
     aliases: [variant]
     views:
       product_performance: product_performance.variant_title
+      return_lifecycle: return_lifecycle.variant_title
   - id: product_type
     display_name: Product Type / Category
     aliases: [category, product category, product type]
@@ -383,6 +441,7 @@ dimensions:
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
       platform_attribution_commerce: platform_attribution_commerce.report_date
+      product_ad_spend: product_ad_spend.report_date
   - id: platform
     display_name: Attribution Platform
     description: Last-touch platform bucket on platform_attribution_commerce (meta | google | organic).
@@ -399,13 +458,16 @@ dimensions:
       amazon_ad_performance: amazon_ad_performance.campaign_id
   - id: campaign_name
     display_name: Campaign Name
-    description: Platform campaign name.
+    description: >
+      Platform campaign name on paid-media views; UTM/campaign name on
+      session_funnel (distinct semantics — ad platform vs session landing).
     views:
       meta_ad_performance: meta_ad_performance.campaign_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_name
       meta_ad_attribution: meta_ad_attribution.campaign_name
       google_ad_performance: google_ad_performance.campaign_name
       amazon_ad_performance: amazon_ad_performance.campaign_name
+      session_funnel: session_funnel.campaign_name
   - id: campaign_status
     display_name: Campaign Status
     description: Platform campaign status (ACTIVE/PAUSED/... per platform).
@@ -580,9 +642,114 @@ dimensions:
   - id: event_type
     display_name: Event Type
     description: >
-      Snowplow tracker event type (page_view / product_view / collection_view /
-      add_to_cart / remove_from_cart / checkout_step / checkout / purchase /
-      refund / site_search / cart).
+      Commerce cancel/return event type (cancellation / return) on commerce_orders,
+      or Snowplow tracker event type (page_view / product_view / …) on web_events.
+    aliases: [cancel vs return, commerce event type]
     views:
+      commerce_orders: commerce_orders.event_type
       web_events: web_events.event_type
       web_events_daily: web_events_daily.event_type
+  # ---- Operations: Returns / Refunds ----
+  - id: refund_date
+    display_name: Refund Date
+    description: IST day the refund/return event was recorded (event axis for refund metrics).
+    is_time: true
+    aliases: [return date, refund event date]
+    views:
+      refund_events: refund_events.refund_date
+      return_lifecycle: return_lifecycle.refund_date
+  - id: pnl_refund_class
+    display_name: P&L Refund Class
+    description: Finance refund classification (PLACEMENT / CANCELLATION / RETURN).
+    allowed_values: [PLACEMENT, CANCELLATION, RETURN]
+    views:
+      refund_events: refund_events.pnl_refund_class
+      return_lifecycle: return_lifecycle.pnl_refund_class
+      product_performance: product_performance.pnl_refund_class
+  - id: payment_status
+    display_name: Payment Status
+    description: Payment status on the refunded order.
+    views:
+      refund_events: refund_events.payment_status
+  - id: primary_return_status
+    display_name: Primary Return Status
+    views:
+      refund_events: refund_events.primary_return_status
+  - id: shopify_return_status
+    display_name: Shopify Return Status
+    views:
+      refund_events: refund_events.shopify_return_status
+  - id: restock_type
+    display_name: Restock Type
+    views:
+      return_lifecycle: return_lifecycle.restock_type
+  - id: restock
+    display_name: Restock Flag
+    views:
+      refund_events: refund_events.restock
+  - id: is_unprocessed
+    display_name: Is Unprocessed Refund
+    views:
+      refund_events: refund_events.is_unprocessed
+  # ---- Web session / geo (Snowplow) ----
+  - id: geo_city
+    display_name: Geo City (Session)
+    description: Visitor geo city from Snowplow session (not shipping address).
+    aliases: [session city, visitor city, geo city]
+    views:
+      session_funnel: session_funnel.geo_city
+      web_events: web_events.geo_city
+  - id: geo_region
+    display_name: Geo Region (Session)
+    aliases: [session region, visitor region, geo region]
+    views:
+      session_funnel: session_funnel.geo_region
+      web_events: web_events.geo_region
+  - id: geo_country
+    display_name: Geo Country (Session)
+    aliases: [session country, visitor country, geo country]
+    views:
+      session_funnel: session_funnel.geo_country
+      web_events: web_events.geo_country
+  - id: device_type
+    display_name: Device Type
+    views:
+      session_funnel: session_funnel.device_type
+  - id: browser_family
+    display_name: Browser Family
+    views:
+      session_funnel: session_funnel.browser_family
+  - id: os_family
+    display_name: OS Family
+    views:
+      session_funnel: session_funnel.os_family
+  - id: landing_page_path
+    display_name: Landing Page Path
+    views:
+      session_funnel: session_funnel.landing_page_path
+  - id: exit_page_path
+    display_name: Exit Page Path
+    views:
+      session_funnel: session_funnel.exit_page_path
+  - id: page_path
+    display_name: Page Path
+    views:
+      web_events: web_events.page_path
+  - id: page_title
+    display_name: Page Title
+    views:
+      web_events: web_events.page_title
+  - id: collection
+    display_name: Collection
+    views:
+      web_events: web_events.collection
+  - id: session_platform
+    display_name: Session Platform
+    views:
+      web_events: web_events.session_platform
+  - id: funnel_web_platform
+    display_name: Web Platform (Session)
+    description: Snowplow platform on session_funnel (web/mobile).
+    views:
+      session_funnel: session_funnel.platform
+

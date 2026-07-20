@@ -1,0 +1,37 @@
+id: product_google_ad_spend
+display_name: Product Google Ad Spend (SKU-attributed)
+category: product
+status: certified
+description: >
+  Directional Google ad spend allocated to each SKU/day from last-touch attributed
+  orders and campaign-day Google spend (revenue-share within campaign).
+formula:
+  human_readable: SUM(google_spend_attributed) at SKU grain
+  authoritative_source: cube
+cube_mapping:
+  view: product_ad_spend
+  measure: product_ad_spend.google_spend_attributed
+  time_dimension: product_ad_spend.report_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: brand × day × sku
+supported_dimensions:
+  - brand_id
+  - report_date
+  - sku
+  - product_title
+  - product_id
+  - variant_id
+supported_filters:
+  - date_range
+  - brand_id
+  - sku
+  - product_title
+data_owner: Growth / Product
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+validation_tests:
+  - product_google_ad_spend >= 0 for any slice
+deprecated_aliases: []

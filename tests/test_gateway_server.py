@@ -104,6 +104,8 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "catalogue_search_metrics",
         "catalogue_get_metric",
         "catalogue_list_dimensions",
+        "catalogue_list_brands",
+        "catalogue_resolve_brand",
         "catalogue_resolve_term",
         "metrics_query",
         "metrics_drilldown",

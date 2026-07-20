@@ -2,10 +2,11 @@ id: meta_attribution_net_sales
 display_name: Meta Attribution Net Sales
 category: attribution
 status: certified
-description: >
-  Meta Attribution Analysis Overview Net Sales — eligible Shopify commerce for
-  last-touch Meta placements (dashboard_net_sales_excl_tax). NOT meta_attr_net_revenue
+description: 'Meta Attribution Analysis Overview Net Sales — eligible Shopify commerce
+  for last-touch Meta placements (dashboard_net_sales_excl_tax). NOT meta_attr_net_revenue
   (ad-day last-touch oracle) and NOT channel_net_revenue alone.
+
+  '
 formula:
   human_readable: SUM(commerce net sales where lt_platform = meta)
   authoritative_source: cube
@@ -17,20 +18,30 @@ unit: currency
 currency_default: INR
 grain: order
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
+- platform
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
+- platform
 data_owner: Growth / Attribution
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: Meta Attribution Net Sales June 2026
-    request:
-      measures: [meta_attribution_net_sales]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: Meta Attribution Net Sales June 2026
+  request:
+    measures:
+    - meta_attribution_net_sales
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - June 2026 brand 20 ≈ ₹24,24,851.18
+- June 2026 brand 20 ≈ ₹24,24,851.18
 deprecated_aliases: []

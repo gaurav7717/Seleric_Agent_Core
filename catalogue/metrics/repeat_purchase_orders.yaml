@@ -2,8 +2,8 @@ id: repeat_purchase_orders
 display_name: Sequenced Orders
 category: customer
 status: certified
-description: Count of eligible orders in the purchase-sequence model (per-customer
-  order_seq assigned). Same population as commerce Total Orders.
+description: Count of eligible orders in the purchase-sequence model (per-customer order_seq assigned). Same population as
+  commerce Total Orders.
 formula:
   human_readable: COUNT(order_id)
   authoritative_source: cube
@@ -25,6 +25,11 @@ supported_dimensions:
 - payment_bucket
 - payment_gateway
 - is_prepaid
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 supported_filters:
 - date_range
 - brand_id
@@ -37,6 +42,11 @@ supported_filters:
 - payment_bucket
 - payment_gateway
 - is_prepaid
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 data_owner: Growth / CRM
 access_policy:
   roles_allowed:

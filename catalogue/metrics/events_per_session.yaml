@@ -2,12 +2,12 @@ id: events_per_session
 display_name: Events per Session
 category: web_analytics
 status: certified
-description: >
-  Average website events per session, computed at event grain
-  (serve.web_events): COUNT(events) / COUNT(DISTINCT session-linked sessions),
-  recomputed as a ratio of aggregates on any slice. Numerator includes
-  sessionless server-side purchase events; denominator counts sessions with
-  ≥1 web event.
+description: 'Average website events per session, computed at event grain (serve.web_events):
+  COUNT(events) / COUNT(DISTINCT session-linked sessions), recomputed as a ratio of
+  aggregates on any slice. Numerator includes sessionless server-side purchase events;
+  denominator counts sessions with ≥1 web event.
+
+  '
 formula:
   human_readable: COUNT(events) / COUNT(DISTINCT session_id)
   authoritative_source: cube
@@ -18,24 +18,51 @@ aggregation: ratio
 unit: ratio
 grain: brand × event (aggregated on any slice)
 supported_dimensions:
-  - brand_id
-  - event_date
-  - event_type
-  - channel
+- brand_id
+- event_date
+- event_type
+- channel
+- utm_source
+- utm_medium
+- utm_campaign
+- geo_city
+- geo_region
+- geo_country
+- page_path
+- product_id
+- sku
+- collection
+- session_platform
 supported_filters:
-  - date_range
-  - brand_id
-  - event_type
-  - channel
+- date_range
+- brand_id
+- event_type
+- channel
+- utm_source
+- utm_medium
+- utm_campaign
+- geo_city
+- geo_region
+- geo_country
+- page_path
+- product_id
+- sku
+- collection
+- session_platform
 data_owner: Growth / Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 validation_tests:
-  - events_per_session >= 1 on unfiltered slices
+- events_per_session >= 1 on unfiltered slices
 ratio_components:
   numerator: web_events.events
   denominator: web_events.unique_sessions
 companion_measures:
-  - web_events
+- web_events
 deprecated_aliases: []

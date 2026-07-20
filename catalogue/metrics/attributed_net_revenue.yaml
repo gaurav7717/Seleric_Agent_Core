@@ -2,9 +2,8 @@ id: attributed_net_revenue
 display_name: Attributed Net Revenue
 category: attribution
 status: certified
-description: First-party net revenue (ex-GST) at order grain from the attribution
-  oracle. Differs from commerce_net_revenue_daily's basis — this is scoped to the
-  attribution population/window, not a period cash-basis rollup.
+description: First-party net revenue (ex-GST) at order grain from the attribution oracle. Differs from commerce_net_revenue_daily's
+  basis — this is scoped to the attribution population/window, not a period cash-basis rollup.
 formula:
   human_readable: SUM(net_revenue_excl_tax)
   authoritative_source: cube
@@ -35,6 +34,12 @@ supported_dimensions:
 - payment_bucket
 - payment_gateway
 - is_prepaid
+- identity_resolution_method
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 supported_filters:
 - date_range
 - brand_id
@@ -47,6 +52,12 @@ supported_filters:
 - payment_gateway
 - is_cod
 - is_prepaid
+- identity_resolution_method
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:

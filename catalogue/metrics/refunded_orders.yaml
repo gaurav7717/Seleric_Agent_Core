@@ -2,10 +2,9 @@ id: refunded_orders
 display_name: Returned Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'Orders with return events on event date (Asia/Kolkata). Maps to returned_orders measure.
-  Filter on event_date — not order_date. Scope: Shopify-only (Historical Analytics / commerce oracle).
-  Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+description: 'Orders with return events on event date (Asia/Kolkata). Maps to returned_orders measure. Filter on event_date
+  — not order_date. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales
+  or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: Distinct orders with return event in period
   authoritative_source: cube
@@ -33,6 +32,11 @@ supported_dimensions:
 - order_status
 - return_status
 - fulfillment_status
+- payment_gateway
+- is_cod
+- is_prepaid
+- financial_status
+- event_type
 supported_filters:
 - date_range
 - brand_id
@@ -50,6 +54,11 @@ supported_filters:
 - order_status
 - return_status
 - fulfillment_status
+- payment_gateway
+- is_cod
+- is_prepaid
+- financial_status
+- event_type
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

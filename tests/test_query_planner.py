@@ -100,16 +100,15 @@ async def test_multi_view_dimension_must_work_on_each_part(planner):
 
 
 async def test_unsupported_dimension_suggests_alternate_metrics(planner):
-    # units_per_order does not support shipping_city; suggestions must name
-    # metrics that do (e.g. product_net_revenue / commerce_net_revenue).
+    # aov does not support sku; suggestions must name metrics that do.
     req = QueryRequest(
-        measures=["units_per_order"],
-        dimensions=["shipping_city"],
+        measures=["aov"],
+        dimensions=["sku"],
         time_range=TimeRange(preset="last_7d"),
     )
     with pytest.raises(PlanError) as exc:
         await planner.run(req)
-    assert any("net_revenue" in s for s in (exc.value.suggestions or []))
+    assert any("product" in s.lower() or "net_revenue" in s for s in (exc.value.suggestions or []))
 
 
 async def test_filter_dimension_must_be_on_view(planner):
