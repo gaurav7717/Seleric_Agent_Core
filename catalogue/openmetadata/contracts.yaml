@@ -13,7 +13,9 @@ contracts:
       - brand_id
       - order_id
       - order_date
-      - is_eligible_order
+      - is_commerce_placement_order
+      - is_placement_active_order
+      - pnl_refund_class
       - total_sales_incl_tax
       - dashboard_net_sales_excl_tax
     quality_tests:
