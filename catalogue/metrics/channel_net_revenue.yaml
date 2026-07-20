@@ -1,41 +1,39 @@
 id: channel_net_revenue
-display_name: Channel Net Revenue (ex-GST)
+display_name: Channel Net Revenue (ex-GST, channel attribution daily)
 category: attribution
 status: certified
-description: 'First-party Shopify net revenue ex-GST by channel. NULL/absent on Amazon
-  channel rows (marketplace incl-GST basis — use channel_gross_revenue).
-
-  '
+description: >
+  Placement-axis first-party Shopify net revenue ex-GST by channel from
+  channel_attribution_daily (meta / google / organic_shopify / amazon /
+  organic_amazon). Shopify rows use the same dashboard_net_sales_excl_tax basis as
+  Attribution Analysis. Amazon channel rows have no ex-GST net on this surface —
+  use channel_gross_revenue for Amazon incl-GST order totals.
 formula:
-  human_readable: SUM(net_revenue_excl_tax)
+  human_readable: SUM(net_revenue_excl_tax) by channel
   authoritative_source: cube
 cube_mapping:
   view: channel_attribution
   measure: channel_attribution.net_revenue_excl_tax
 aggregation: additive
-unit: INR
+unit: currency
+currency_default: INR
 grain: brand × day × channel
 supported_dimensions:
-- brand_id
-- report_date
-- channel
-- revenue_basis
-- source_platform
+  - brand_id
+  - report_date
+  - channel
+  - revenue_basis
+  - source_platform
 supported_filters:
-- date_range
-- brand_id
-- channel
-- source_platform
+  - date_range
+  - brand_id
+  - channel
+  - source_platform
 data_owner: Growth / Attribution
 access_policy:
-  roles_allowed:
-  - exec
-  - growth_lead
-  - analyst
-  - ops
-  scopes:
-  - metrics:read
-currency_default: INR
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
 validation_tests:
-- channel_net_revenue is Shopify-basis only
+  - channel_net_revenue is Shopify-basis only on meta/google/organic_shopify rows
+  - June 2026 brand 20 meta channel ≈ ₹24,24,851.18
 deprecated_aliases: []

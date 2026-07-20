@@ -112,6 +112,9 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Amazon Ads": "amazon_ads_spend",
         "P&L Net Profit": "net_profit_all_channels",
         "Net Profit (all channels)": "net_profit_all_channels",
+        "Shopify-only Net Profit": "net_profit",
+        "shopify only net profit": "net_profit",
+        "Historical all channels Net Profit": "net_profit_incl_amazon",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)
@@ -202,10 +205,13 @@ def test_resolve_attribution_scope(catalogue):
         "meta attribution orders": "meta_attribution_orders",
         "google attribution net sales": "google_attribution_net_sales",
         "google attribution orders": "google_attribution_orders",
+        "channel attribution daily sales": "channel_net_revenue",
         "channel orders": "channel_orders",
         "channel sales": "channel_net_revenue",
         "sales by channel": "channel_net_revenue",
         "channel gross revenue": "channel_gross_revenue",
+        "shopify only net profit": "net_profit",
+        "historical all channels net profit": "net_profit_incl_amazon",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)

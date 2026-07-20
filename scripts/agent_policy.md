@@ -326,6 +326,24 @@ Do not use a fixed default KPI bundle stored in this policy.
 
 ---
 
+## Period snapshot (multi-KPI month / overview)
+
+When the user asks for a snapshot, summary, or "how did we do" for a period:
+
+1. Query the catalogue for each implied KPI — do not reuse one query for mixed scopes.
+2. Label every figure with its scope in the evidence table:
+   `(all channels)`, `(Shopify-only)`, `(Amazon-only)`, `(P&L all channels)`,
+   `(Attribution Analysis)`, `(Channel attribution daily)`, `(Attr oracle)`,
+   `(Meta ad-day)`.
+3. Never write bare **Net Profit** — always include the scope parenthetical.
+4. When the headline uses all-channel Total Sales, include all three net-profit
+   scopes in evidence: Shopify-only, P&L all-channels, Historical all-channels.
+5. For Meta/Google sales breakdown on Attribution Analysis pages, use
+   `meta_attribution_*` and `google_attribution_*` — not `channel_net_revenue`.
+6. Keep channel attribution daily as a separate labeled block if included.
+
+---
+
 ## Reconciliation and gap analysis
 
 For questions such as:

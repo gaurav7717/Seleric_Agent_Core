@@ -31,7 +31,7 @@ access_policy:
   scopes:
   - metrics:read
 examples:
-- question: Net Profit for June 2026
+- question: Shopify-only Net Profit for June 2026
   request:
     measures:
     - net_profit
@@ -40,5 +40,6 @@ examples:
       end: '2026-06-30'
 validation_tests:
 - net_profit can be negative (loss periods are valid)
-- June 2026 brand 20 ≈ dashboard Net Profit −₹2,72,173.77
+- June 2026 brand 20 ≈ Historical Shopify-only Net Profit −₹2,72,173.77
+- When snapshot includes all-channel sales, also report net_profit_all_channels and net_profit_incl_amazon with explicit scope labels
 deprecated_aliases: []

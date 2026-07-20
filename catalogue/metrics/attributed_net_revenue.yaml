@@ -2,8 +2,9 @@ id: attributed_net_revenue
 display_name: Attributed Net Revenue
 category: attribution
 status: certified
-description: First-party net revenue (ex-GST) at order grain from the attribution oracle. Differs from commerce_net_revenue_daily's
-  basis — this is scoped to the attribution population/window, not a period cash-basis rollup.
+description: Placement-axis first-party net revenue (ex-GST) at order grain from the attribution product. Uses the same
+  per-order dashboard net sales basis as Attribution Analysis and serve.commerce_orders, but remains scoped to the
+  attribution population/window rather than commerce_net_revenue_daily's period event-date rollup.
 formula:
   human_readable: SUM(net_revenue_excl_tax)
   authoritative_source: cube

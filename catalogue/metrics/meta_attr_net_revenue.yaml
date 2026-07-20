@@ -2,7 +2,8 @@ id: meta_attr_net_revenue
 display_name: Meta Attributed Net Revenue
 category: attribution
 status: certified
-description: First-party net revenue (ex-GST) last-touch attributed to a Meta ad.
+description: Placement-axis first-party net revenue (ex-GST) last-touch attributed to
+  a Meta ad. Uses the same per-order dashboard net sales basis as serve.order_attribution.
   Never mix with Meta's platform-reported purchase_value.
 formula:
   human_readable: SUM(attributed_net_revenue_excl_tax)

@@ -1,14 +1,13 @@
 id: net_sales_all_channels
-display_name: Net Sales (all channels, ex-GST)
+display_name: Net Sales (all channels)
 category: commerce
 status: certified
-description: 'All-channels Net Sales (ex-GST): Shopify net_sales_excl_tax (dashboard
-  parity) plus Amazon SP net revenue (effective_gross + refunds + tax_withheld per
-  FE §11 amazon_net_revenue). For Shopify-only use commerce_net_revenue_daily.
-
-  '
+description: >
+  All-channels Net Sales: Shopify net_sales_excl_tax (dashboard parity) plus
+  Amazon operational_revenue_incl_gst. Matches Historical Analytics All channels
+  Net Sales. For Shopify-only use commerce_net_revenue_daily.
 formula:
-  human_readable: SUM(shopify net_sales_excl_tax) + SUM(amazon net revenue)
+  human_readable: SUM(shopify net_sales_excl_tax) + SUM(amazon operational_revenue_incl_gst)
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
@@ -18,47 +17,23 @@ unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-- brand_id
-- report_date
-- channel
-- shipping_region
-- shipping_country
-- shipping_city
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
+  - brand_id
+  - report_date
+  - channel
+  - shipping_region
+  - shipping_country
+  - shipping_city
 supported_filters:
-- date_range
-- brand_id
-- channel
-- shipping_region
-- shipping_country
-- shipping_city
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
+  - date_range
+  - brand_id
+  - channel
+  - shipping_region
+  - shipping_country
+  - shipping_city
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed:
-  - exec
-  - finance
-  - growth_lead
-  - analyst
-  - ops
-  scopes:
-  - metrics:read
-examples:
-- question: Net Sales June 2026 all channels
-  request:
-    measures:
-    - net_sales_all_channels
-    time_range:
-      start: '2026-06-01'
-      end: '2026-06-30'
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
 validation_tests:
-- net_sales_all_channels >= 0 for typical commerce slices
+  - June 2026 brand 20 ≈ ₹33,97,210.51
 deprecated_aliases: []

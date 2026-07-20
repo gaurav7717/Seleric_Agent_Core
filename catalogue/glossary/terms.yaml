@@ -154,6 +154,10 @@ terms:
       Shopify-only Net Profit (Net Sales − Net COGS − Meta+Google spend).
   - term: net profit (shopify-only)
     canonical_id: net_profit
+  - term: shopify only net profit
+    canonical_id: net_profit
+  - term: shopify-only net profit
+    canonical_id: net_profit
   - term: shopify net profit
     canonical_id: net_profit
   - term: pnl net profit
@@ -537,9 +541,17 @@ terms:
     canonical_id: channel_orders
   - term: channel sales
     canonical_id: channel_net_revenue
+    definition: >
+      Channel attribution daily — first-party Shopify net by channel (meta/google/
+      organic_shopify). NOT Meta/Google Attribution Analysis Overview Net Sales;
+      for dashboard parity use meta_attribution_net_sales / google_attribution_net_sales.
   - term: channel revenue
     canonical_id: channel_net_revenue
   - term: channel net revenue
+    canonical_id: channel_net_revenue
+  - term: channel attribution sales
+    canonical_id: channel_net_revenue
+  - term: channel attribution daily sales
     canonical_id: channel_net_revenue
   - term: channel gross revenue
     canonical_id: channel_gross_revenue
@@ -547,8 +559,23 @@ terms:
     canonical_id: channel_orders
   - term: sales by channel
     canonical_id: channel_net_revenue
+    definition: >
+      Channel attribution daily rollup. For Meta/Google Attribution Analysis
+      dashboard numbers use "meta attribution net sales" / "google attribution
+      net sales" instead.
   - term: revenue by channel
     canonical_id: channel_net_revenue
+  - term: attribution analysis by channel
+    canonical_id: null
+    definition: >
+      Query meta_attribution_net_sales, meta_attribution_orders,
+      google_attribution_net_sales, google_attribution_orders separately — not
+      channel_net_revenue.
+  - term: meta google attribution breakdown
+    canonical_id: null
+    definition: >
+      Meta/Google Attribution Analysis Overview — use meta_attribution_* and
+      google_attribution_* metrics, not channel_net_revenue.
   - term: product views
     canonical_id: product_views
     definition: >
