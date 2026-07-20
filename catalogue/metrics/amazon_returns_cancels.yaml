@@ -1,0 +1,40 @@
+id: amazon_returns_cancels
+display_name: Returns + Cancels Orders (Amazon-only)
+category: commerce
+status: certified
+description: >
+  Combined count of Amazon SP orders cancelled (purchase_date axis) or
+  returned (refund-posted date axis) — the Amazon-only counterpart to the
+  Shopify returns_cancels card. Equals amazon_cancelled_orders +
+  amazon_returned_orders; use the two components for the split. Scope:
+  Amazon SP-only — does not include Shopify orders. For the Shopify-only
+  equivalent use returns_cancels; for all-platform ad spend use
+  total_ad_spend; for blended-ads net profit use net_profit_blended.
+formula:
+  human_readable: amazon_cancelled_orders + amazon_returned_orders
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_commerce_performance
+  measure: amazon_commerce_performance.returns_cancels
+  time_dimension: amazon_commerce_performance.report_date
+aggregation: additive
+unit: count
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Amazon returns and cancellations last 30 days
+    request:
+      measures: [amazon_returns_cancels]
+      time_range: {preset: last_30d}
+validation_tests:
+  - amazon_returns_cancels == amazon_cancelled_orders + amazon_returned_orders
+deprecated_aliases: []

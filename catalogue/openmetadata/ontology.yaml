@@ -86,8 +86,13 @@ domains:
     grain: RefundEvent (+ RefundLine port)
     date_axes: [refund_date]
     notes: >
-      Shopify refunds/returns only; Amazon returns tables in gold
-      (fct_amazon_return_items, fct_amazon_returns_daily) = V2 port.
+      Shopify refunds/returns only; Amazon's own line-item return detail in
+      gold (fct_amazon_return_items, fct_amazon_returns_daily) = V2 port.
+      Amazon's daily-grain cancelled/returned order counts and returned
+      revenue are certified, but live under Commerce.AmazonCommercePerformance
+      (amazon_commerce_performance cube view), not here — mirrors how
+      Shopify's own cancelled_orders/refunded_orders/returns_cancels live on
+      Commerce.commerce_orders rather than Operations.refund_events.
 
 entity_clusters:
   commerce_order:
@@ -102,6 +107,26 @@ entity_clusters:
     glossary: Commerce.EventAxis
     related: [Commerce.CancelledOrder, Commerce.ReturnedOrder, Commerce.returnsCancels]
     catalogue_metrics: [cancelled_orders, refunded_orders, returns_cancels]
+  amazon_commerce_order:
+    glossary: Commerce.TotalOrders
+    related: [Commerce.CancelledOrder, Commerce.ReturnedOrder, Commerce.returnsCancels]
+    notes: >
+      Amazon-only counterpart of commerce_order + commerce_events: amazon_orders
+      is the purchase_date placement count (excl. Canceled); amazon_cancelled_orders/
+      amazon_returned_orders/amazon_returns_cancels are the Amazon SP Cancellations
+      and Returns cards. No Amazon "active_orders"/"new_customer_orders" catalogue
+      metrics exist yet (amazon_commerce_performance.active_orders is Cube-exposed
+      but not catalogued).
+    catalogue_metrics: [amazon_orders, amazon_cancelled_orders, amazon_returned_orders, amazon_returns_cancels]
+  amazon_commerce_revenue:
+    glossary: Commerce.CommerceOrder
+    related: [Commerce.GrossSales, Commerce.ReturnCancelRevenue]
+    notes: >
+      Amazon-only counterpart of commerce_revenue. All incl.-GST (Amazon
+      marketplace convention) — never sum directly against Shopify's ex-GST
+      commerce_revenue cluster without adjusting basis. No "cancelled
+      revenue" exists for Amazon (CANCELED orders contribute ₹0 to P&L).
+    catalogue_metrics: [amazon_gross_revenue, amazon_gross_sales, amazon_net_sales, amazon_total_sales, amazon_net_payout, amazon_return_revenue]
   product_line:
     glossary: Product.ProductOrder
     related: [Product.UnitsSold, Product.ProductNetRevenue, Product.ProductCOGS]

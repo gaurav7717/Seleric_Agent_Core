@@ -232,7 +232,21 @@ contracts:
     grain: [brand_id, report_date]
     time_dimension: report_date
     currency: INR
-    notes: Secondary daily port of AmazonCommercePerformance.
+    required_columns:
+      - brand_id
+      - report_date
+      - total_orders
+      - active_orders
+      - cancelled_orders
+      - returned_orders
+      - gross_revenue
+      - returned_revenue
+      - is_final
+    notes: >
+      Secondary daily port of AmazonCommercePerformance. cancelled_orders is
+      purchase_date axis; returned_orders/returned_revenue are refund-posted
+      date axis (return/adjustment). No cancelled-revenue column — CANCELED
+      orders are excluded from P&L (₹0), not netted like Shopify cancels.
 
   channel_attribution_daily_contract_v1:
     serve_table: clickhouse.default.serve.channel_attribution_daily

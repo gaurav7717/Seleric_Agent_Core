@@ -36,6 +36,17 @@ data_products:
     notes: >
       Marketplace-reported revenue INCLUDES GST. Never mix with Shopify ex-GST
       CommercePerformance without stating the basis. Ads stay on AmazonAdsPerformance.
+      amazon_commerce_performance now also carries Amazon's own cancelled/returned
+      order axis (cancelled_orders on purchase_date, returned_orders +
+      returned_revenue on refund-posted date; returns_cancels = the sum) —
+      the Amazon-only counterpart to CommercePerformance's Shopify event-date
+      cancelled_orders/refunded_orders/returns_cancels/return_revenue, per the
+      Seleric Dashboard Historical Analytics Amazon Seller Partner Returns /
+      Cancellations cards. Amazon has no "cancelled revenue" figure — CANCELED
+      orders are excluded from P&L entirely (₹0), unlike Shopify's cancel_revenue.
+      Pending customer refunds not yet posted to Amazon settlement
+      (gold.int_amazon_return_reconciliation) are a Seleric Dashboard
+      Node-Backend accrual overlay, not reflected in the certified Cube measure.
   - name: ProductPerformance
     domain: Product
     owner_team: commerce-data-team
@@ -181,9 +192,14 @@ data_products:
     cube_views: [refund_events, return_lifecycle]
     platforms: [Shopify]
     notes: >
-      Return REVENUE oracle remains Commerce (commerce_order_events). Amazon
-      returns (gold.fct_amazon_return_items, gold.fct_amazon_returns_daily,
-      gold.int_amazon_return_reconciliation) = V2 port, separate grain.
+      Return REVENUE oracle remains Commerce (commerce_order_events for
+      Shopify; amazon_commerce_performance for Amazon SP — see
+      AmazonCommercePerformance). Amazon's own line-item return detail
+      (gold.fct_amazon_return_items, gold.fct_amazon_returns_daily,
+      gold.int_amazon_return_reconciliation at return/line grain, incl.
+      pending-refund and return-label-fee accruals) remains a V2 port —
+      only the AmazonCommercePerformance daily-grain rollup
+      (cancelled_orders/returned_orders/returned_revenue) is certified today.
 
 views:
   commerce_orders:

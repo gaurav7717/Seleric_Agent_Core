@@ -1,0 +1,55 @@
+id: amazon_return_revenue
+display_name: Returns Revenue (Amazon-only, incl. GST)
+category: commerce
+status: certified
+description: >
+  Customer refund amount posted against Amazon SP orders, incl. GST, on
+  refund-posted date (return/adjustment axis) — the Amazon slice of the P&L
+  Returns card. Not an order count (use amazon_returned_orders for that).
+  Sourced from gold.fct_amazon_daily_pnl
+  (serve.amazon_commerce_daily.returned_revenue). Unlike Shopify's
+  return_revenue (ex-GST, event-date), this figure is incl.-GST to match the
+  rest of the Amazon commerce surface (amazon_gross_revenue,
+  amazon_net_sales) — never sum directly against Shopify's ex-GST return_revenue
+  without adjusting basis. Pending customer refunds not yet posted to Amazon
+  settlement (gold.int_amazon_return_reconciliation,
+  REPORT_REFUND_PENDING_FINANCE) are folded into the Returns card on the live
+  Seleric Dashboard but are a Node-Backend-only accrual overlay — not
+  reflected in this Cube measure. There is no equivalent "cancelled revenue"
+  figure for Amazon (see amazon_cancelled_orders). Scope: Amazon SP-only. For
+  the Shopify-only equivalent use return_revenue; for all-platform ad spend
+  use total_ad_spend.
+formula:
+  human_readable: >
+    SUM(posted customer refund amount: effective_refunds, else
+    estimated_refunds, else total_refund_amount / refund_principal), incl.
+    GST, on refund-posted date
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_commerce_performance
+  measure: amazon_commerce_performance.returned_revenue
+  time_dimension: amazon_commerce_performance.report_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Amazon returns revenue last month
+    request:
+      measures: [amazon_return_revenue]
+      time_range: {preset: last_month}
+validation_tests:
+  - amazon_return_revenue >= 0
+  - reconciles to Seleric Dashboard Historical Analytics Amazon Seller Partner Returns card (settled refunds only; excludes pending-refund accrual overlay)
+deprecated_aliases:
+  - amazon_refund_revenue

@@ -1,0 +1,51 @@
+id: amazon_returned_orders
+display_name: Returned Orders (Amazon-only)
+category: commerce
+status: certified
+description: >
+  Amazon SP orders with a posted customer refund, on refund-posted date
+  (return/adjustment axis — not purchase_date) — the Amazon slice of the
+  dashboard Returns card. Sourced from gold.fct_amazon_daily_pnl
+  (serve.amazon_commerce_daily.returned_orders). Per-order refund resolution
+  (Seleric Dashboard Node-Backend, amazonReturnsHelpers.js
+  resolveAmazonRefundAmountFromPnl): settled effective_refunds, falling back
+  to estimated_refunds, then total_refund_amount / refund_principal.
+  Customer refunds not yet posted to Amazon settlement (pending
+  REPORT_REFUND_PENDING_FINANCE rows in gold.int_amazon_return_reconciliation)
+  are folded into the Returns card on the live Seleric Dashboard but are a
+  Node-Backend-only accrual overlay — not reflected in this Cube measure.
+  Scope: Amazon SP-only. For the Shopify-only equivalent use refunded_orders;
+  for all-platform ad spend use total_ad_spend.
+formula:
+  human_readable: >
+    COUNT(active Amazon SP orders with a non-zero posted refund
+    (effective_refunds, else estimated_refunds, else total_refund_amount /
+    refund_principal), on refund-posted date)
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_commerce_performance
+  measure: amazon_commerce_performance.returned_orders
+  time_dimension: amazon_commerce_performance.report_date
+aggregation: additive
+unit: count
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Amazon returned orders last month
+    request:
+      measures: [amazon_returned_orders]
+      time_range: {preset: last_month}
+validation_tests:
+  - amazon_returned_orders >= 0
+  - reconciles to Seleric Dashboard Historical Analytics Amazon Seller Partner Returns card (settled refunds only; excludes pending-refund accrual overlay)
+deprecated_aliases:
+  - amazon_return_count

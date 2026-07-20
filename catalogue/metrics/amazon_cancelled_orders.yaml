@@ -1,0 +1,46 @@
+id: amazon_cancelled_orders
+display_name: Cancelled Orders (Amazon-only)
+category: commerce
+status: certified
+description: >
+  Amazon SP orders cancelled on purchase_date (placement axis) — the Amazon
+  slice of the dashboard Cancellations card. Sourced from
+  gold.fct_amazon_daily_pnl (serve.amazon_commerce_daily.cancelled_orders):
+  orders whose pnl_status = CANCELED, or whose order_status is
+  cancelled/canceled with no matching PnL row. Cancelled orders contribute
+  ₹0 to Gross/Net Sales — Amazon has no separate "cancelled revenue" figure
+  the way Shopify does (contrast cancel_revenue, which nets a real
+  placed-then-cancelled amount); use amazon_orders for the excl.-cancelled
+  order count. Scope: Amazon SP-only. For the Shopify-only equivalent use
+  cancelled_orders; for all-platform ad spend use total_ad_spend.
+formula:
+  human_readable: >
+    COUNT(Amazon SP orders on purchase_date where pnl_status = CANCELED, or
+    order_status IN (cancelled, canceled) with no matching PnL row)
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_commerce_performance
+  measure: amazon_commerce_performance.cancelled_orders
+  time_dimension: amazon_commerce_performance.report_date
+aggregation: additive
+unit: count
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Amazon cancelled orders last 30 days
+    request:
+      measures: [amazon_cancelled_orders]
+      time_range: {preset: last_30d}
+validation_tests:
+  - amazon_cancelled_orders >= 0
+  - reconciles to Seleric Dashboard Historical Analytics Amazon Seller Partner Cancellations card
+deprecated_aliases: []

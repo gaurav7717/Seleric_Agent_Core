@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 186
+count: 190
 metrics:
   active_orders:
     category: commerce
@@ -60,6 +60,13 @@ metrics:
     - Paid Media.Spend
     - Paid Media.SponsoredProducts(SP)
     om_name: amazonAdsSpend
+  amazon_cancelled_orders:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CancelledOrder
+    om_name: amazonCancelledOrders
   amazon_gross_revenue:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -109,6 +116,27 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: amazonPlatformFees
+  amazon_return_revenue:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.ReturnCancelRevenue
+    om_name: amazonReturnRevenue
+  amazon_returned_orders:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.ReturnedOrder
+    om_name: amazonReturnedOrders
+  amazon_returns_cancels:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.returnsCancels
+    om_name: amazonReturnsCancels
   amazon_total_sales:
     category: commerce
     cube_view: sales_all_channels
