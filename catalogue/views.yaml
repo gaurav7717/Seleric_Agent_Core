@@ -115,6 +115,12 @@ views:
     freshness:
       source: serve.channel_attribution_daily
       expected_cadence: "hourly Shopify + daily Amazon SP; 30h SLA"
+  - name: platform_attribution_commerce
+    title: Platform Attribution Commerce (Attribution Analysis)
+    date_dimension: report_date
+    freshness:
+      source: serve.platform_attribution_commerce (commerce_orders ⋈ order_attribution)
+      expected_cadence: "hourly after gold sync, IST"
   - name: customer_data
     title: Customer Data (Serve)
     date_dimension: null

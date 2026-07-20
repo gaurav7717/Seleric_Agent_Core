@@ -3,12 +3,13 @@ display_name: Amazon Platform Fees
 category: finance
 status: certified
 description: >
-  Amazon SP marketplace fees for the period (brand × day): abs(marketplace_fees)
-  + abs(return_label_fees). Settled fee components (commission, closing, shipping,
-  other, TCS) plus return shipping-label accrual. Not Amazon Ads spend
+  Amazon SP marketplace fees for the period (brand × day): abs(commission) +
+  abs(closing) + abs(shipping) + abs(tax_withheld) + abs(other_service_fees).
+  Matches Amazon Attribution Analysis Amazon Fees card. Not Amazon Ads spend
   (amazon_ads_spend). Distinct from Shopify Net COGS / Total Operating Cost.
+  P&L TOC uses operational marketplace fees (slightly different rollup).
 formula:
-  human_readable: SUM(abs(marketplace_fees) + abs(return_label_fees))
+  human_readable: SUM(|commission| + |closing| + |shipping| + |tax_withheld| + |other|)
   authoritative_source: cube
 cube_mapping:
   view: amazon_daily_pnl
@@ -34,5 +35,5 @@ examples:
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
   - amazon_platform_fees >= 0 for any slice
-  - June 2026 brand 20 ≈ ₹53,828.09 (settled 52,646.91 + return labels 1,181.18)
+  - June 2026 brand 20 ≈ ₹52,128.10
 deprecated_aliases: []

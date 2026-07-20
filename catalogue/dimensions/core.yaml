@@ -2,7 +2,11 @@
 dimensions:
   - id: brand_id
     display_name: Brand
-    description: Brand identifier; filter when data spans multiple brands.
+    description: >
+      Tenant brand. Default Tilting Heads (20). Pass brand_id or a brand name
+      (Sniff Theory, Urthend, Mannmore, The Billy Company); the planner resolves
+      names via catalogue/brands.yaml.
+    aliases: [brand, store, shop]
     views:
       commerce_orders: commerce_orders.brand_id
       commerce_performance: commerce_performance.brand_id
@@ -22,6 +26,7 @@ dimensions:
       amazon_commerce_performance: amazon_commerce_performance.brand_id
       channel_attribution: channel_attribution.brand_id
       customer_data: customer_data.brand_id
+      platform_attribution_commerce: platform_attribution_commerce.brand_id
       session_funnel: session_funnel.brand_id
       funnel_daily: funnel_daily.brand_id
       web_events: web_events.brand_id
@@ -102,12 +107,32 @@ dimensions:
       order_attribution: order_attribution.identity_resolution_method
   - id: is_cod
     display_name: Is COD
+    description: True when the order is cash-on-delivery (boolean flag). For COD vs online/prepaid mix breakdowns prefer payment_bucket.
+    aliases: [cash on delivery, is_cod, cod flag]
     views:
+      commerce_orders: commerce_orders.is_cod
       order_attribution: order_attribution.is_cod
       purchase_sequence: purchase_sequence.is_cod
+      product_performance: product_performance.is_cod
+      orders_all_channels: orders_all_channels.is_cod
+      sales_all_channels: sales_all_channels.is_cod
+  - id: is_prepaid
+    display_name: Is Prepaid
+    description: True when the order is prepaid/online (non-COD bucket).
+    aliases: [prepaid, online payment, online orders, is_prepaid]
+    views:
+      commerce_orders: commerce_orders.is_prepaid
+      order_attribution: order_attribution.is_prepaid
+      purchase_sequence: purchase_sequence.is_prepaid
+      product_performance: product_performance.is_prepaid
+      orders_all_channels: orders_all_channels.is_prepaid
+      sales_all_channels: sales_all_channels.is_prepaid
   - id: source_name
     display_name: Order Source Name
+    description: Shopify order source_name (web, pos, shopify_draft_order, …).
+    aliases: [source, order source, source_name]
     views:
+      commerce_orders: commerce_orders.source_name
       order_attribution: order_attribution.source_name
   # ---- Customer LTV (2026-07-16): Customer.CustomerIntelligence ----
   - id: acquisition_platform
@@ -147,8 +172,31 @@ dimensions:
   # ---- Purchase Sequence (2026-07-16): Customer.CustomerIntelligence port #2 ----
   - id: order_status
     display_name: Order Status
+    description: Lifecycle status on the order (active, cancelled, voided, …).
+    aliases: [status, order status]
     views:
+      commerce_orders: commerce_orders.order_status
+      product_performance: product_performance.order_status
       purchase_sequence: purchase_sequence.order_status
+  - id: return_status
+    display_name: Return Status
+    description: Return lifecycle status on the order / line.
+    aliases: [return status]
+    views:
+      commerce_orders: commerce_orders.return_status
+      product_performance: product_performance.return_status
+  - id: fulfillment_status
+    display_name: Fulfillment Status
+    description: Shopify fulfillment_status (fulfilled, partial, unfulfilled, …).
+    aliases: [fulfillment, fulfilment, fulfilled, unfulfilled]
+    views:
+      commerce_orders: commerce_orders.fulfillment_status
+  - id: financial_status
+    display_name: Financial Status
+    description: Shopify financial_status (paid, pending, refunded, …).
+    aliases: [payment status, financial status]
+    views:
+      commerce_orders: commerce_orders.financial_status
   - id: order_seq
     display_name: Order Sequence Number
     description: This order's 1-indexed position in the customer's purchase history.
@@ -176,22 +224,53 @@ dimensions:
       web_events: web_events.event_date
   - id: payment_method
     display_name: Payment Method
-    description: Payment method on the order (COD, prepaid gateways).
+    description: Payment method on the order (COD, prepaid gateways, upi, razorpay, …).
+    aliases: [payment, payment method, gateway method, payment type, payment mode]
     views:
       commerce_orders: commerce_orders.payment_method
+      order_attribution: order_attribution.payment_method
+      purchase_sequence: purchase_sequence.payment_method
+      product_performance: product_performance.payment_method
+      orders_all_channels: orders_all_channels.payment_method
+      sales_all_channels: sales_all_channels.payment_method
+  - id: payment_gateway
+    display_name: Payment Gateway
+    description: Raw payment gateway string on the order.
+    aliases: [gateway, payment gateway]
+    views:
+      commerce_orders: commerce_orders.payment_gateway
+      order_attribution: order_attribution.payment_gateway
+      purchase_sequence: purchase_sequence.payment_gateway
+      product_performance: product_performance.payment_gateway
+      orders_all_channels: orders_all_channels.payment_gateway
+      sales_all_channels: sales_all_channels.payment_gateway
   - id: payment_bucket
     display_name: Payment Bucket
     description: >
       Coarse payment mix bucket used by the Commerce dashboard
-      (cod, online/prepaid, paytm card machine, manual).
+      (cod, online/prepaid, paytm card machine, manual). Shopify-only on
+      all-channels views (Amazon rows are blank).
+    aliases: [cod vs prepaid, payment mix, prepaid vs cod, cod, online, prepaid, paytm, manual payment]
     allowed_values: [online, cod, paytm card machine, manual]
     views:
       commerce_orders: commerce_orders.payment_bucket
+      order_attribution: order_attribution.payment_bucket
+      purchase_sequence: purchase_sequence.payment_bucket
+      product_performance: product_performance.payment_bucket
+      orders_all_channels: orders_all_channels.payment_bucket
+      sales_all_channels: sales_all_channels.payment_bucket
   - id: utm_source
     display_name: UTM Source
     description: Landing UTM source (order or session funnel).
+    aliases: [utm source, source utm]
     views:
       commerce_orders: commerce_orders.utm_source
+  - id: utm_medium
+    display_name: UTM Medium
+    description: Landing UTM medium on the order.
+    aliases: [utm medium, medium]
+    views:
+      commerce_orders: commerce_orders.utm_medium
   - id: utm_campaign
     display_name: UTM Campaign
     description: >
@@ -199,47 +278,86 @@ dimensions:
       lt_campaign_name, which is the last-touch-resolved campaign from
       attribution — UTM is unresolved/free-text, may not match ad platform
       metadata 1:1).
+    aliases: [utm campaign, campaign utm]
     views:
       commerce_orders: commerce_orders.utm_campaign
   - id: shipping_country
     display_name: Shipping Country
+    description: Destination country on the order shipping address.
+    aliases: [country, ship country, shipping country]
     views:
       commerce_orders: commerce_orders.shipping_country
       product_performance: product_performance.shipping_country
+      sales_all_channels: sales_all_channels.shipping_country
   - id: shipping_region
-    display_name: Shipping Region / State
+    display_name: Shipping Region / State / Province
+    description: >
+      Destination province/state/region on the order shipping address.
+      Shopify = shipping_address.province (as shipping_region); Amazon =
+      ship_to_state. Use this for "sales by state", "by province", or "by region".
+    aliases:
+      - region
+      - state
+      - province
+      - shipping state
+      - shipping province
+      - ship state
+      - ship province
+      - ship_to_state
     views:
       commerce_orders: commerce_orders.shipping_region
       product_performance: product_performance.shipping_region
+      sales_all_channels: sales_all_channels.shipping_region
   - id: shipping_city
     display_name: Shipping City
+    description: Destination city on the order shipping address.
+    aliases: [city, ship city, shipping city, ship_to_city]
     views:
       commerce_orders: commerce_orders.shipping_city
       product_performance: product_performance.shipping_city
+      sales_all_channels: sales_all_channels.shipping_city
+  - id: shipping_state_code
+    display_name: Shipping State Code
+    description: ISO/Shopify province code (MH, KA, DL, …) on Shopify shipping address.
+    aliases: [state code, province code, shipping_province_code]
+    views:
+      commerce_orders: commerce_orders.shipping_state_code
+  - id: shipping_pincode
+    display_name: Shipping Pincode
+    description: Destination postal / PIN code on the order shipping address.
+    aliases: [pincode, pin code, postal code, zip, zipcode, shipping zip]
+    views:
+      commerce_orders: commerce_orders.shipping_pincode
   - id: is_new_customer
     display_name: New Customer Flag
     description: Whether this was the customer's first order.
+    aliases: [new customer, first order customer, new vs repeat, is_new_customer]
     views:
       commerce_orders: commerce_orders.is_new_customer
       order_attribution: order_attribution.is_new_customer
   - id: sku
     display_name: SKU
+    aliases: [SKU, product sku]
     views:
       product_performance: product_performance.sku
   - id: product_title
     display_name: Product Title
+    aliases: [product, product name]
     views:
       product_performance: product_performance.product_title
   - id: variant_title
     display_name: Variant Title
+    aliases: [variant]
     views:
       product_performance: product_performance.variant_title
   - id: product_type
     display_name: Product Type / Category
+    aliases: [category, product category, product type]
     views:
       product_performance: product_performance.product_type
   - id: vendor
     display_name: Vendor
+    aliases: [brand vendor, supplier, vendor name]
     views:
       product_performance: product_performance.vendor
   # ---- Paid media (2026-07-15): PaidMedia.{Meta,Google,Amazon}AdsPerformance ----
@@ -264,6 +382,13 @@ dimensions:
       channel_attribution: channel_attribution.report_date
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
+      platform_attribution_commerce: platform_attribution_commerce.report_date
+  - id: platform
+    display_name: Attribution Platform
+    description: Last-touch platform bucket on platform_attribution_commerce (meta | google | organic).
+    aliases: [lt platform, attribution platform]
+    views:
+      platform_attribution_commerce: platform_attribution_commerce.platform
   - id: campaign_id
     display_name: Campaign ID
     description: Platform campaign identifier.
@@ -391,13 +516,17 @@ dimensions:
     description: >
       On channel_attribution: closed 5-channel set (meta/google/organic_shopify/
       amazon/organic_amazon). On funnel_daily and session_funnel: FINE channel
-      (ig_feed, google_search, organic, ...).
+      (ig_feed, google_search, organic, ...). On orders_all_channels /
+      sales_all_channels: marketplace channel (shopify | amazon).
+    aliases: [marketplace, marketplace channel, shopify vs amazon]
     views:
       channel_attribution: channel_attribution.channel
       funnel_daily: funnel_daily.channel
       session_funnel: session_funnel.channel
       web_events: web_events.channel
       web_events_daily: web_events_daily.channel
+      orders_all_channels: orders_all_channels.channel
+      sales_all_channels: sales_all_channels.channel
   - id: source_platform
     display_name: Source Platform
     description: Originating platform of the attribution row (shopify | amazon).

@@ -2,11 +2,12 @@ id: total_sales_all_channels
 display_name: Total Sales (all channels, incl. GST)
 category: commerce
 status: certified
-description: >
-  Historical Analytics / P&L Total Sales when All channels is selected: Shopify
-  eligible Total Sales (gross_revenue + total_discounts, incl. GST) plus Amazon
-  SP order_total_header for all placements in range (including canceled). For
-  Shopify-only use metric total_sales.
+description: 'Historical Analytics / P&L Total Sales when All channels is selected:
+  Shopify eligible Total Sales (gross_revenue + total_discounts, incl. GST) plus Amazon
+  SP order_total_header for all placements in range (including canceled). For Shopify-only
+  use metric total_sales.
+
+  '
 formula:
   human_readable: SUM(shopify total_sales) + SUM(amazon order_total_header)
   authoritative_source: cube
@@ -18,20 +19,47 @@ unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
+- channel
+- shipping_region
+- shipping_country
+- shipping_city
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
+- channel
+- shipping_region
+- shipping_country
+- shipping_city
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: Total Sales June 2026 all channels
-    request:
-      measures: [total_sales_all_channels]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: Total Sales June 2026 all channels
+  request:
+    measures:
+    - total_sales_all_channels
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - June 2026 brand 20 = ₹48,46,429 (Shopify 45,72,809 + Amazon header 2,73,620)
+- June 2026 brand 20 = ₹48,46,429 (Shopify 45,72,809 + Amazon header 2,73,620)
 deprecated_aliases: []

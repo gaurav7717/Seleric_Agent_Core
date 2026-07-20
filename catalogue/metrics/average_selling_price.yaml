@@ -2,12 +2,13 @@ id: average_selling_price
 display_name: Average Selling Price (ex-GST)
 category: product
 status: certified
-description: >
-  Lifecycle net revenue per net unit from serve.product_performance. A ratio —
-  never average daily ASP rows; recompute from components. No dashboard card
+description: 'Lifecycle net revenue per net unit from serve.product_performance. A
+  ratio — never average daily ASP rows; recompute from components. No dashboard card
   exists for ASP (policy-defined metric).
+
+  '
 formula:
-  human_readable: "product_net_revenue / units_sold (net)"
+  human_readable: product_net_revenue / units_sold (net)
   authoritative_source: cube
 cube_mapping:
   view: product_performance
@@ -19,15 +20,51 @@ ratio_components:
 unit: currency
 currency_default: INR
 grain: order_item
-supported_dimensions: [brand_id, order_date, product_title, variant_title, sku, product_type, vendor]
-supported_filters: [date_range, brand_id, product_title, sku, product_type, vendor]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- variant_title
+- sku
+- product_type
+- vendor
+- order_status
+- return_status
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- product_type
+- vendor
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
 examples:
-  - question: "Average selling price by SKU this month"
-    request: {measures: [average_selling_price], dimensions: [sku], time_range: {preset: this_month}}
+- question: Average selling price by SKU this month
+  request:
+    measures:
+    - average_selling_price
+    dimensions:
+    - sku
+    time_range:
+      preset: this_month
 validation_tests:
-  - "period value equals sum(net_revenue)/sum(units_sold) for the same slice"
+- period value equals sum(net_revenue)/sum(units_sold) for the same slice
 deprecated_aliases: []

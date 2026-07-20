@@ -1,0 +1,36 @@
+id: net_profit_all_channels
+display_name: Net Profit (all channels — P&L Forecast)
+category: finance
+status: certified
+description: >
+  P&L Forecast Net Profit: (Shopify net + Amazon operational revenue / 1.18) −
+  all-channels TOC − Total Ad Spend (Meta+Google+Amazon). Distinct from
+  Shopify-only net_profit and from Historical all-channels net_profit_incl_amazon.
+formula:
+  human_readable: pnl_net_sales_all - toc_all_channels - total_ad_spend
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.net_profit_all_channels
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed: [exec, finance]
+  scopes: [metrics:read]
+examples:
+  - question: P&L Net Profit for June 2026
+    request:
+      measures: [net_profit_all_channels]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
+validation_tests:
+  - June 2026 brand 20 ≈ −₹2,78,615.42
+deprecated_aliases: []

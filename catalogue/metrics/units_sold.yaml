@@ -2,13 +2,13 @@ id: units_sold
 display_name: Units Sold (net)
 category: product
 status: certified
-description: >
-  Net units (ordered − refunded) on eligible placement lines from
-  serve.product_performance. Basis corrected 2026-07-14 from gross ordered
-  quantity to lifecycle net (policy product_performance_policy_v1). For the
-  gross basis use gross_units_ordered.
+description: 'Net units (ordered − refunded) on eligible placement lines from serve.product_performance.
+  Basis corrected 2026-07-14 from gross ordered quantity to lifecycle net (policy
+  product_performance_policy_v1). For the gross basis use gross_units_ordered.
+
+  '
 formula:
-  human_readable: "Sum of net_quantity (ordered − refunded) on eligible lines"
+  human_readable: Sum of net_quantity (ordered − refunded) on eligible lines
   authoritative_source: cube
 cube_mapping:
   view: product_performance
@@ -16,15 +16,54 @@ cube_mapping:
 aggregation: additive
 unit: count
 grain: order_item
-supported_dimensions: [brand_id, order_date, product_title, variant_title, sku, product_type, vendor, shipping_city, shipping_region, shipping_country]
-supported_filters: [date_range, brand_id, product_title, sku, product_type, vendor]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- variant_title
+- sku
+- product_type
+- vendor
+- shipping_city
+- shipping_region
+- shipping_country
+- order_status
+- return_status
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- product_type
+- vendor
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
 examples:
-  - question: "Units sold by SKU last 30 days"
-    request: {measures: [units_sold], dimensions: [sku], time_range: {preset: last_30d}}
+- question: Units sold by SKU last 30 days
+  request:
+    measures:
+    - units_sold
+    dimensions:
+    - sku
+    time_range:
+      preset: last_30d
 validation_tests:
-  - "matches dashboard product-performance net quantity for closed months"
+- matches dashboard product-performance net quantity for closed months
 deprecated_aliases: []

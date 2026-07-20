@@ -23,20 +23,48 @@ grain: order
 supported_dimensions:
 - brand_id
 - order_date
+- order_created_at_ist
 - payment_method
 - payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
 - utm_source
+- utm_medium
+- utm_campaign
+- source_name
 - shipping_country
 - shipping_region
 - shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- financial_status
 supported_filters:
 - date_range
 - brand_id
 - payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
 - utm_source
+- utm_medium
+- utm_campaign
+- source_name
 - shipping_country
 - shipping_region
 - shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- financial_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

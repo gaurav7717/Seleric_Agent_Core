@@ -24,9 +24,37 @@ grain: order
 supported_dimensions:
 - brand_id
 - event_date
+- payment_method
+- payment_bucket
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
 supported_filters:
 - date_range
 - brand_id
+- payment_method
+- payment_bucket
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

@@ -2,12 +2,13 @@ id: units_per_order
 display_name: Average Units per Order
 category: product
 status: certified
-description: >
-  Net units per distinct eligible order from serve.product_performance. A
-  ratio — never sum or average daily units_per_order rows; recompute from
-  units_sold / product_orders. Basis corrected 2026-07-14 (was gross quantity).
+description: 'Net units per distinct eligible order from serve.product_performance.
+  A ratio — never sum or average daily units_per_order rows; recompute from units_sold
+  / product_orders. Basis corrected 2026-07-14 (was gross quantity).
+
+  '
 formula:
-  human_readable: "Units sold (net) / distinct eligible orders"
+  human_readable: Units sold (net) / distinct eligible orders
   authoritative_source: cube
 cube_mapping:
   view: product_performance
@@ -18,15 +19,46 @@ ratio_components:
   denominator: product_performance.product_orders
 unit: count
 grain: order_item
-supported_dimensions: [brand_id, order_date, product_title, sku, product_type, vendor]
-supported_filters: [date_range, brand_id, product_title, sku]
-data_owner: "Commerce Ops"
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- sku
+- product_type
+- vendor
+- order_status
+- return_status
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
 examples:
-  - question: "Average units per order last 30 days"
-    request: {measures: [units_per_order], time_range: {preset: last_30d}}
+- question: Average units per order last 30 days
+  request:
+    measures:
+    - units_per_order
+    time_range:
+      preset: last_30d
 validation_tests:
-  - "period value equals sum(units_sold)/uniq(product_orders) for the same slice"
+- period value equals sum(units_sold)/uniq(product_orders) for the same slice
 deprecated_aliases: []

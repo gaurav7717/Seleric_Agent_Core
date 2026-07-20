@@ -22,7 +22,9 @@ storage:
   db_path: var/seleric_mcp.db
 
 defaults:
-  # Injected when metrics_query has no brand filter (single-tenant: Tilting Heads)
+  # Injected when metrics_query has no brand filter (default tenant: Tilting Heads).
+  # Other brands: Sniff Theory=26, Urthend=25, Mannmore=27, The Billy Company=24 —
+  # see catalogue/brands.yaml; pass brand_id filter when the user names one.
   brand_id: "20"
 
 tunables:

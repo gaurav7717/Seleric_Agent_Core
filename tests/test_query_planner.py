@@ -92,7 +92,7 @@ async def test_multi_view_dimension_must_work_on_each_part(planner):
     """A dimension invalid for one of the views still fails (no silent drop)."""
     req = QueryRequest(
         measures=["product_net_revenue", "orders"],
-        dimensions=["payment_method"],  # commerce only
+        dimensions=["utm_source"],  # commerce only
         time_range=TimeRange(preset="last_7d"),
     )
     with pytest.raises(PlanError, match="not supported"):
@@ -115,7 +115,7 @@ async def test_unsupported_dimension_suggests_alternate_metrics(planner):
 async def test_filter_dimension_must_be_on_view(planner):
     req = QueryRequest(
         measures=["product_net_revenue"],
-        filters=[FilterSpec(dimension="payment_bucket", values=["cod"])],  # commerce only
+        filters=[FilterSpec(dimension="utm_campaign", values=["summer"])],  # commerce only
         time_range=TimeRange(preset="last_7d"),
     )
     with pytest.raises(PlanError, match="not valid on view"):
@@ -286,3 +286,50 @@ async def test_default_brand_scope_not_injected_when_brand_filter_given(
         if f["member"] == "commerce_orders.brand_id"
     ]
     assert values == [["31"]]  # explicit filter wins; nothing injected
+
+
+async def test_brand_name_filter_resolves_to_id(catalogue, fake_cube, result_store):
+    planner = QueryPlanner(catalogue, fake_cube, result_store, default_brand_id="20")
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.orders": "10"}]
+    req = QueryRequest(
+        measures=["orders"],
+        filters=[FilterSpec(dimension="brand_id", operator="equals", values=["Sniff Theory"])],
+        time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+    )
+    out = await planner.run(req)
+    values = [
+        f["values"]
+        for f in fake_cube.queries[0]["filters"]
+        if f["member"] == "commerce_orders.brand_id"
+    ]
+    assert values == [["26"]]
+    assert any("brand_id=26" in w or "Sniff" in w for w in out["warnings"])
+
+
+async def test_province_alias_resolves_to_shipping_region(planner, fake_cube):
+    """NL synonyms province/state/region must map to shipping_region."""
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.total_sales": "100"}]
+    out = await planner.run(
+        QueryRequest(
+            measures=["total_sales"],
+            dimensions=["province"],
+            time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+        )
+    )
+    assert "error" not in out
+    assert fake_cube.queries[0]["dimensions"] == ["commerce_orders.shipping_region"]
+
+
+async def test_all_channels_total_sales_by_state(planner, fake_cube):
+    fake_cube.by_prefix["sales_all_channels"] = [
+        {"sales_all_channels.total_sales": "4865459"}
+    ]
+    out = await planner.run(
+        QueryRequest(
+            measures=["total_sales_all_channels"],
+            dimensions=["state"],
+            time_range=TimeRange(start=date(2026, 6, 1), end=date(2026, 6, 30)),
+        )
+    )
+    assert "error" not in out
+    assert fake_cube.queries[0]["dimensions"] == ["sales_all_channels.shipping_region"]

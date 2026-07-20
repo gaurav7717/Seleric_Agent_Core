@@ -134,29 +134,30 @@ class QueryPlanner:
         view = metrics[0].cube_mapping.view
         qualified: list[str] = []
         for did in dimension_ids:
-            dim = self.catalogue.cat.dimensions.get(did)
+            dim = self.catalogue.resolve_dimension(did)
             if dim is None:
                 raise PlanError(
                     f"Unknown dimension '{did}'.",
                     suggestions=[d.id for d in self.catalogue.list_dimensions(view)],
                 )
+            canonical = dim.id
             for m in metrics:
-                if did not in m.supported_dimensions:
-                    alts = self._metrics_supporting_dimension(did, exclude=m.id)
+                if canonical not in m.supported_dimensions:
+                    alts = self._metrics_supporting_dimension(canonical, exclude=m.id)
                     hint = (
-                        f" Metrics that support '{did}': {', '.join(alts)}."
+                        f" Metrics that support '{canonical}': {', '.join(alts)}."
                         if alts
                         else ""
                     )
                     raise PlanError(
-                        f"Dimension '{did}' is not supported by metric '{m.id}'. "
+                        f"Dimension '{did}' (→ {canonical}) is not supported by metric '{m.id}'. "
                         f"Supported: {', '.join(m.supported_dimensions) or '(none)'}.{hint}",
                         suggestions=alts,
                     )
             if view not in dim.views:
-                alts = self._metrics_supporting_dimension(did)
+                alts = self._metrics_supporting_dimension(canonical)
                 raise PlanError(
-                    f"Dimension '{did}' has no mapping on view '{view}'.",
+                    f"Dimension '{canonical}' has no mapping on view '{view}'.",
                     suggestions=alts,
                 )
             qualified.append(dim.views[view])
@@ -194,7 +195,7 @@ class QueryPlanner:
         cube_filters: list[dict] = []
         warnings: list[str] = []
         for f in filters:
-            dim = self.catalogue.cat.dimensions.get(f.dimension)
+            dim = self.catalogue.resolve_dimension(f.dimension)
             if dim is None or view not in dim.views:
                 valid = [d.id for d in self.catalogue.list_dimensions(view)]
                 raise PlanError(
@@ -205,6 +206,17 @@ class QueryPlanner:
                 raise PlanError(f"Filter on '{f.dimension}' requires values.")
             values, value_warnings = self._resolve_filter_values(dim, f)
             warnings.extend(value_warnings)
+            if dim.id == "brand_id" and f.operator in ("equals", "notEquals") and values:
+                resolved_brands: list[str] = []
+                for v in values:
+                    try:
+                        bid, warn = self.catalogue.resolve_brand_filter_value(v)
+                    except ValueError as exc:
+                        raise PlanError(str(exc)) from exc
+                    resolved_brands.append(bid)
+                    if warn:
+                        warnings.append(warn)
+                values = resolved_brands
             entry: dict = {"member": dim.views[view], "operator": f.operator}
             if values:
                 entry["values"] = values
@@ -222,7 +234,7 @@ class QueryPlanner:
             if s.field in metric_by_id:
                 member = metric_by_id[s.field].cube_mapping.measure
             else:
-                dim = self.catalogue.cat.dimensions.get(s.field)
+                dim = self.catalogue.resolve_dimension(s.field)
                 if dim is None or view not in dim.views:
                     raise PlanError(
                         f"Cannot sort by '{s.field}': not one of the requested measures "

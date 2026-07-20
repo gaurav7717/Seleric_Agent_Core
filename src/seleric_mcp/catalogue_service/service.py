@@ -16,7 +16,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from .loader import Catalogue, DimensionDef, MetricDef
+from .loader import BrandDef, Catalogue, DimensionDef, MetricDef
 
 # Fuzzy-resolution band fallbacks (SequenceMatcher ratio on normalized
 # strings). Runtime values come from Settings (env-overridable); these only
@@ -89,6 +89,36 @@ class UnknownTerm(BaseModel):
     guidance: str = (
         "Term not in the catalogue. Do not guess a metric — ask the user to "
         "clarify, or pick from the suggestions if one clearly matches."
+    )
+
+
+class ResolvedBrand(BaseModel):
+    kind: Literal["resolved"] = "resolved"
+    term: str
+    brand_id: str
+    name: str
+    code: str | None = None
+    status: str = "active"
+    matched_via: str
+    is_default: bool = False
+
+
+class AmbiguousBrand(BaseModel):
+    kind: Literal["ambiguous"] = "ambiguous"
+    term: str
+    candidates: list[dict]
+    guidance: str = (
+        "Several brands match. Pick the one that fits the user's wording, or ask once."
+    )
+
+
+class UnknownBrand(BaseModel):
+    kind: Literal["unknown"] = "unknown"
+    term: str
+    suggestions: list[str]
+    guidance: str = (
+        "Brand not in the registry. Ask the user to clarify, or use the default "
+        "(Tilting Heads) if they did not name a brand."
     )
 
 
@@ -262,6 +292,36 @@ class CatalogueService:
     def get_metric(self, metric_id: str) -> MetricDef | None:
         return self.cat.metrics.get(metric_id)
 
+    def resolve_dimension(self, name: str) -> DimensionDef | None:
+        """Resolve a dimension id, display name, or alias to the canonical DimensionDef."""
+        raw = (name or "").strip()
+        if not raw:
+            return None
+        key = raw.lower().replace("-", "_").replace(" ", "_")
+        # Payment-mix breakdown phrases map to payment_bucket (not boolean flags).
+        if key in {
+            "online", "prepaid", "cod", "paytm", "paytm_card_machine", "manual",
+            "payment_mix", "payment_type", "payment_mode", "cod_vs_prepaid",
+            "prepaid_vs_cod", "online_payment", "online_orders",
+        }:
+            bucket = self.cat.dimensions.get("payment_bucket")
+            if bucket is not None:
+                return bucket
+        dim = self.cat.dimensions.get(raw) or self.cat.dimensions.get(key)
+        if dim is not None:
+            return dim
+        for d in self.cat.dimensions.values():
+            if d.id.lower() == key:
+                return d
+            if _normalize(d.display_name) == _normalize(raw):
+                return d
+            for alias in d.aliases:
+                if alias.lower().replace("-", "_").replace(" ", "_") == key:
+                    return d
+                if _normalize(alias) == _normalize(raw):
+                    return d
+        return None
+
     def list_dimensions(self, view: str) -> list[DimensionDef]:
         return [d for d in self.cat.dimensions.values() if view in d.views]
 
@@ -273,3 +333,130 @@ class CatalogueService:
         m = self.cat.metrics.get(metric_id)
         if m:
             m.status = "broken"
+
+    def list_brands(self, *, include_test: bool = False) -> list[BrandDef]:
+        reg = self.cat.brands
+        if reg is None:
+            return []
+        out = []
+        for b in reg.brands:
+            if b.status == "inactive":
+                continue
+            if b.status == "test" and not include_test:
+                continue
+            out.append(b)
+        return out
+
+    def default_brand(self) -> BrandDef | None:
+        reg = self.cat.brands
+        if reg is None:
+            return None
+        for b in reg.brands:
+            if b.id == reg.default_brand_id:
+                return b
+        return reg.brands[0] if reg.brands else None
+
+    def resolve_brand(
+        self, text: str
+    ) -> ResolvedBrand | AmbiguousBrand | UnknownBrand:
+        """Map a brand name / code / id to catalogue brand_id for metrics_query filters."""
+        raw = (text or "").strip()
+        if not raw:
+            return UnknownBrand(term=text, suggestions=[b.name for b in self.list_brands()])
+        reg = self.cat.brands
+        if reg is None:
+            return UnknownBrand(term=text, suggestions=[])
+
+        norm = _normalize(raw)
+        candidates: list[tuple[float, BrandDef, str]] = []
+        for b in reg.brands:
+            if b.status == "inactive":
+                continue
+            forms: list[tuple[str, str]] = [
+                (_normalize(b.id), "brand_id"),
+                (_normalize(b.name), "name"),
+            ]
+            if b.code:
+                forms.append((_normalize(b.code), "code"))
+            for alias in b.aliases:
+                forms.append((_normalize(alias), f"alias:{alias}"))
+            for form, via in forms:
+                if not form:
+                    continue
+                if form == norm:
+                    candidates.append((1.0, b, via))
+                else:
+                    score = difflib.SequenceMatcher(None, norm, form).ratio()
+                    if score >= self.ambiguous_threshold:
+                        candidates.append((score, b, via))
+
+        if not candidates:
+            return UnknownBrand(
+                term=text,
+                suggestions=[f"{b.name} ({b.id})" for b in self.list_brands()],
+            )
+
+        # Best score per brand_id
+        best: dict[str, tuple[float, BrandDef, str]] = {}
+        for score, brand, via in candidates:
+            prev = best.get(brand.id)
+            if prev is None or score > prev[0]:
+                best[brand.id] = (score, brand, via)
+        ranked = sorted(best.values(), key=lambda x: x[0], reverse=True)
+        top_score, top_brand, top_via = ranked[0]
+        is_default = top_brand.id == reg.default_brand_id
+
+        if top_score >= self.auto_threshold and (
+            len(ranked) == 1 or top_score - ranked[1][0] >= self.runner_up_margin
+        ):
+            return ResolvedBrand(
+                term=text,
+                brand_id=top_brand.id,
+                name=top_brand.name,
+                code=top_brand.code,
+                status=top_brand.status,
+                matched_via=top_via,
+                is_default=is_default,
+            )
+
+        return AmbiguousBrand(
+            term=text,
+            candidates=[
+                {
+                    "brand_id": b.id,
+                    "name": b.name,
+                    "code": b.code,
+                    "confidence": round(score, 3),
+                    "matched_via": via,
+                }
+                for score, b, via in ranked[:5]
+            ],
+        )
+
+    def resolve_brand_filter_value(self, value: str) -> tuple[str, str | None]:
+        """Resolve a brand_id filter value (id or name) → (brand_id, warning|None).
+
+        Bare numeric ids always pass through (even if not in the registry) so
+        ops can query any tenant. Names/codes must resolve via the registry.
+        """
+        raw = (value or "").strip()
+        if raw.isdigit():
+            return raw, None
+        result = self.resolve_brand(raw)
+        if isinstance(result, ResolvedBrand):
+            warn = (
+                f"Brand filter '{value}' resolved to {result.name} "
+                f"(brand_id={result.brand_id})."
+            )
+            return result.brand_id, warn
+        if isinstance(result, AmbiguousBrand) and result.candidates:
+            raise ValueError(
+                f"Ambiguous brand '{value}'. Candidates: "
+                + ", ".join(
+                    f"{c['name']} ({c['brand_id']})" for c in result.candidates
+                )
+            )
+        raise ValueError(
+            f"Unknown brand '{value}'. Known: "
+            + ", ".join(f"{b.name} ({b.id})" for b in self.list_brands())
+        )

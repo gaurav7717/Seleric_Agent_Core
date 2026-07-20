@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 161
+count: 173
 metrics:
   active_orders:
     category: commerce
@@ -360,6 +360,34 @@ metrics:
     contract: funnel_daily_contract_v1
     glossary: []
     om_name: funnelRevenue
+  google_attribution_gross_sales:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: googleAttributionGrossSales
+  google_attribution_net_sales:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: googleAttributionNetSales
+  google_attribution_orders:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedOrder
+    om_name: googleAttributionOrders
+  google_attribution_total_sales:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: googleAttributionTotalSales
   google_clicks:
     category: paid_media
     cube_view: google_ad_performance
@@ -535,6 +563,34 @@ metrics:
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttrRefundAmount
+  meta_attribution_gross_sales:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttributionGrossSales
+  meta_attribution_net_sales:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttributionNetSales
+  meta_attribution_orders:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedOrder
+    om_name: metaAttributionOrders
+  meta_attribution_total_sales:
+    category: attribution
+    cube_view: platform_attribution_commerce
+    contract: attribution_order_contract_v1
+    glossary:
+    - Attribution.AttributedNetRevenue
+    om_name: metaAttributionTotalSales
   meta_breakdown_clicks:
     category: paid_media
     cube_view: meta_ad_breakdown_performance
@@ -826,6 +882,13 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: netProfit
+  net_profit_all_channels:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: netProfitAllChannels
   net_profit_blended:
     category: finance
     cube_view: canonical_pnl
@@ -833,6 +896,13 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: netProfitBlended
+  net_profit_incl_amazon:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetProfit
+    om_name: netProfitInclAmazon
   net_roas:
     category: finance
     cube_view: canonical_pnl
@@ -902,6 +972,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: productCost
+  product_cost_all_channels:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: productCostAllChannels
   product_gross_margin_pct:
     category: product
     cube_view: product_performance
@@ -1056,6 +1133,13 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: totalOperatingCost
+  total_operating_cost_all_channels:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary:
+    - Finance.NetCogs
+    om_name: totalOperatingCostAllChannels
   total_orders:
     category: commerce
     cube_view: orders_all_channels

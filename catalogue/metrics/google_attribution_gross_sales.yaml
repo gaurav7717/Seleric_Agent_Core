@@ -1,0 +1,34 @@
+id: google_attribution_gross_sales
+display_name: Google Attribution Gross Sales
+category: attribution
+status: certified
+description: 'Google Attribution Analysis Overview Gross Sales (ex-GST) for last-touch
+  Google eligible Shopify placements.
+
+  '
+formula:
+  human_readable: SUM(commerce gross sales where lt_platform = google)
+  authoritative_source: cube
+cube_mapping:
+  view: platform_attribution_commerce
+  measure: platform_attribution_commerce.google_gross_sales
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+deprecated_aliases: []

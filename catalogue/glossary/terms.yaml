@@ -141,6 +141,14 @@ terms:
     canonical_id: net_profit
   - term: shopify net profit
     canonical_id: net_profit
+  - term: pnl net profit
+    canonical_id: net_profit_all_channels
+  - term: net profit (all channels)
+    canonical_id: net_profit_all_channels
+  - term: net profit all channels
+    canonical_id: net_profit_all_channels
+  - term: historical all channels net profit
+    canonical_id: net_profit_incl_amazon
   - term: net profit blended
     canonical_id: net_profit_blended
   - term: net profit (all platforms)
@@ -156,20 +164,30 @@ terms:
   - term: cost of goods
     canonical_id: net_cogs
   - term: product cost
-    canonical_id: product_cost
+    canonical_id: product_cost_all_channels
+  - term: product cost (all channels)
+    canonical_id: product_cost_all_channels
+  - term: pnl product cost
+    canonical_id: product_cost_all_channels
   - term: product cost (shopify-only)
     canonical_id: product_cost
   - term: product COGS
     canonical_id: product_cogs
   - term: total operating cost
-    canonical_id: total_operating_cost
+    canonical_id: total_operating_cost_all_channels
+  - term: total operating cost (all channels)
+    canonical_id: total_operating_cost_all_channels
+  - term: pnl total operating cost
+    canonical_id: total_operating_cost_all_channels
   - term: total operating cost (shopify-only)
     canonical_id: total_operating_cost
   - term: operating cost
-    canonical_id: total_operating_cost
+    canonical_id: total_operating_cost_all_channels
     definition: >
-      On the P&L Metrics page this means Total Operating Cost (= Net COGS),
-      Shopify-only. For the non-product breakdown only, use metric operating_cost.
+      On the P&L Metrics page this means Total Operating Cost (= Shopify Net
+      COGS + Amazon product + marketplace fees). For Shopify-only say
+      "shopify only total operating cost". For the non-product breakdown only,
+      use metric operating_cost.
   - term: packaging cost
     canonical_id: packaging_cost
   - term: shipping cost
@@ -458,7 +476,30 @@ terms:
   - term: meta attr sales
     canonical_id: meta_attr_net_revenue
   - term: meta attribution sales
-    canonical_id: meta_attr_net_revenue
+    canonical_id: meta_attribution_net_sales
+    definition: >
+      Meta Attribution Analysis page Net Sales (commerce cohort). For ad-day
+      last-touch oracle use "meta attributed sales" → meta_attr_net_revenue.
+  - term: meta attribution net sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta attribution analysis net sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta attribution gross sales
+    canonical_id: meta_attribution_gross_sales
+  - term: meta attribution total sales
+    canonical_id: meta_attribution_total_sales
+  - term: meta attribution orders
+    canonical_id: meta_attribution_orders
+  - term: google attribution net sales
+    canonical_id: google_attribution_net_sales
+  - term: google attribution analysis net sales
+    canonical_id: google_attribution_net_sales
+  - term: google attribution gross sales
+    canonical_id: google_attribution_gross_sales
+  - term: google attribution total sales
+    canonical_id: google_attribution_total_sales
+  - term: google attribution orders
+    canonical_id: google_attribution_orders
   - term: meta attributed net revenue
     canonical_id: meta_attr_net_revenue
   - term: meta attributed gross revenue
@@ -620,6 +661,24 @@ terms:
     canonical_id: cod_orders
   - term: prepaid orders
     canonical_id: prepaid_orders
+  - term: online orders
+    canonical_id: prepaid_orders
+  - term: online payment
+    canonical_id: prepaid_orders
+  - term: payment mix
+    definition: >
+      Break down Shopify orders by payment_bucket (online, cod, paytm card machine,
+      manual) using total_sales, orders, commerce_net_revenue, or product_net_revenue
+      with dimension payment_bucket. Amazon has no COD/prepaid bucket.
+  - term: sales by payment method
+    definition: >
+      Use total_sales or commerce_net_revenue with dimension payment_method or
+      payment_bucket on commerce_orders (Shopify-only). For gateway-level detail
+      use payment_gateway.
+  - term: prepaid vs cod
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
   - term: active orders
     canonical_id: active_orders
   - term: new customer orders

@@ -2,12 +2,13 @@ id: product_gross_margin_pct
 display_name: Product Gross Margin %
 category: product
 status: certified
-description: >
-  Gross profit as a share of lifecycle net revenue (ex-GST), fully-loaded COGS
-  basis, from serve.product_performance. A ratio — never sum or average
-  row/daily margin percentages; recompute from components.
+description: 'Gross profit as a share of lifecycle net revenue (ex-GST), fully-loaded
+  COGS basis, from serve.product_performance. A ratio — never sum or average row/daily
+  margin percentages; recompute from components.
+
+  '
 formula:
-  human_readable: "100 × product_gross_profit / product_net_revenue"
+  human_readable: 100 × product_gross_profit / product_net_revenue
   authoritative_source: cube
 cube_mapping:
   view: product_performance
@@ -18,15 +19,51 @@ ratio_components:
   denominator: product_performance.net_line_revenue_ex_gst
 unit: percent
 grain: order_item
-supported_dimensions: [brand_id, order_date, product_title, variant_title, sku, product_type, vendor]
-supported_filters: [date_range, brand_id, product_title, sku, product_type, vendor]
-data_owner: "Commerce Ops / Finance"
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- variant_title
+- sku
+- product_type
+- vendor
+- order_status
+- return_status
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- product_type
+- vendor
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+data_owner: Commerce Ops / Finance
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
 examples:
-  - question: "Gross margin by SKU last month"
-    request: {measures: [product_gross_margin_pct], dimensions: [sku], time_range: {preset: last_month}}
+- question: Gross margin by SKU last month
+  request:
+    measures:
+    - product_gross_margin_pct
+    dimensions:
+    - sku
+    time_range:
+      preset: last_month
 validation_tests:
-  - "period value equals 100 × sum(gross_profit)/sum(net_revenue) for the same slice"
+- period value equals 100 × sum(gross_profit)/sum(net_revenue) for the same slice
 deprecated_aliases: []

@@ -23,6 +23,23 @@ def test_loads_seed(catalogue):
     assert len(catalogue.cat.openmetadata.metrics) == len(catalogue.cat.metrics)
     assert catalogue.cat.openmetadata.contracts
     assert catalogue.cat.openmetadata.ontology is not None
+    assert catalogue.cat.brands is not None
+    assert catalogue.cat.brands.default_brand_id == "20"
+    assert any(b.id == "26" and "sniff" in b.name.lower() for b in catalogue.cat.brands.brands)
+
+
+def test_resolve_brand_default_and_named(catalogue):
+    from seleric_mcp.catalogue_service.service import ResolvedBrand
+
+    th = catalogue.resolve_brand("Tilting Heads")
+    assert isinstance(th, ResolvedBrand)
+    assert th.brand_id == "20"
+    sniff = catalogue.resolve_brand("sniff theory")
+    assert isinstance(sniff, ResolvedBrand)
+    assert sniff.brand_id == "26"
+    urth = catalogue.resolve_brand("Urthend")
+    assert isinstance(urth, ResolvedBrand)
+    assert urth.brand_id == "25"
 
 
 def test_openmetadata_orders_om_name(catalogue):
@@ -81,11 +98,11 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Cancelled": "cancel_revenue",
         "Net Sales (Ex-GST)": "commerce_net_revenue_daily",
         "Taxes (18% on Shopify Net)": "taxes_on_net_sales",
-        "Product Cost": "product_cost",
+        "Product Cost": "product_cost_all_channels",
         "Amazon Platform Fees": "amazon_platform_fees",
         "Shipping Cost (Courier)": "shipping_cost",
         "RTO Logistics Cost": "rto_cost",
-        "Total Operating Cost": "total_operating_cost",
+        "Total Operating Cost": "total_operating_cost_all_channels",
         "Total Sales (Including GST)": "total_sales_all_channels",
         "Total Performance Marketing": "total_ad_spend",
         "Total Ad Spend (all platforms)": "total_ad_spend",
@@ -93,6 +110,8 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Meta Ads": "meta_spend",
         "Google Ads": "google_spend",
         "Amazon Ads": "amazon_ads_spend",
+        "P&L Net Profit": "net_profit_all_channels",
+        "Net Profit (all channels)": "net_profit_all_channels",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)
@@ -178,6 +197,11 @@ def test_resolve_attribution_scope(catalogue):
         "meta attributed sales": "meta_attr_net_revenue",
         "meta attr sales": "meta_attr_net_revenue",
         "meta attributed orders": "meta_attr_orders",
+        "meta attribution net sales": "meta_attribution_net_sales",
+        "meta attribution sales": "meta_attribution_net_sales",
+        "meta attribution orders": "meta_attribution_orders",
+        "google attribution net sales": "google_attribution_net_sales",
+        "google attribution orders": "google_attribution_orders",
         "channel orders": "channel_orders",
         "channel sales": "channel_net_revenue",
         "sales by channel": "channel_net_revenue",
@@ -280,9 +304,19 @@ tunables:
 def test_list_dimensions_scoped_by_view(catalogue):
     product = {d.id for d in catalogue.list_dimensions("product_performance")}
     assert "sku" in product
-    assert "payment_method" not in product  # commerce-only dimension
+    assert "payment_method" in product
+    assert "payment_bucket" in product
     commerce = {d.id for d in catalogue.list_dimensions("commerce_orders")}
     assert "payment_method" in commerce
+
+
+def test_resolve_payment_mix_dimensions(catalogue):
+    for phrase in ("online", "cod", "prepaid", "payment mix", "payment method"):
+        dim = catalogue.resolve_dimension(phrase)
+        assert dim is not None, phrase
+    assert catalogue.resolve_dimension("online").id == "payment_bucket"
+    assert catalogue.resolve_dimension("cod").id == "payment_bucket"
+    assert catalogue.resolve_dimension("payment method").id == "payment_method"
 
 
 def test_freshness(catalogue):

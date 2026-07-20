@@ -1,0 +1,67 @@
+# Agent-facing brand registry. Default scope = Tilting Heads (20).
+# When the user names another brand, metrics_query must filter brand_id to that id.
+# Source: Postgres core.brands (company 19 = live tenants).
+
+default_brand_id: "20"
+
+brands:
+  - id: "20"
+    name: Tilting Heads
+    code: TH
+    status: active
+    aliases:
+      - tilting heads
+      - tilting head
+      - tiltingheads
+      - tilting-heads
+      - TH
+      - brand 20
+  - id: "26"
+    name: Sniff Theory
+    code: ST
+    status: active
+    aliases:
+      - sniff theory
+      - snifftheory
+      - sniff
+      - ST
+      - brand 26
+  - id: "25"
+    name: Urthend
+    code: URTH
+    status: active
+    aliases:
+      - urthend
+      - urth end
+      - URTH
+      - brand 25
+  - id: "27"
+    name: Mannmore
+    code: MNM
+    status: active
+    aliases:
+      - manymore
+      - mann more
+      - man & more
+      - man and more
+      - MNM
+      - brand 27
+  - id: "24"
+    name: The Billy Company
+    code: TBC
+    status: active
+    aliases:
+      - the billy company
+      - billy company
+      - billy
+      - billcompany
+      - TBC
+      - brand 24
+  - id: "21"
+    name: LPB Test1
+    code: "1"
+    status: test
+    aliases:
+      - lpb test1
+      - lpb
+      - brand 21

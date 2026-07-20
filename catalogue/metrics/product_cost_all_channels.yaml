@@ -1,0 +1,35 @@
+id: product_cost_all_channels
+display_name: Product Cost (all channels — P&L)
+category: finance
+status: certified
+description: >
+  P&L Forecast Product Cost: Shopify merchandise product_cost + Amazon SP
+  total_cogs. For Shopify-only Historical Product Cost use product_cost.
+formula:
+  human_readable: SUM(product_cost + amazon_cogs)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.product_cost_all_channels
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed: [exec, finance]
+  scopes: [metrics:read]
+examples:
+  - question: P&L Product Cost for June 2026
+    request:
+      measures: [product_cost_all_channels]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
+validation_tests:
+  - June 2026 brand 20 ≈ ₹12,05,663.60
+deprecated_aliases: []

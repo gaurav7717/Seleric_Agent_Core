@@ -308,6 +308,31 @@ def build_server(settings: Settings) -> FastMCP:
         _log_call("catalogue_resolve_term", text=text)
         return ctx.catalogue.resolve_term(text).model_dump()
 
+    @mcp.tool()
+    def catalogue_resolve_brand(text: str) -> dict:
+        """Resolve a brand name/code to brand_id for metrics_query filters.
+        Default brand is Tilting Heads (20) when the user does not name one.
+        When they say Sniff Theory / Urthend / Mannmore / Billy / etc., resolve
+        here and pass filters=[{dimension:'brand_id', operator:'equals',
+        values:[brand_id]}]. Never invent a brand_id."""
+        _log_call("catalogue_resolve_brand", text=text)
+        return ctx.catalogue.resolve_brand(text).model_dump()
+
+    @mcp.tool()
+    def catalogue_list_brands() -> dict:
+        """List active brands the agent can query (id, name, code, aliases).
+        Default brand is Tilting Heads unless the user names another."""
+        _log_call("catalogue_list_brands")
+        default = ctx.catalogue.default_brand()
+        return {
+            "default_brand_id": (
+                ctx.catalogue.cat.brands.default_brand_id if ctx.catalogue.cat.brands else "20"
+            ),
+            "default_brand_name": default.name if default else "Tilting Heads",
+            "brands": [b.model_dump() for b in ctx.catalogue.list_brands()],
+            "catalogue_version": ctx.catalogue.version,
+        }
+
     # ---------------- metrics tools ----------------
 
     @mcp.tool()
@@ -492,6 +517,27 @@ def build_server(settings: Settings) -> FastMCP:
             target = f" -> `{t.canonical_id}`" if t.canonical_id else ""
             definition = f" — {t.definition.strip()}" if t.definition else ""
             lines.append(f"- **{t.term}**{target}{definition}")
+        lines.append(f"\n_catalogue version {ctx.catalogue.version}_")
+        return "\n".join(lines)
+
+    @mcp.resource("catalogue://brands")
+    def brands_resource() -> str:
+        """Brand registry: default Tilting Heads; filter brand_id for others."""
+        lines = [
+            "# Brands",
+            "",
+            "Default (when user does not name a brand): **Tilting Heads** (`brand_id=20`).",
+            "When the user names another brand, resolve with `catalogue_resolve_brand` "
+            "and pass `filters: [{dimension: brand_id, operator: equals, values: [<id>]}]`.",
+            "",
+        ]
+        for b in ctx.catalogue.list_brands():
+            aliases = ", ".join(b.aliases[:6]) if b.aliases else "—"
+            mark = " ← default" if (
+                ctx.catalogue.cat.brands
+                and b.id == ctx.catalogue.cat.brands.default_brand_id
+            ) else ""
+            lines.append(f"- **{b.name}** (`{b.id}`, code `{b.code}`){mark} — aliases: {aliases}")
         lines.append(f"\n_catalogue version {ctx.catalogue.version}_")
         return "\n".join(lines)
 

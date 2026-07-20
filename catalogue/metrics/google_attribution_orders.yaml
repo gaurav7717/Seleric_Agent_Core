@@ -1,0 +1,35 @@
+id: google_attribution_orders
+display_name: Google Attribution Orders
+category: attribution
+status: certified
+description: 'Google Attribution Analysis Total Orders — eligible Shopify placements
+  with last-touch Google.
+
+  '
+formula:
+  human_readable: COUNT(eligible orders where lt_platform = google)
+  authoritative_source: cube
+cube_mapping:
+  view: platform_attribution_commerce
+  measure: platform_attribution_commerce.google_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+validation_tests:
+- June 2026 brand 20 = 464
+deprecated_aliases: []

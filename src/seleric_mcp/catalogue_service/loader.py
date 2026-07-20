@@ -79,6 +79,7 @@ class DimensionDef(BaseModel):
     description: str = ""
     is_time: bool = False
     views: dict[str, str]  # view name -> qualified cube member
+    aliases: list[str] = Field(default_factory=list)  # NL synonyms (province, state, …)
     allowed_values: list[str] | None = None  # declared only for small, stable
     # enum-like dimensions (verified against source SQL, not guessed) — lets
     # equals/notEquals filters be case/typo-corrected instead of silently
@@ -126,6 +127,19 @@ class Deprecation(BaseModel):
     old: str
     new: str
     reason: str
+
+
+class BrandDef(BaseModel):
+    id: str
+    name: str
+    code: str | None = None
+    status: Literal["active", "test", "inactive"] = "active"
+    aliases: list[str] = Field(default_factory=list)
+
+
+class BrandRegistry(BaseModel):
+    default_brand_id: str = "20"
+    brands: list[BrandDef] = Field(default_factory=list)
 
 
 class OpenMetadataDataProduct(BaseModel):
@@ -198,6 +212,7 @@ class Catalogue(BaseModel):
     views: dict[str, ViewDef]
     actions: dict[str, ActionContractDef]
     deprecations: list[Deprecation]
+    brands: BrandRegistry | None = None
     openmetadata: OpenMetadataRegistry | None = None
 
 
@@ -248,6 +263,11 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         for raw in _read_yaml(catalogue_dir / "deprecations.yaml").get("deprecations", [])
     ]
 
+    brands: BrandRegistry | None = None
+    brands_path = catalogue_dir / "brands.yaml"
+    if brands_path.exists():
+        brands = BrandRegistry.model_validate(_read_yaml(brands_path))
+
     om_registry: OpenMetadataRegistry | None = None
     om_path = catalogue_dir / "openmetadata" / "registry.yaml"
     if om_path.exists():
@@ -272,6 +292,7 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         views=views,
         actions=actions,
         deprecations=deprecations,
+        brands=brands,
         openmetadata=om_registry,
     )
     _check_integrity(cat)

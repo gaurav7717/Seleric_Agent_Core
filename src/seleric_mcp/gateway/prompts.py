@@ -103,6 +103,17 @@ NON-NEGOTIABLE RULES
      Gross Sales → gross_sales_all_channels; Net Sales → net_sales_all_channels.
    Always state which scope you used in the answer.
 
+3c-bis. Brand scope (required).
+   - Default brand is **Tilting Heads** (brand_id 20). When the user does not
+     name a brand, leave brand filter unset — the server scopes to Tilting Heads.
+   - When the user names another brand (Sniff Theory, Urthend, Mannmore,
+     The Billy Company / Billy, or a brand_id), call catalogue_resolve_brand
+     (or catalogue_list_brands) and pass
+     filters: [{dimension: "brand_id", operator: "equals", values: ["<id>"]}].
+   - You may also pass the brand name as the filter value; the server resolves
+     names to ids. Always state which brand the numbers are for.
+   - Never invent a brand_id. Never mix brands unless the user asks to compare.
+
 3d. Platform scope for ads / marketing spend (required).
    Same only-vs-total rule as commerce:
    - "Meta only" / "meta ads" → meta_spend (and meta_* delivery metrics).
@@ -116,18 +127,34 @@ NON-NEGOTIABLE RULES
    Always state which ad platforms are included.
 
 3e. Attribution scope (required when user says attr / attributed / attribution /
-    last-touch / by channel / by campaign).
-   Do NOT use commerce Total/Net Sales for these — take sales from attribution:
-   - Bare "attr sales" / "attributed revenue" / "last-touch revenue" →
-     attributed_net_revenue (order_attribution).
-   - "attr orders" / "attributed orders" → attributed_orders.
-   - "attr gross sales" → attributed_gross_revenue.
-   - Meta attributed sales/orders/AOV/refunds → meta_attr_net_revenue /
-     meta_attr_orders / meta_attr_aov / meta_attr_refund_amount (ad grain).
-   - "by channel" / channel sales/orders → channel_net_revenue /
-     channel_orders / channel_gross_revenue with dimension channel.
+    last-touch / by channel / by campaign / Attribution Analysis).
+   Three different products — pick by wording:
+   A) Attribution Analysis pages (Meta/Google Attribution Overview Net/Gross/
+      Total Sales, Orders) → meta_attribution_net_sales /
+      meta_attribution_gross_sales / meta_attribution_total_sales /
+      meta_attribution_orders (and google_attribution_*). These are commerce
+      cohort metrics for last-touch placements — NOT meta_attr_*.
+   B) Bare "attr sales" / "attributed revenue" / "last-touch revenue" →
+      attributed_net_revenue (order_attribution oracle).
+      "attr orders" → attributed_orders; "attr gross sales" → attributed_gross_revenue.
+   C) Meta ad-grain last-touch ("meta attributed sales" / "meta attr sales" /
+      campaign ad revenue) → meta_attr_net_revenue / meta_attr_orders /
+      meta_attr_aov / meta_attr_refund_amount.
+   D) "by channel" / channel sales/orders → channel_net_revenue /
+      channel_orders / channel_gross_revenue with dimension channel.
    Never substitute Meta platform-reported purchase_value for attributed sales.
-   State that figures are first-party attribution, not commerce period totals.
+   State which attribution product you used.
+
+3f. P&L vs Historical scope for finance lines (required).
+   - "P&L" / "P&L Forecast" / bare Product Cost / Total Operating Cost when
+     comparing to /application/pnl → product_cost_all_channels /
+     total_operating_cost_all_channels / net_profit_all_channels.
+   - "Shopify only" Product Cost / TOC / Net Profit → product_cost /
+     total_operating_cost / net_profit.
+   - Historical "All channels" Net Profit → net_profit_incl_amazon.
+   - Amazon Platform Fees (Attribution card) → amazon_platform_fees (component
+     abs-sum). Do not use return-label-inclusive rollups for that card.
+   Always state which scope you used.
 
 4. Handle broad requests by resolving their implied business concepts.
    For requests such as "How are we doing?" or "Give me a performance summary":

@@ -2,9 +2,10 @@ id: gross_sales_all_channels
 display_name: Gross Sales (all channels, ex-GST)
 category: commerce
 status: certified
-description: >
-  All-channels Gross Sales (ex-GST): Shopify gross_sales_excl_tax plus Amazon SP
-  revenue_principal. For Shopify-only use metric gross_sales.
+description: 'All-channels Gross Sales (ex-GST): Shopify gross_sales_excl_tax plus
+  Amazon SP revenue_principal. For Shopify-only use metric gross_sales.
+
+  '
 formula:
   human_readable: SUM(shopify gross_sales_excl_tax) + SUM(amazon revenue_principal)
   authoritative_source: cube
@@ -16,20 +17,47 @@ unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
+- channel
+- shipping_region
+- shipping_country
+- shipping_city
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
+- channel
+- shipping_region
+- shipping_country
+- shipping_city
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: Gross Sales June 2026 all channels
-    request:
-      measures: [gross_sales_all_channels]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: Gross Sales June 2026 all channels
+  request:
+    measures:
+    - gross_sales_all_channels
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - gross_sales_all_channels >= shopify gross_sales for same slice
+- gross_sales_all_channels >= shopify gross_sales for same slice
 deprecated_aliases: []

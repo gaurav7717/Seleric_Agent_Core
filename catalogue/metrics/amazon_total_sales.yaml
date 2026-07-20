@@ -19,9 +19,17 @@ grain: daily
 supported_dimensions:
   - brand_id
   - report_date
+  - channel
+  - shipping_region
+  - shipping_country
+  - shipping_city
 supported_filters:
   - date_range
   - brand_id
+  - channel
+  - shipping_region
+  - shipping_country
+  - shipping_city
 data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]

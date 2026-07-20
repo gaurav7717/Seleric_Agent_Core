@@ -31,6 +31,10 @@ supported_dimensions:
 - is_cod
 - source_name
 - attribution_model
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_prepaid
 supported_filters:
 - date_range
 - brand_id
@@ -38,6 +42,11 @@ supported_filters:
 - lt_channel
 - attribution_method
 - is_new_customer
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:
