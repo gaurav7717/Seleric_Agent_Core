@@ -83,3 +83,8 @@ examples:
 validation_tests:
 - reconciles to dashboard Returns / Cancels card for closed periods
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:998-1021

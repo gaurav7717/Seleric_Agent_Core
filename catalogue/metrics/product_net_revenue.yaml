@@ -2,16 +2,11 @@ id: product_net_revenue
 display_name: Product Net Revenue (ex-GST)
 category: product
 status: certified
-description: 'Lifecycle line-item net revenue ex-GST (pre-refund − cancelled − returned
-  deductions, per-line GST rates) from serve.product_performance. Cohort model: deductions
-  attach to the placement period. Use for product/SKU breakdowns — company net_revenue
-  on canonical_pnl has no product dimension; commerce net sales reconciles within
-  a documented band, not exactly (shipping revenue and order-level GST strip differ).
+description: 'Lifecycle line-item net revenue ex-GST (pre-refund − cancelled − returned deductions, per-line GST rates) from serve.product_performance. Cohort model: deductions attach to the placement period. Use for product/SKU breakdowns — company net_revenue on canonical_pnl has no product dimension; commerce net sales reconciles within a documented band, not exactly (shipping revenue and order-level GST strip differ).
 
   '
 formula:
-  human_readable: 'Sum of (net_pre_refund_excl_gst − cancelled_revenue_excl_gst −
-    returned_revenue_excl_gst) on eligible lines
+  human_readable: 'Sum of (net_pre_refund_excl_gst − cancelled_revenue_excl_gst − returned_revenue_excl_gst) on eligible lines
 
     '
   authoritative_source: cube
@@ -84,3 +79,9 @@ validation_tests:
 - matches dashboard product-performance lifecycle revenue for closed months
 - reconciles to commerce net sales within documented band
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:1677,1702,1739
+  note: Field labeled net_sales is actually pre-refund gross with no lifecycle deduction applied.

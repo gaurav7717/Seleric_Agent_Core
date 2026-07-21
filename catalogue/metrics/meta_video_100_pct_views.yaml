@@ -1,7 +1,7 @@
 id: meta_video_100_pct_views
 display_name: Meta Video Completions
 category: paid_media
-status: certified
+status: draft
 description: Views reaching 100% of video length.
 formula:
   human_readable: SUM(meta_video_100_pct_views)
@@ -51,3 +51,12 @@ access_policy:
   - metrics:read
 validation_tests:
 - meta_video_100_pct_views >= 0 for any slice
+dashboard_alignment:
+  status: unclear
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    A per-ad value exists (meta/analytics.js:1814,1837) but it is never
+    summed to a campaign/account/date-level dashboard total, so it's unclear
+    whether this catalogue entry describes anything the dashboard actually
+    surfaces.

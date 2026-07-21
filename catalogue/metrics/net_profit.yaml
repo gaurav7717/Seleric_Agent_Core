@@ -1,14 +1,12 @@
 id: net_profit
-display_name: Net Profit (Shopify-only)
+display_name: Net Profit (Shopify-only, Meta+Google spend)
 category: finance
 status: certified
-description: 'Company P&L bottom line matching the Historical Analytics Net Profit card (Shopify-only):
-  Net Sales − Net COGS − (Meta + Google) ad spend. FE buildDashboardStats identity. Uses Shopify-only
-  spend because commerce net sales exclude Amazon SP; for blended Meta+Google+Amazon profit ask for net_profit_blended.
-  Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
-  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: 'Canonical P&L net profit in `serve_canonical_pnl`: Shopify net sales (ex-GST) − Shopify Net
+  COGS − Shopify ad spend (Meta + Google). This maps to `canonical_pnl.net_profit_shopify` and is distinct
+  from all-platform variants (`net_profit_blended`, `net_profit_all_channels`).'
 formula:
-  human_readable: net_sales - net_cogs - shopify_ad_spend
+  human_readable: net_sales - net_cogs - total_ad_spend
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
@@ -40,6 +38,14 @@ examples:
       end: '2026-06-30'
 validation_tests:
 - net_profit can be negative (loss periods are valid)
-- June 2026 brand 20 ≈ Historical Shopify-only Net Profit −₹2,72,173.77
-- When snapshot includes all-channel sales, also report net_profit_all_channels and net_profit_incl_amazon with explicit scope labels
+- net_profit equals net_sales - net_cogs - shopify_ad_spend for the same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/services/dashboardService.js:132,136
+  note: >
+    Dashboard summary computes a blended number, but this catalogue metric is
+    intentionally aligned to canonical Cube semantic execution
+    (`canonical_pnl.net_profit_shopify`) for agent consistency.

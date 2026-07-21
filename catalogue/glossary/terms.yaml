@@ -228,7 +228,11 @@ terms:
   - term: amazon fees
     canonical_id: amazon_platform_fees
   - term: amazon marketplace fees
-    canonical_id: amazon_platform_fees
+    canonical_id: amazon_marketplace_fees
+    definition: >
+      Maps to the commerce-semantic marketplace_fees measure on
+      amazon_commerce_performance. For attribution-component fee totals from
+      amazon_daily_pnl, ask for "amazon platform fees".
   - term: gross margin
     canonical_id: gross_margin_pct
   - term: gross margin %

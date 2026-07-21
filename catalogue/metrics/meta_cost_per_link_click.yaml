@@ -1,9 +1,11 @@
 id: meta_cost_per_link_click
 display_name: Meta Cost per Link Click
 category: paid_media
-status: certified
-description: Meta Cost per Link Click recomputed from aggregated components — never SUM/AVG
-  of row ratios.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Meta Cost per Link Click recomputed
+  from aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(spend) / SUM(link_clicks)
   authoritative_source: cube
@@ -59,3 +61,10 @@ companion_measures:
 - meta_spend
 - meta_link_clicks
 currency_default: INR
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Depends on meta_link_clicks, which no code in Node-Backend extracts
+    specifically, so this metric is not computed on the dashboard.

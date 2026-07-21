@@ -2,9 +2,7 @@ id: units_per_order
 display_name: Average Units per Order
 category: product
 status: certified
-description: 'Net units per distinct eligible order from serve.product_performance.
-  A ratio — never sum or average daily units_per_order rows; recompute from units_sold
-  / product_orders. Basis corrected 2026-07-14 (was gross quantity).
+description: 'Net units per distinct eligible order from serve.product_performance. A ratio — never sum or average daily units_per_order rows; recompute from units_sold / product_orders. Basis corrected 2026-07-14 (was gross quantity).
 
   '
 formula:
@@ -76,3 +74,9 @@ examples:
 validation_tests:
 - period value equals sum(units_sold)/uniq(product_orders) for the same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: shopify/analytics.js:4937-4938
+  note: Only exists in legacy gross-incl-GST path, opposite of catalogue claimed corrected ex-GST basis.

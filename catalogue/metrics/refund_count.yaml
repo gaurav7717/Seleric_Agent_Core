@@ -2,8 +2,7 @@ id: refund_count
 display_name: Refund Count (Shopify)
 category: operations
 status: certified
-description: 'Count of Shopify refund transactions from serve.refund_events. Event axis is refund_date (not order_date). For
-  return order counts use refunded_orders.
+description: 'Count of Shopify refund transactions from serve.refund_events. Event axis is refund_date (not order_date). For return order counts use refunded_orders.
 
   '
 formula:
@@ -76,3 +75,9 @@ examples:
 validation_tests:
 - refund_count >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:591,685
+  note: Only order-grain returned_orders exists, not refund-event grain count.

@@ -37,3 +37,8 @@ validation_tests:
   - June 2026 brand 20 ≈ ₹19,22,687.25
 deprecated_aliases:
   - total_performance_marketing
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/historicalQueryHelpers.js:369-370

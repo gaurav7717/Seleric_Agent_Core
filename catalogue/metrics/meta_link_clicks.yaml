@@ -1,8 +1,11 @@
 id: meta_link_clicks
 display_name: Meta Link Clicks
 category: paid_media
-status: certified
-description: Link clicks (action link_click) on Meta ads.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Link clicks (action link_click) on
+  Meta ads.
 formula:
   human_readable: SUM(meta_link_clicks)
   authoritative_source: cube
@@ -51,3 +54,10 @@ access_policy:
   - metrics:read
 validation_tests:
 - meta_link_clicks >= 0 for any slice
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No code in Node-Backend extracts a link_click action specifically, so
+    this metric is not computed on the dashboard.

@@ -2,10 +2,9 @@ id: web_events
 display_name: Website Events
 category: web_analytics
 status: certified
-description: >
-  All Snowplow website events (page/product/collection views, cart
-  interactions, checkout steps, searches, purchases) on the event-type ×
-  channel day rollup (serve.web_events_daily).
+description: 'All Snowplow website events (page/product/collection views, cart interactions, checkout steps, searches, purchases) on the event-type × channel day rollup (serve.web_events_daily).
+
+  '
 formula:
   human_readable: SUM(events)
   authoritative_source: cube
@@ -16,25 +15,39 @@ aggregation: additive
 unit: count
 grain: brand × day × event type × fine channel
 supported_dimensions:
-  - brand_id
-  - report_date
-  - event_type
-  - channel
+- brand_id
+- report_date
+- event_type
+- channel
 supported_filters:
-  - date_range
-  - brand_id
-  - event_type
-  - channel
+- date_range
+- brand_id
+- event_type
+- channel
 data_owner: Growth / Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: Website events by type last 7 days
-    request:
-      measures: [web_events]
-      dimensions: [event_type]
-      time_range: {preset: last_7_days}
+- question: Website events by type last 7 days
+  request:
+    measures:
+    - web_events
+    dimensions:
+    - event_type
+    time_range:
+      preset: last_7_days
 validation_tests:
-  - web_events >= 0
+- web_events >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: —
+  note: No all-event-types daily rollup exists in Node-Backend.

@@ -4,10 +4,14 @@ category: commerce
 status: certified
 description: >
   All-channels Net Sales: Shopify net_sales_excl_tax (dashboard parity) plus
-  Amazon operational_revenue_incl_gst. Matches Historical Analytics All channels
-  Net Sales. For Shopify-only use commerce_net_revenue_daily.
+  Amazon net sales computed ex-tax as revenue_principal minus refund_principal
+  — not operational_revenue_incl_gst as previously documented (see
+  amazon_net_sales / amazonShared/amazonOrderPnl.js:6-9, whose own header
+  comment establishes revenue_principal/refund_principal as ex-tax fields).
+  Matches Historical Analytics All channels Net Sales. For Shopify-only use
+  commerce_net_revenue_daily.
 formula:
-  human_readable: SUM(shopify net_sales_excl_tax) + SUM(amazon operational_revenue_incl_gst)
+  human_readable: SUM(shopify net_sales_excl_tax) + (SUM(amazon revenue_principal) - SUM(amazon refund_principal))
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
@@ -35,5 +39,18 @@ access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 validation_tests:
-  - June 2026 brand 20 ≈ ₹33,97,210.51
+  - net_sales_all_channels equals shopify net_sales_excl_tax + (amazon revenue_principal - amazon refund_principal) on any slice
+  - previous figure assuming incl.-GST Amazon basis (June 2026 brand 20 ≈ ₹33,97,210.51) requires re-verification against the ex-tax basis
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonOrderPnl.js:6-9
+  note: >
+    Inherits the amazon_net_sales tax-basis issue: the catalogue described
+    the Amazon component as incl.-GST (operational_revenue_incl_gst), but
+    amazonOrderPnl.js's own header comment (lines 6-9) establishes that
+    revenue_principal and refund_principal — the fields the live code
+    actually sums for the Amazon leg — are ex-tax. Corrected description,
+    formula, and validation_tests accordingly.

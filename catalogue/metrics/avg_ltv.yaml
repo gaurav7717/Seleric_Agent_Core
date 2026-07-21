@@ -1,8 +1,11 @@
 id: avg_ltv
 display_name: Average LTV
 category: customer
-status: certified
-description: Lifetime net revenue divided by customer count (ex-GST).
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no lifetime-value calc
+  exists anywhere in Node-Backend. Lifetime net revenue divided by customer
+  count (ex-GST).
 formula:
   human_readable: lifetime_net_revenue / customers
   authoritative_source: cube
@@ -49,3 +52,11 @@ currency_default: INR
 ratio_components:
   numerator: customer_ltv.lifetime_net_revenue
   denominator: customer_ltv.customers
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No lifetime-value calculation exists anywhere in Node-Backend. Part of the
+    broader finding that there is no customer-master or lifetime-aggregation
+    layer.

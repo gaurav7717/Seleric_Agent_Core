@@ -2,12 +2,10 @@ id: aov
 display_name: Average Order Value (Shopify-only)
 category: commerce
 status: certified
-description: 'Total Sales (incl. GST) divided by Total Orders on the placement axis. Ratio — never sum
-  or average daily AOV rows. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include
-  Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net
-  profit use net_profit_blended.'
+description: 'Shopify Average Order Value at commerce order grain, computed as net
+  revenue divided by order count (ratio of aggregates).'
 formula:
-  human_readable: Total Sales ÷ Total Orders
+  human_readable: commerce_net_revenue / orders
   authoritative_source: cube
 cube_mapping:
   view: commerce_orders
@@ -16,52 +14,19 @@ cube_mapping:
 aggregation: ratio
 unit: currency
 currency_default: INR
-grain: order
+grain: daily
 supported_dimensions:
 - brand_id
 - order_date
-- order_created_at_ist
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
 - shipping_region
+- shipping_country
 - shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
 supported_filters:
 - date_range
 - brand_id
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
 - shipping_region
+- shipping_country
 - shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
@@ -83,5 +48,14 @@ examples:
       preset: last_90d
 validation_tests:
 - aov > 0 for any slice with orders
+- aov equals commerce_net_revenue ÷ orders for the same slice
 deprecated_aliases:
 - daily_pnl.avg_order_value
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: services/dashboardService.js:141
+  note: >
+    Dashboard summary may compute blended AOV in a separate path. This metric
+    is aligned to canonical Cube semantic execution (`commerce_orders.aov`).

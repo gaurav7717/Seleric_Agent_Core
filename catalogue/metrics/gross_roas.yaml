@@ -2,10 +2,8 @@ id: gross_roas
 display_name: Gross ROAS (Shopify-only)
 category: finance
 status: certified
-description: 'Historical Analytics Gross ROAS: Gross Sales / Shopify ad spend (Meta + Google). FE §11.
-  Not platform-reported ROAS. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include
-  Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net
-  profit use net_profit_blended.'
+description: 'Canonical Gross ROAS: Shopify Gross Sales / Shopify ad spend (Meta + Google), computed as a
+  ratio of aggregates. This maps to `canonical_pnl.gross_roas`.'
 formula:
   human_readable: SUM(gross_sales) / SUM(shopify_ad_spend)
   authoritative_source: cube
@@ -43,3 +41,12 @@ deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.gross_sales
   denominator: canonical_pnl.shopify_ad_spend
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/services/dashboardService.js:142
+  note: >
+    Dashboard summary may use blended inputs. This metric is aligned to
+    canonical Cube semantic execution (`canonical_pnl.gross_roas`), which uses
+    Shopify gross sales over Shopify ad spend.

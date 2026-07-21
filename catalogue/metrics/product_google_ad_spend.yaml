@@ -1,10 +1,12 @@
 id: product_google_ad_spend
 display_name: Product Google Ad Spend (SKU-attributed)
 category: product
-status: certified
+status: draft
 description: >
-  Directional Google ad spend allocated to each SKU/day from last-touch attributed
-  orders and campaign-day Google spend (revenue-share within campaign).
+  Not implemented in the dashboard as of this audit — no SKU-attributed ad
+  spend exists anywhere in Node-Backend. Directional Google ad spend
+  allocated to each SKU/day from last-touch attributed orders and
+  campaign-day Google spend (revenue-share within campaign).
 formula:
   human_readable: SUM(google_spend_attributed) at SKU grain
   authoritative_source: cube
@@ -35,3 +37,11 @@ access_policy:
 validation_tests:
   - product_google_ad_spend >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No SKU-attributed ad spend exists anywhere in Node-Backend; ad spend is
+    only tracked at channel/campaign level (pnlService.js:359 documents this
+    explicitly — no SKU dimension).

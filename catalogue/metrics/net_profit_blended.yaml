@@ -3,10 +3,10 @@ display_name: Net Profit (all-platform ads)
 category: finance
 status: certified
 description: >
-  Net Profit using all-platform ad spend: Shopify Net Sales − Shopify Net COGS
-  − Total Ad Spend (Meta+Google+Amazon). FE §13 P&L form. Commerce sales/COGS
-  remain Shopify-only; only the ad-spend denominator is all-platform. For
-  Historical Analytics Shopify-only Net Profit use net_profit.
+  Canonical P&L net profit using all-platform ad spend:
+  Shopify net sales (ex-GST) − Shopify Net COGS − (Meta+Google+Amazon ad spend).
+  This maps to `canonical_pnl.net_profit` and differs from `net_profit` (which
+  uses Shopify-only ad spend).
 formula:
   human_readable: net_sales - net_cogs - total_ad_spend
   authoritative_source: cube
@@ -35,3 +35,12 @@ examples:
 validation_tests:
   - June 2026 brand 20 ≈ −₹2,87,231.67
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/services/pnlService.js:207,227
+  note: >
+    Dashboard summary may report blended figures from a different integration
+    path; this metric is aligned to canonical Cube semantic execution
+    (`canonical_pnl.net_profit`) for agent consistency.

@@ -1,9 +1,10 @@
 id: channel_gross_revenue
 display_name: Channel Gross Revenue
 category: attribution
-status: certified
+status: draft
 description: >
-  Gross revenue by closed channel set (meta / google / organic_shopify / amazon /
+  Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. Gross revenue by closed channel set (meta / google / organic_shopify / amazon /
   organic_amazon). Shopify rows are ex-GST-compatible first-party; Amazon rows
   use marketplace incl-GST basis — check revenue_basis. For Shopify-only net
   by channel prefer channel_net_revenue.
@@ -40,3 +41,11 @@ examples:
 validation_tests:
   - channel_gross_revenue >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The catalogued 5-way channel_attribution_daily split has zero references
+    in Node-Backend; the nearest real endpoint uses a different channel
+    definition, excludes cancelled orders, and never merges in Amazon.

@@ -1,8 +1,9 @@
 id: touch_attributed_orders
 display_name: Touch-Attributed Orders
 category: attribution
-status: certified
-description: Count of orders with an identified marketing touchpoint (attribution_method
+status: draft
+description: Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. Count of orders with an identified marketing touchpoint (attribution_method
   != 'unattributed'). Last-touch only — no multi-touch/view-through.
 formula:
   human_readable: COUNT(order_id) WHERE attribution_method != 'unattributed'
@@ -64,3 +65,10 @@ examples:
       end: '2026-06-30'
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No attribution_method field or 'unattributed' bucket exists — every order
+    is exhaustively bucketed meta/google/organic/other.

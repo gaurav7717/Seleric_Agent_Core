@@ -1,8 +1,10 @@
 id: meta_thruplays
 display_name: Meta ThruPlays
 category: paid_media
-status: certified
-description: ThruPlays (15s or full watch).
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. ThruPlays (15s or full watch).
 formula:
   human_readable: SUM(meta_thruplays)
   authoritative_source: cube
@@ -51,3 +53,11 @@ access_policy:
   - metrics:read
 validation_tests:
 - meta_thruplays >= 0 for any slice
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Confirmed by grep — "thruplay" has zero occurrences anywhere in
+    Node-Backend's src/. This field is not fetched or computed on the
+    dashboard.

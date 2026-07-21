@@ -44,3 +44,8 @@ examples:
 validation_tests:
 - June 2026 brand 20 ≈ ₹4,37,371.90
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:307-333

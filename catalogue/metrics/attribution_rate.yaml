@@ -1,8 +1,9 @@
 id: attribution_rate
 display_name: Attribution Rate
 category: attribution
-status: certified
-description: Share of orders with an identified last-touch marketing touchpoint.
+status: draft
+description: Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. Share of orders with an identified last-touch marketing touchpoint.
 formula:
   human_readable: touch_attributed_orders / attributed_orders
   authoritative_source: cube
@@ -66,3 +67,10 @@ deprecated_aliases: []
 ratio_components:
   numerator: order_attribution.touch_attributed_orders
   denominator: order_attribution.attributed_orders
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No attribution_method field or 'unattributed' bucket exists — every order
+    is exhaustively bucketed meta/google/organic/other.

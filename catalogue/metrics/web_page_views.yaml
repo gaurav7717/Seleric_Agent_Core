@@ -2,9 +2,9 @@ id: web_page_views
 display_name: Page Views
 category: web_analytics
 status: certified
-description: >
-  Snowplow page_view events (one rendered page each) on the event-type ×
-  channel day rollup. Page identity on serve is the URL path.
+description: 'Snowplow page_view events (one rendered page each) on the event-type × channel day rollup. Page identity on serve is the URL path.
+
+  '
 formula:
   human_readable: SUM(events WHERE event_type = 'page_view')
   authoritative_source: cube
@@ -15,23 +15,37 @@ aggregation: additive
 unit: count
 grain: brand × day × fine channel
 supported_dimensions:
-  - brand_id
-  - report_date
-  - channel
+- brand_id
+- report_date
+- channel
 supported_filters:
-  - date_range
-  - brand_id
-  - channel
+- date_range
+- brand_id
+- channel
 data_owner: Growth / Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
-  - question: Page views by channel last 7 days
-    request:
-      measures: [web_page_views]
-      dimensions: [channel]
-      time_range: {preset: last_7_days}
+- question: Page views by channel last 7 days
+  request:
+    measures:
+    - web_page_views
+    dimensions:
+    - channel
+    time_range:
+      preset: last_7_days
 validation_tests:
-  - web_page_views >= 0
+- web_page_views >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: ga4/analytics.js:93,132,182
+  note: Catalogue implies first-party/Snowplow source; real source is GA4 Data API with different grain.

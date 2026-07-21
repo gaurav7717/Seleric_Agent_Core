@@ -1,9 +1,11 @@
 id: meta_video_25_pct_rate
 display_name: Meta Video 25% Rate
 category: paid_media
-status: certified
-description: Meta Video 25% Rate recomputed from aggregated components — never SUM/AVG of
-  row ratios.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Meta Video 25% Rate recomputed from
+  aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(25% views) / SUM(3s views)
   authoritative_source: cube
@@ -59,3 +61,10 @@ ratio_components:
 companion_measures:
 - meta_video_25_pct_views
 - meta_video_3s_views
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    This rate needs a 3s-views denominator, which does not exist anywhere in
+    Node-Backend, so it is not computed on the dashboard.

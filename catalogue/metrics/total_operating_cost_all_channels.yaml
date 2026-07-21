@@ -2,10 +2,9 @@ id: total_operating_cost_all_channels
 display_name: Total Operating Cost (all channels — P&L)
 category: finance
 status: certified
-description: >
-  P&L Forecast Total Operating Cost: Shopify Net COGS + Amazon product cost +
-  abs(operational marketplace fees). For Shopify-only TOC / Net COGS use
-  total_operating_cost / net_cogs.
+description: 'P&L Forecast Total Operating Cost: Shopify Net COGS + Amazon product cost + abs(operational marketplace fees). For Shopify-only TOC / Net COGS use total_operating_cost / net_cogs.
+
+  '
 formula:
   human_readable: SUM(net_cogs + amazon_cogs + abs(amazon_marketplace_fees))
   authoritative_source: cube
@@ -17,20 +16,32 @@ unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
 data_owner: Finance
 access_policy:
-  roles_allowed: [exec, finance]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
 examples:
-  - question: P&L Total Operating Cost for June 2026
-    request:
-      measures: [total_operating_cost_all_channels]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: P&L Total Operating Cost for June 2026
+  request:
+    measures:
+    - total_operating_cost_all_channels
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - June 2026 brand 20 ≈ ₹17,26,296.46
+- June 2026 brand 20 ≈ ₹17,26,296.46
 deprecated_aliases: []
+dashboard_alignment:
+  status: unclear
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: services/pnlService.js:208
+  note: End value plausibly matches but is a single pre-blended field, not composed the way the catalogue formula literally states.

@@ -2,10 +2,8 @@ id: gross_profit
 display_name: Gross Profit (Shopify-only)
 category: finance
 status: certified
-description: 'Net Sales − Net COGS (before ads). Same numeric identity as contribution_margin on canonical_pnl
-  v2. Distinct from the FE dashboard "Gross Profit" card which is Gross Sales − Gross COGS − Ad Spend.
-  Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
-  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: 'Canonical gross profit in `serve_canonical_pnl`: Shopify Net Sales − Shopify Net COGS
+  (before ads).'
 formula:
   human_readable: net_sales - net_cogs
   authoritative_source: cube
@@ -40,3 +38,11 @@ examples:
 validation_tests:
 - gross_profit = net_sales - net_cogs for the same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/analyticsClickhouse.js:543
+  note: >
+    Dashboard summary may use a different blended path. This metric is aligned
+    to canonical Cube semantic execution (`canonical_pnl.gross_profit`).

@@ -1,8 +1,11 @@
 id: meta_hook_rate
 display_name: Meta Hook Rate
 category: paid_media
-status: certified
-description: Meta Hook Rate recomputed from aggregated components — never SUM/AVG of row ratios.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Meta Hook Rate recomputed from
+  aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(3s views) / SUM(impressions) — approved gold formula
   authoritative_source: cube
@@ -57,3 +60,10 @@ ratio_components:
 companion_measures:
 - meta_video_3s_views
 - meta_impressions
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No 3-second-view field is fetched anywhere in Node-Backend, so this
+    metric's numerator does not exist and it is not computed on the dashboard.

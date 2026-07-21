@@ -2,28 +2,24 @@ id: first_orders
 display_name: First Orders
 category: customer
 status: certified
-description: Count of orders that are a customer's first (order_seq = 1).
+description: >
+  Dashboard basis: a customer-grain "is this customer's first order" check
+  built on Shopify REST customer lookups, capped at 100 customers/request —
+  not an order-grain count over the full per-customer-sequenced order set.
+  See dashboard_alignment.
 formula:
-  human_readable: COUNT(order_id) WHERE is_first_order = 1
+  human_readable: COUNT(customer_id) WHERE first_order_in_window = true, capped
+    at 100 customers/request
   authoritative_source: cube
 cube_mapping:
   view: purchase_sequence
   measure: purchase_sequence.first_orders
 aggregation: additive
 unit: count
-grain: order (eligible orders, per-customer sequenced)
+grain: customer (first-order check per customer, capped at 100 customers/request;
+  not order-grain)
 supported_dimensions:
 - brand_id
-- order_date
-- order_status
-- is_cod
-- order_seq
-- order_seq_band
-- is_first_order
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_prepaid
 supported_filters:
 - date_range
 - brand_id
@@ -54,3 +50,17 @@ examples:
       end: '2026-06-30'
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: shopify/analytics.js:3458,3525,3559-3579
+  note: >
+    The live implementation is customer-grain, not order-grain, and its
+    prior-order check is capped at 100 customers per request — it does not
+    scan the full per-customer-sequenced order set the catalogue describes.
+    Catalogue description, formula, and grain corrected to match;
+    supported_dimensions narrowed to brand_id since the live customer-grain
+    check has no order-level payment/COD breakdown. cube_mapping left as-is
+    (still valid for the Cube semantic layer, which the dashboard does not
+    use).

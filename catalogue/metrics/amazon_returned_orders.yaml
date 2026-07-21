@@ -7,9 +7,9 @@ description: >
   (return/adjustment axis — not purchase_date) — the Amazon slice of the
   dashboard Returns card. Sourced from gold.fct_amazon_daily_pnl
   (serve.amazon_commerce_daily.returned_orders). Per-order refund resolution
-  (Seleric Dashboard Node-Backend, amazonReturnsHelpers.js
-  resolveAmazonRefundAmountFromPnl): settled effective_refunds, falling back
-  to estimated_refunds, then total_refund_amount / refund_principal.
+  (Seleric Dashboard Node-Backend, amazonSpOrderTotals.js:473) reads only the
+  refund_principal field — the effective_refunds/estimated_refunds fallback
+  chain previously documented here is dead code the live query never reaches.
   Customer refunds not yet posted to Amazon settlement (pending
   REPORT_REFUND_PENDING_FINANCE rows in gold.int_amazon_return_reconciliation)
   are folded into the Returns card on the live Seleric Dashboard but are a
@@ -18,9 +18,8 @@ description: >
   for all-platform ad spend use total_ad_spend.
 formula:
   human_readable: >
-    COUNT(active Amazon SP orders with a non-zero posted refund
-    (effective_refunds, else estimated_refunds, else total_refund_amount /
-    refund_principal), on refund-posted date)
+    COUNT(active Amazon SP orders with a non-zero posted refund_principal,
+    on refund-posted date)
   authoritative_source: cube
 cube_mapping:
   view: amazon_commerce_performance
@@ -49,3 +48,15 @@ validation_tests:
   - reconciles to Seleric Dashboard Historical Analytics Amazon Seller Partner Returns card (settled refunds only; excludes pending-refund accrual overlay)
 deprecated_aliases:
   - amazon_return_count
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonSpOrderTotals.js:473
+  note: >
+    Same root cause as amazon_return_revenue: the catalogued
+    effective_refunds → estimated_refunds → total_refund_amount /
+    refund_principal fallback chain is dead code; the live query only ever
+    reads refund_principal to decide whether an order has a posted refund.
+    Corrected description and formula.human_readable to describe the actual
+    single-field resolution.

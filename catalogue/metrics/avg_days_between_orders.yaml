@@ -1,9 +1,11 @@
 id: avg_days_between_orders
 display_name: Average Days Between Orders
 category: customer
-status: certified
-description: Average days since the previous order, computed over repeat orders only
-  (order_seq > 1).
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no order-interval calc
+  exists anywhere in Node-Backend. Average days since the previous order,
+  computed over repeat orders only (order_seq > 1).
 formula:
   human_readable: SUM(days_since_prev_order) / repeat_orders
   authoritative_source: cube
@@ -55,3 +57,11 @@ examples:
       end: '2026-06-30'
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No order-interval calculation exists anywhere in Node-Backend. Part of the
+    broader finding that there is no customer-master or lifetime-aggregation
+    layer.

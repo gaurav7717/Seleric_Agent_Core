@@ -1,9 +1,11 @@
 id: lifetime_gross_revenue
 display_name: Lifetime Gross Revenue
 category: customer
-status: certified
-description: Sum of customers' lifetime gross revenue. A cumulative snapshot — do
-  not filter by date_range.
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no all-time
+  revenue-per-customer aggregation exists in Node-Backend. Sum of customers'
+  lifetime gross revenue. A cumulative snapshot — do not filter by date_range.
 formula:
   human_readable: SUM(lifetime_gross_revenue)
   authoritative_source: cube
@@ -47,3 +49,11 @@ examples:
 validation_tests: []
 deprecated_aliases: []
 currency_default: INR
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No all-time revenue-per-customer aggregation exists in Node-Backend. Part
+    of the broader finding that there is no customer-master or
+    lifetime-aggregation layer.

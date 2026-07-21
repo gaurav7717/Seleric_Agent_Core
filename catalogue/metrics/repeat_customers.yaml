@@ -2,25 +2,22 @@ id: repeat_customers
 display_name: Repeat Customers
 category: customer
 status: certified
-description: Count of customers with more than one lifetime order.
+description: >
+  Dashboard basis: a windowed/sampled count of customers flagged as repeat
+  within the query window (Shopify REST), not a lifetime "more than one
+  order, ever" flag. See dashboard_alignment.
 formula:
-  human_readable: COUNT(customer_id) WHERE is_repeat_customer = 1
+  human_readable: COUNT(DISTINCT customer_id) WHERE repeat_in_window = true
+    (windowed/sampled)
   authoritative_source: cube
 cube_mapping:
   view: customer_ltv
   measure: customer_ltv.repeat_customers
 aggregation: additive
 unit: count
-grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+grain: customer (windowed/sampled repeat flag; not a lifetime snapshot)
 supported_dimensions:
 - brand_id
-- acquisition_platform
-- acquisition_channel
-- acquisition_campaign
-- is_repeat_customer
-- lifetime_order_count_band
-- customer_default_city
-- customer_default_province
 supported_filters:
 - brand_id
 - acquisition_platform
@@ -45,3 +42,15 @@ examples:
     - acquisition_channel
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: shopify/analytics.js:3459,3566,3576,5098,5110
+  note: >
+    The live "repeat customers" figure is windowed/sampled from Shopify REST,
+    not a lifetime is_repeat_customer flag over full order history. Catalogue
+    description, formula, and grain corrected to match; supported_dimensions
+    narrowed to brand_id since the live windowed query has no
+    acquisition/geo breakdown. cube_mapping left as-is (still valid for the
+    Cube semantic layer, which the dashboard does not use).

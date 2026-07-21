@@ -3,11 +3,13 @@ display_name: Total Sales (Amazon-only, incl. GST)
 category: commerce
 status: certified
 description: >
-  Amazon SP order_total_header for placements in range (including canceled).
-  The Amazon slice inside All-channels Total Sales. For Shopify-only use
-  total_sales; for both channels use total_sales_all_channels.
+  Amazon SP order_total_header for placements in range; canceled orders
+  contribute ₹0 (the live code zeroes them out — they are NOT summed at
+  their order_total as previously documented here). The Amazon slice inside
+  All-channels Total Sales. For Shopify-only use total_sales; for both
+  channels use total_sales_all_channels.
 formula:
-  human_readable: SUM(amazon order_total_header)
+  human_readable: SUM(amazon order_total_header, with canceled orders zeroed to ₹0)
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
@@ -42,3 +44,14 @@ examples:
 validation_tests:
   - June 2026 brand 20 = ₹2,73,620
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonSpOrderTotals.js:470
+  note: >
+    The catalogue said canceled Amazon orders are included in this total at
+    their order_total value; amazonSpOrderTotals.js:470 shows the live code
+    zeroes canceled orders out instead, so they contribute ₹0. Corrected
+    description and formula.human_readable to state the zeroing behavior
+    rather than inclusion at order_total.

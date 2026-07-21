@@ -1,11 +1,13 @@
 id: product_total_ad_spend
 display_name: Product Total Ad Spend (SKU-attributed)
 category: product
-status: certified
+status: draft
 description: >
-  Total directional ad spend on a SKU (Meta + Google + Other). Allocated from
-  last-touch attributed line revenue and campaign-day spend — compare with
-  product_net_revenue for product ROAS. Fan-out caveat applies at campaign grain.
+  Not implemented in the dashboard as of this audit — no SKU-attributed ad
+  spend exists anywhere in Node-Backend. Total directional ad spend on a SKU
+  (Meta + Google + Other). Allocated from last-touch attributed line revenue
+  and campaign-day spend — compare with product_net_revenue for product
+  ROAS. Fan-out caveat applies at campaign grain.
 formula:
   human_readable: SUM(total_ad_spend_attributed) = Meta + Google + Other at SKU grain
   authoritative_source: cube
@@ -42,3 +44,11 @@ examples:
 validation_tests:
   - product_total_ad_spend >= product_meta_ad_spend for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No SKU-attributed ad spend exists anywhere in Node-Backend; ad spend is
+    only tracked at channel/campaign level (pnlService.js:359 documents this
+    explicitly — no SKU dimension).

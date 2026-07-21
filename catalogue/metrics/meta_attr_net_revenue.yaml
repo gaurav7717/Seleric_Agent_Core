@@ -54,3 +54,8 @@ examples:
 validation_tests: []
 deprecated_aliases: []
 currency_default: INR
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: metaAttribution/buildMetaAttributionPayload.js:409

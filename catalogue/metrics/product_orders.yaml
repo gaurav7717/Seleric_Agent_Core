@@ -2,9 +2,7 @@ id: product_orders
 display_name: Product Orders
 category: product
 status: certified
-description: 'Distinct eligible orders containing the product/SKU (serve.product_performance).
-  One order can contain many SKUs — NEVER sum per-SKU order counts across SKUs; the
-  ungrouped total is the count of orders with at least one product line.
+description: 'Distinct eligible orders containing the product/SKU (serve.product_performance). One order can contain many SKUs — NEVER sum per-SKU order counts across SKUs; the ungrouped total is the count of orders with at least one product line.
 
   '
 formula:
@@ -76,3 +74,9 @@ examples:
 validation_tests:
 - ungrouped total <= commerce orders for the same window
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:1697-1700
+  note: Logic matches but only exists inside channel-scoped attribution query, not standalone.

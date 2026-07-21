@@ -2,16 +2,23 @@ id: meta_attr_gross_revenue
 display_name: Meta Attributed Gross Revenue
 category: attribution
 status: certified
-description: Gross revenue last-touch attributed to a Meta ad.
+description: >
+  Gross revenue last-touch attributed to a Meta ad. Dashboard basis: no ex-GST
+  gross-revenue figure is broken out at ad/adset/campaign grain — only a
+  net-revenue field (attributed_orders_revenue) exists at that grain; a
+  whole-summary gross sales figure exists only at the platform_attribution_commerce
+  level (see meta_attribution_gross_sales) — see dashboard_alignment.
 formula:
-  human_readable: SUM(attributed_gross_revenue)
+  human_readable: Not computed at ad grain — only attributed_orders_revenue (a net
+    figure) exists at campaign x adset x ad grain; see dashboard_alignment
   authoritative_source: cube
 cube_mapping:
   view: meta_ad_attribution
   measure: meta_ad_attribution.attributed_gross_revenue
 aggregation: additive
 unit: currency
-grain: daily ad grain (brand x campaign x adset x ad x day, last-touch attribution)
+grain: daily ad grain (brand x campaign x adset x ad x day) — not populated for gross
+  revenue; only net revenue exists at this grain, last-touch attribution
 supported_dimensions:
 - brand_id
 - report_date
@@ -52,3 +59,14 @@ examples:
 validation_tests: []
 deprecated_aliases: []
 currency_default: INR
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: metaAttribution/buildMetaAttributionPayload.js:401-418
+  note: >
+    buildMetaAttributionPayload.js:401-418 only breaks out a net-revenue field
+    (attributed_orders_revenue) at campaign x adset x ad grain. No ex-GST
+    gross-revenue figure exists below the whole-summary gross_sales level.
+    Catalogue description, formula, and grain corrected to note this gap;
+    cube_mapping left as-is.

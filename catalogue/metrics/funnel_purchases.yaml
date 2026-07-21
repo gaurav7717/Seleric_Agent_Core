@@ -2,9 +2,9 @@ id: funnel_purchases
 display_name: Funnel Purchases
 category: web_analytics
 status: certified
-description: >
-  Orders on the channel-day funnel — order-grain last-touch attribution
-  (fct_order_attribution lt_channel), NOT converted_sessions.
+description: 'Orders on the channel-day funnel — order-grain last-touch attribution (fct_order_attribution lt_channel), NOT converted_sessions.
+
+  '
 formula:
   human_readable: SUM(purchases)
   authoritative_source: cube
@@ -15,17 +15,28 @@ aggregation: additive
 unit: count
 grain: brand × day × fine channel
 supported_dimensions:
-  - brand_id
-  - report_date
-  - channel
+- brand_id
+- report_date
+- channel
 supported_filters:
-  - date_range
-  - brand_id
-  - channel
+- date_range
+- brand_id
+- channel
 data_owner: Growth / Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 validation_tests:
-  - funnel_purchases >= 0
+- funnel_purchases >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: channelFunnel/martFunnelClickhouse.js:6-9,33,49
+  note: Live mart uses session-attributed purchase counts that double-count per the code comment; catalogue claims last-touch attributed orders.

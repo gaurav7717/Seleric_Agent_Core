@@ -2,8 +2,7 @@ id: returns_excl_tax
 display_name: Returns (ex-GST, refund events)
 category: operations
 status: certified
-description: 'Return-class refund revenue ex-GST from serve.refund_events (P&L Returns card companion at refund-event grain).
-  Distinct from return_revenue on canonical_pnl (daily rollup).
+description: 'Return-class refund revenue ex-GST from serve.refund_events (P&L Returns card companion at refund-event grain). Distinct from return_revenue on canonical_pnl (daily rollup).
 
   '
 formula:
@@ -68,3 +67,9 @@ access_policy:
 validation_tests:
 - returns_excl_tax >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:42-63,315-332,689
+  note: Formula/tax logic matches at brand×day totals but catalogued dims (restock, return_status, geo, payment) have zero support in the live query.

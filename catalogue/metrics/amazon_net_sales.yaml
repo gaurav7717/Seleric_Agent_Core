@@ -1,13 +1,16 @@
 id: amazon_net_sales
-display_name: Net Sales (Amazon-only — operational incl GST)
+display_name: Net Sales (Amazon-only — ex-tax revenue principal)
 category: commerce
 status: certified
 description: >
-  Amazon SP operational_revenue_incl_gst — Amazon slice inside Historical
-  All-channels Net Sales. For Shopify-only use commerce_net_revenue_daily; for
-  both use net_sales_all_channels.
+  Amazon SP net sales computed ex-tax as revenue_principal minus
+  refund_principal — Amazon slice inside Historical All-channels Net Sales.
+  Not incl.-GST as previously documented: amazonShared/amazonOrderPnl.js's
+  own header comment establishes revenue_principal/refund_principal as
+  ex-tax fields. For Shopify-only use commerce_net_revenue_daily; for both
+  use net_sales_all_channels.
 formula:
-  human_readable: SUM(operational_revenue_incl_gst)
+  human_readable: SUM(revenue_principal) - SUM(refund_principal), ex-tax (excl. GST)
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
@@ -35,5 +38,18 @@ access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 validation_tests:
-  - June 2026 brand 20 ≈ ₹1,75,967
+  - amazon_net_sales equals SUM(revenue_principal) - SUM(refund_principal) (ex-tax) on any slice
+  - previous incl.-GST figure (June 2026 brand 20 ≈ ₹1,75,967) requires re-verification against the ex-tax basis
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonShared/amazonOrderPnl.js:6-9
+  note: >
+    The catalogue described this metric as incl.-GST (operational_revenue_incl_gst),
+    but amazonOrderPnl.js's own header comment (lines 6-9) establishes that
+    revenue_principal and refund_principal — the fields the live code actually
+    sums — are ex-tax. Corrected display_name, description, formula, and
+    validation_tests to describe the ex-tax revenue_principal/refund_principal
+    basis instead of an incl.-GST operational figure.

@@ -4,12 +4,13 @@ category: commerce
 status: certified
 description: 'Historical Analytics / P&L Total Sales when All channels is selected:
   Shopify eligible Total Sales (gross_revenue + total_discounts, incl. GST) plus Amazon
-  SP order_total_header for all placements in range (including canceled). For Shopify-only
-  use metric total_sales.
+  SP order_total_header for placements in range; canceled Amazon orders contribute ₹0
+  (the live code zeroes them out rather than summing their order_total, contrary to
+  what was previously documented here). For Shopify-only use metric total_sales.
 
   '
 formula:
-  human_readable: SUM(shopify total_sales) + SUM(amazon order_total_header)
+  human_readable: SUM(shopify total_sales) + SUM(amazon order_total_header, with canceled Amazon orders zeroed to ₹0)
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
@@ -63,3 +64,14 @@ examples:
 validation_tests:
 - June 2026 brand 20 = ₹48,46,429 (Shopify 45,72,809 + Amazon header 2,73,620)
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonSpOrderTotals.js:470
+  note: >
+    Same root cause as amazon_total_sales: the catalogue said canceled Amazon
+    orders are included at their order_total value, but the live code zeroes
+    canceled orders out instead. Corrected description and
+    formula.human_readable to state the zeroing behavior rather than
+    inclusion at order_total.

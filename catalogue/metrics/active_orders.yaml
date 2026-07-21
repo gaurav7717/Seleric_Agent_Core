@@ -1,8 +1,9 @@
 id: active_orders
 display_name: Active Orders (Shopify-only)
 category: commerce
-status: approved
-description: 'Orders in active/payment_pending status, excluding cancelled/revenue-adjustment orders and
+status: draft
+description: 'Not implemented in the live Seleric Dashboard as of this audit (2026-07-21) — see
+  dashboard_alignment. Orders in active/payment_pending status, excluding cancelled/revenue-adjustment orders and
   test orders. The "clean" order count used as the denominator for AOV and revenue-per-order metrics.
   Companion to orders (total placed, including cancelled/voided) on the same view. Scope: Shopify-only
   (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
@@ -84,3 +85,9 @@ examples:
 validation_tests:
 - active_orders <= orders for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No standalone active-orders count exists anywhere in Node-Backend.

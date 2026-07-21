@@ -2,10 +2,9 @@ id: net_profit_incl_amazon
 display_name: Net Profit (Historical all channels)
 category: finance
 status: certified
-description: >
-  Historical Analytics All-channels Net Profit approximation: Shopify net profit
-  (blended ads) + Amazon (marketplace_net_payout − amazon_cogs). For P&L Forecast
-  Net Profit use net_profit_all_channels; for Shopify-only use net_profit.
+description: 'Historical Analytics All-channels Net Profit approximation: Shopify net profit (blended ads) + Amazon (marketplace_net_payout − amazon_cogs). For P&L Forecast Net Profit use net_profit_all_channels; for Shopify-only use net_profit.
+
+  '
 formula:
   human_readable: net_profit + (amazon_net_payout - amazon_cogs)
   authoritative_source: cube
@@ -17,20 +16,32 @@ unit: currency
 currency_default: INR
 grain: daily
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
 data_owner: Finance
 access_policy:
-  roles_allowed: [exec, finance]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
 examples:
-  - question: All channels Net Profit Historical June 2026
-    request:
-      measures: [net_profit_incl_amazon]
-      time_range: {start: "2026-06-01", end: "2026-06-30"}
+- question: All channels Net Profit Historical June 2026
+  request:
+    measures:
+    - net_profit_incl_amazon
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 validation_tests:
-  - June 2026 brand 20 ≈ −₹2,52,748 (Historical card ≈ −₹2,52,571)
+- June 2026 brand 20 ≈ −₹2,52,748 (Historical card ≈ −₹2,52,571)
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: —
+  note: No field of this name; live net_profit is already Amazon-inclusive — building this formula literally would double-count.

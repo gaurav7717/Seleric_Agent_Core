@@ -1,8 +1,10 @@
 id: meta_breakdown_clicks
 display_name: Meta Clicks (breakdown)
 category: paid_media
-status: certified
-description: MUST filter exactly one breakdown_type (age_and_gender | placement | platform_device
+status: draft
+description: >-
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. MUST filter exactly one breakdown_type (age_and_gender | placement | platform_device
   | publisher_platform | region) — the five slices repeat the same delivery, so unfiltered
   aggregation counts spend 5x. Clicks per breakdown slice.
 formula:
@@ -49,3 +51,13 @@ access_policy:
   - metrics:read
 validation_tests:
 - single breakdown_type totals reconcile to meta_spend/meta_impressions on meta_ad_performance
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The entire meta_ad_breakdown_performance cube view has no dashboard
+    analog — no breakdown_type gating or single-select filter exists in
+    Node-Backend. The nearest real feature (getAudienceInsights) returns
+    several breakdowns simultaneously via a live Graph API call, not this
+    ClickHouse-backed metric.

@@ -34,3 +34,8 @@ examples:
 validation_tests:
   - amazon_orders >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonSpOrderTotals.js:469

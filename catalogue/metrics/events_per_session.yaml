@@ -2,10 +2,7 @@ id: events_per_session
 display_name: Events per Session
 category: web_analytics
 status: certified
-description: 'Average website events per session, computed at event grain (serve.web_events):
-  COUNT(events) / COUNT(DISTINCT session-linked sessions), recomputed as a ratio of
-  aggregates on any slice. Numerator includes sessionless server-side purchase events;
-  denominator counts sessions with ≥1 web event.
+description: 'Average website events per session, computed at event grain (serve.web_events): COUNT(events) / COUNT(DISTINCT session-linked sessions), recomputed as a ratio of aggregates on any slice. Numerator includes sessionless server-side purchase events; denominator counts sessions with ≥1 web event.
 
   '
 formula:
@@ -66,3 +63,9 @@ ratio_components:
 companion_measures:
 - web_events
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: —
+  note: Zero hits for events-per-session anywhere in Node-Backend.

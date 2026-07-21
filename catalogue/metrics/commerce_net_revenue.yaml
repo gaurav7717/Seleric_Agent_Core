@@ -86,3 +86,8 @@ examples:
 validation_tests:
 - placement-axis total within tolerance of DASHBOARD_NET_SALES_O sum for closed periods
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/historicalQueryHelpers.js:72-78

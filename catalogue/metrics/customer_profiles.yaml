@@ -1,11 +1,12 @@
 id: customer_profiles
 display_name: Customer Profiles
 category: customer
-status: certified
+status: draft
 description: >
-  Count of customer master-data rows (serve.customer_data). Profile/consent/
-  acquisition only — use lifetime_net_revenue / customers on CustomerIntelligence
-  for LTV questions.
+  Not implemented in the dashboard as of this audit — no customer master-data
+  table/endpoint exists in Node-Backend. Count of customer master-data rows
+  (serve.customer_data). Profile/consent/ acquisition only — use
+  lifetime_net_revenue / customers on CustomerIntelligence for LTV questions.
 formula:
   human_readable: COUNT(customer_id)
   authoritative_source: cube
@@ -35,3 +36,11 @@ access_policy:
 validation_tests:
   - customer_profiles >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No customer master-data table or endpoint exists in Node-Backend. Part of
+    the broader finding that there is no customer-master or
+    lifetime-aggregation layer.

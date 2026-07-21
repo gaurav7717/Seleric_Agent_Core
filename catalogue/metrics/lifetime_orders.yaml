@@ -1,9 +1,12 @@
 id: lifetime_orders
 display_name: Lifetime Orders
 category: customer
-status: certified
-description: Sum of customers' lifetime order counts. A cumulative snapshot — do not
-  filter by date_range.
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no all-time
+  order-count-per-customer aggregation exists in Node-Backend. Sum of
+  customers' lifetime order counts. A cumulative snapshot — do not filter by
+  date_range.
 formula:
   human_readable: SUM(lifetime_order_count)
   authoritative_source: cube
@@ -46,3 +49,11 @@ examples:
     - acquisition_channel
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No all-time order-count-per-customer aggregation exists in Node-Backend.
+    Part of the broader finding that there is no customer-master or
+    lifetime-aggregation layer.

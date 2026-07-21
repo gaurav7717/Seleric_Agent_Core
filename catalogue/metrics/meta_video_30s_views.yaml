@@ -1,8 +1,10 @@
 id: meta_video_30s_views
 display_name: Meta 30s Video Views
 category: paid_media
-status: certified
-description: 30-second video views.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. 30-second video views.
 formula:
   human_readable: SUM(meta_video_30s_views)
   authoritative_source: cube
@@ -51,3 +53,10 @@ access_policy:
   - metrics:read
 validation_tests:
 - meta_video_30s_views >= 0 for any slice
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    This field is never fetched anywhere in Node-Backend and is not computed
+    on the dashboard.

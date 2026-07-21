@@ -2,9 +2,8 @@ id: net_margin_pct
 display_name: Net Margin % (Shopify-only)
 category: finance
 status: certified
-description: 'Net profit (Shopify-only) as a share of net sales — ratio of aggregates. Scope: Shopify-only
-  (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
-  all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: 'Net profit as a share of Shopify net sales, computed as a ratio of aggregates:
+  net_profit_shopify / net_sales.'
 formula:
   human_readable: 100 x SUM(net_profit_shopify) / SUM(net_sales)
   authoritative_source: cube
@@ -36,8 +35,16 @@ examples:
       start: '2026-06-01'
       end: '2026-06-30'
 validation_tests:
-- period value equals 100 x sum(net_profit_shopify)/sum(net_sales)
+- period value equals 100 x sum(net_profit_shopify)/sum(net_sales) for the same slice
 deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.net_profit_shopify
   denominator: canonical_pnl.net_sales
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/services/pnlService.js:137
+  note: >
+    Dashboard summary may use blended inputs. This metric is aligned to
+    canonical Cube semantic execution (`canonical_pnl.net_margin_pct`).

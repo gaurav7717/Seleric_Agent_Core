@@ -1,8 +1,11 @@
 id: meta_frequency
 display_name: Meta Frequency
 category: paid_media
-status: certified
-description: Meta Frequency recomputed from aggregated components — never SUM/AVG of row ratios.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Meta Frequency recomputed from
+  aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(impressions) / SUM(daily reach) — approximation above ad-day grain
   authoritative_source: cube
@@ -57,3 +60,11 @@ ratio_components:
 companion_measures:
 - meta_impressions
 - meta_reach
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The reach field is requested in the Meta Graph API field list but never
+    extracted downstream, and meta_reach itself is hardcoded to 0 — so
+    frequency cannot be and is not computed on the dashboard.

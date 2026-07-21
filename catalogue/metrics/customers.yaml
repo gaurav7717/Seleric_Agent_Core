@@ -2,26 +2,20 @@ id: customers
 display_name: Customers
 category: customer
 status: certified
-description: Count of distinct customers with at least one eligible order (lifetime
-  snapshot).
+description: >
+  Dashboard basis: a 30-day windowed count of distinct Shopify customers (not
+  a lifetime, all-time-history snapshot) — see dashboard_alignment.
 formula:
-  human_readable: COUNT(customer_id)
+  human_readable: COUNT(DISTINCT customer_id) over the trailing 30-day window
   authoritative_source: cube
 cube_mapping:
   view: customer_ltv
   measure: customer_ltv.customers
 aggregation: additive
 unit: count
-grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+grain: customer (distinct customers active in a 30-day window; not a lifetime snapshot)
 supported_dimensions:
 - brand_id
-- acquisition_platform
-- acquisition_channel
-- acquisition_campaign
-- is_repeat_customer
-- lifetime_order_count_band
-- customer_default_city
-- customer_default_province
 supported_filters:
 - brand_id
 - acquisition_platform
@@ -46,3 +40,16 @@ examples:
     - acquisition_channel
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: shopify/analytics.js:3442,3596,3608
+  note: >
+    Node-Backend has no customer-master or lifetime-aggregation layer; the
+    only "customers" figure it computes is a 30-day windowed Shopify REST
+    count, not a lifetime snapshot. Catalogue description, formula, and grain
+    corrected to match; supported_dimensions narrowed to brand_id since the
+    live windowed query has no acquisition/geo breakdown. cube_mapping left
+    as-is (still valid for the Cube semantic layer, which the dashboard does
+    not use).

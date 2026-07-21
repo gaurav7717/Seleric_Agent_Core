@@ -44,3 +44,8 @@ companion_measures:
 - google_spend
 - google_impressions
 currency_default: INR
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js:914

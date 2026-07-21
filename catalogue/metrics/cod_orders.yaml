@@ -82,3 +82,8 @@ examples:
 validation_tests:
 - cod_orders <= orders for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/lineItemHistoricalSql.js:424-467

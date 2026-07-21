@@ -1,9 +1,10 @@
 id: channel_net_revenue
 display_name: Channel Net Revenue (ex-GST, channel attribution daily)
 category: attribution
-status: certified
+status: draft
 description: >
-  Placement-axis first-party Shopify net revenue ex-GST by channel from
+  Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. Placement-axis first-party Shopify net revenue ex-GST by channel from
   channel_attribution_daily (meta / google / organic_shopify / amazon /
   organic_amazon). Shopify rows use the same dashboard_net_sales_excl_tax basis as
   Attribution Analysis. Amazon channel rows have no ex-GST net on this surface —
@@ -37,3 +38,11 @@ validation_tests:
   - channel_net_revenue is Shopify-basis only on meta/google/organic_shopify rows
   - June 2026 brand 20 meta channel ≈ ₹24,24,851.18
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The catalogued 5-way channel_attribution_daily split has zero references
+    in Node-Backend; the nearest real endpoint uses a different channel
+    definition, excludes cancelled orders, and never merges in Amazon.

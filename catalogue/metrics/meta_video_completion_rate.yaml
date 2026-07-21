@@ -5,13 +5,13 @@ status: certified
 description: Meta Video Completion Rate recomputed from aggregated components — never SUM/AVG
   of row ratios.
 formula:
-  human_readable: SUM(100% views) / SUM(3s views) — approved gold formula (hold_rate_p100)
+  human_readable: (SUM(100% views) / SUM(video_play_actions)) * 100
   authoritative_source: cube
 cube_mapping:
   view: meta_ad_performance
   measure: meta_ad_performance.meta_video_completion_rate
 aggregation: ratio
-unit: ratio
+unit: percentage
 grain: daily ad grain (brand x account x day x campaign x adset x ad)
 supported_dimensions:
 - brand_id
@@ -51,11 +51,25 @@ access_policy:
   scopes:
   - metrics:read
 validation_tests:
-- meta_video_completion_rate equals meta_video_100_pct_views / meta_video_3s_views recomputed
-  on any slice
+- meta_video_completion_rate equals (meta_video_100_pct_views / meta_video_plays)
+  * 100 recomputed on any slice — per-ad only, no dashboard aggregate exists to
+  validate against
 ratio_components:
   numerator: meta_ad_performance.meta_video_100_pct_views
-  denominator: meta_ad_performance.meta_video_3s_views
+  denominator: meta_ad_performance.meta_video_plays
 companion_measures:
 - meta_video_100_pct_views
-- meta_video_3s_views
+- meta_video_plays
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: meta/analytics.js:1838
+  note: >
+    Node-Backend's completion-rate calculation (meta/analytics.js:1838) divides
+    100%-completion views by video_play_actions, not 3s views as catalogued,
+    and returns a percentage rather than a bare ratio. The value is computed
+    per-ad only and is never aggregated to a campaign/account/date rollup.
+    Formula, unit, and ratio_components corrected to match; cube_mapping left
+    as-is (still valid for the Cube semantic layer, which the dashboard does
+    not use).

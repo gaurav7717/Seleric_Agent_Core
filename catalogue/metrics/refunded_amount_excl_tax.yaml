@@ -67,3 +67,9 @@ access_policy:
 validation_tests:
 - refunded_amount_excl_tax >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:76,315-332,600-601
+  note: Resolves to the identical figure as returns_excl_tax; catalogue implies a broader all-refunds number that does not exist.

@@ -39,3 +39,8 @@ access_policy:
 validation_tests:
   - June 2026 brand 20 ≈ ₹2,68,622
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonAttribution/buildAmazonAttributionPayload.js:131-133

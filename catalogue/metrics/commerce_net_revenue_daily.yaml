@@ -48,3 +48,8 @@ validation_tests:
 - commerce_net_revenue_daily period total reconciles exactly to the dashboard Net Sales card for the same
   brand and period
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:604-611

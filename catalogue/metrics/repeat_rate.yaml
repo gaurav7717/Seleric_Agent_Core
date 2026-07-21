@@ -2,25 +2,21 @@ id: repeat_rate
 display_name: Repeat Customer Rate
 category: customer
 status: certified
-description: Share of customers who placed more than one lifetime order.
+description: >
+  Dashboard basis: windowed/sampled repeat_customers ÷ windowed/sampled
+  customers — both components inherit the same windowed/sampled Shopify REST
+  basis, not a lifetime repeat rate. See dashboard_alignment.
 formula:
-  human_readable: repeat_customers / customers
+  human_readable: (windowed/sampled repeat_customers) / (windowed/sampled customers)
   authoritative_source: cube
 cube_mapping:
   view: customer_ltv
   measure: customer_ltv.repeat_rate
 aggregation: ratio
 unit: percent
-grain: customer (one row per customer with >=1 eligible order, lifetime snapshot)
+grain: customer (windowed/sampled; not a lifetime snapshot)
 supported_dimensions:
 - brand_id
-- acquisition_platform
-- acquisition_channel
-- acquisition_campaign
-- is_repeat_customer
-- lifetime_order_count_band
-- customer_default_city
-- customer_default_province
 supported_filters:
 - brand_id
 - acquisition_platform
@@ -48,3 +44,15 @@ deprecated_aliases: []
 ratio_components:
   numerator: customer_ltv.repeat_customers
   denominator: customer_ltv.customers
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: shopify/analytics.js:3611,5169-5173
+  note: >
+    repeat_rate inherits the windowed/sampled numerator and denominator from
+    the live repeat_customers and customers implementations, so it is a
+    windowed/sampled ratio, not a lifetime repeat rate. Catalogue
+    description, formula, and grain corrected to match; supported_dimensions
+    narrowed to brand_id. cube_mapping left as-is (still valid for the Cube
+    semantic layer, which the dashboard does not use).

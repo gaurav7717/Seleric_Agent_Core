@@ -2,9 +2,9 @@ id: bounce_rate
 display_name: Bounce Rate
 category: web_analytics
 status: certified
-description: >
-  Share of sessions that never reached a product detail page:
-  (sessions - pdp_sessions) / sessions, recomputed from sums on any slice.
+description: 'Share of sessions that never reached a product detail page: (sessions - pdp_sessions) / sessions, recomputed from sums on any slice.
+
+  '
 formula:
   human_readable: (SUM(sessions) - SUM(pdp_sessions)) / SUM(sessions)
   authoritative_source: cube
@@ -15,22 +15,33 @@ aggregation: ratio
 unit: ratio
 grain: brand × day × fine channel
 supported_dimensions:
-  - brand_id
-  - report_date
-  - channel
+- brand_id
+- report_date
+- channel
 supported_filters:
-  - date_range
-  - brand_id
-  - channel
+- date_range
+- brand_id
+- channel
 data_owner: Growth / Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 validation_tests:
-  - bounce_rate between 0 and 1 on any slice
+- bounce_rate between 0 and 1 on any slice
 ratio_components:
   numerator: funnel_daily.bounce_sessions
   denominator: funnel_daily.sessions
 companion_measures:
-  - web_sessions
+- web_sessions
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: channelFunnel/sessionDrilldownClickhouse.js:74-94
+  note: Dashboard uses native is_bounce flag (avg(is_bounce)), not the catalogued funnel-proxy (sessions - pdp) / sessions formula. Description and formula left for Cube layer; alignment recorded.

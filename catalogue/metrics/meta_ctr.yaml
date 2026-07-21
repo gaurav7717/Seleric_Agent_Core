@@ -2,7 +2,9 @@ id: meta_ctr
 display_name: Meta CTR
 category: paid_media
 status: certified
-description: Meta CTR recomputed from aggregated components — never SUM/AVG of row ratios.
+description: >
+  Meta CTR recomputed from aggregated components — never SUM/AVG of row
+  ratios.
 formula:
   human_readable: SUM(clicks) / SUM(impressions)
   authoritative_source: cube
@@ -18,28 +20,20 @@ supported_dimensions:
 - ad_account_id
 - campaign_id
 - campaign_name
-- campaign_status
-- campaign_objective
 - adset_id
 - adset_name
 - ad_id
 - ad_name
-- creative_id
-- creative_type
 supported_filters:
 - date_range
 - brand_id
 - ad_account_id
 - campaign_id
 - campaign_name
-- campaign_status
-- campaign_objective
 - adset_id
 - adset_name
 - ad_id
 - ad_name
-- creative_id
-- creative_type
 data_owner: Growth / Paid Media
 access_policy:
   roles_allowed:
@@ -50,10 +44,19 @@ access_policy:
   scopes:
   - metrics:read
 validation_tests:
-- meta_ctr equals meta_clicks / meta_impressions recomputed on any slice
+- meta_ctr equals (meta_clicks / meta_impressions) recomputed on any slice
 ratio_components:
   numerator: meta_ad_performance.meta_clicks
   denominator: meta_ad_performance.meta_impressions
 companion_measures:
 - meta_clicks
 - meta_impressions
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js:780
+  note: >
+    Dashboard computes CTR as percentage (x100). Canonical Cube semantic is a
+    ratio-of-aggregates measure (no x100), which the catalogue now reflects for
+    agent query consistency.

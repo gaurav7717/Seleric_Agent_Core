@@ -1,8 +1,9 @@
 id: meta_attr_new_customer_orders
 display_name: Meta Attributed New Customer Orders
 category: attribution
-status: certified
-description: New-customer orders last-touch attributed to a Meta ad.
+status: draft
+description: Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. New-customer orders last-touch attributed to a Meta ad.
 formula:
   human_readable: SUM(new_customer_orders)
   authoritative_source: cube
@@ -51,3 +52,10 @@ examples:
       end: '2026-06-30'
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    is_new_customer is attached per-order but never summed to ad/adset/campaign
+    grain anywhere.

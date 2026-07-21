@@ -2,8 +2,11 @@ id: meta_cost_per_landing_page_view
 display_name: Meta Cost per Landing Page View
 category: paid_media
 status: certified
-description: Meta Cost per Landing Page View recomputed from aggregated components — never
-  SUM/AVG of row ratios.
+description: >
+  Meta Cost per Landing Page View recomputed from aggregated components —
+  never SUM/AVG of row ratios. Dashboard basis: landing_page_views comes from
+  a separate account-level Meta Graph API call, not the ClickHouse-backed
+  query used for spend — see dashboard_alignment.
 formula:
   human_readable: SUM(spend) / SUM(landing_page_views)
   authoritative_source: cube
@@ -12,35 +15,15 @@ cube_mapping:
   measure: meta_ad_performance.meta_cost_per_landing_page_view
 aggregation: ratio
 unit: INR
-grain: daily ad grain (brand x account x day x campaign x adset x ad)
+grain: daily account grain (brand x ad_account x day)
 supported_dimensions:
 - brand_id
 - report_date
 - ad_account_id
-- campaign_id
-- campaign_name
-- campaign_status
-- campaign_objective
-- adset_id
-- adset_name
-- ad_id
-- ad_name
-- creative_id
-- creative_type
 supported_filters:
 - date_range
 - brand_id
 - ad_account_id
-- campaign_id
-- campaign_name
-- campaign_status
-- campaign_objective
-- adset_id
-- adset_name
-- ad_id
-- ad_name
-- creative_id
-- creative_type
 data_owner: Growth / Paid Media
 access_policy:
   roles_allowed:
@@ -60,3 +43,16 @@ companion_measures:
 - meta_spend
 - meta_landing_page_views
 currency_default: INR
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: meta/analytics.js:773,782
+  note: >
+    landing_page_views (the denominator) comes from a separate account-level
+    Meta Graph API call (meta/analytics.js:773,782), not the ClickHouse-backed
+    fct_meta_ads_daily query used for spend. It has no campaign, adset, ad, or
+    creative breakdown, unlike the catalogued grain. Grain and
+    supported_dimensions/filters corrected to account-level; cube_mapping
+    left as-is (still valid for the Cube semantic layer, which the dashboard
+    does not use).

@@ -46,3 +46,9 @@ access_policy:
 validation_tests:
 - return_recovered_cogs >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:335-361 vs 364-393,617-646
+  note: 'Matching CTE is dead code; live logic adds return cost to COGS — the opposite operation — see cross-cutting #8.'

@@ -1,8 +1,11 @@
 id: repeat_order_share
 display_name: Repeat Order Share
 category: customer
-status: certified
-description: Share of orders that are a repeat purchase (order_seq > 1).
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no purchase-sequence
+  model exists in Node-Backend. Share of orders that are a repeat purchase
+  (order_seq > 1).
 formula:
   human_readable: repeat_orders / repeat_purchase_orders
   authoritative_source: cube
@@ -67,3 +70,10 @@ deprecated_aliases: []
 ratio_components:
   numerator: purchase_sequence.repeat_orders
   denominator: purchase_sequence.orders
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No purchase-sequence model exists in Node-Backend. Part of the broader
+    finding that there is no customer-master or lifetime-aggregation layer.

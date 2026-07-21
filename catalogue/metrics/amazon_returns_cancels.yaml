@@ -38,3 +38,8 @@ examples:
 validation_tests:
   - amazon_returns_cancels == amazon_cancelled_orders + amazon_returned_orders
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonSpOrderTotals.js:318-324

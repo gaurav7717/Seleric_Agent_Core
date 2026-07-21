@@ -51,3 +51,8 @@ access_policy:
   - metrics:read
 validation_tests:
 - meta_impressions >= 0 for any slice
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js:762

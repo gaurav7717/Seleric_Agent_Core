@@ -1,8 +1,11 @@
 id: avg_orders_per_customer
 display_name: Average Orders per Customer
 category: customer
-status: certified
-description: Lifetime orders divided by customer count.
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no such ratio is
+  surfaced anywhere in Node-Backend. Lifetime orders divided by customer
+  count.
 formula:
   human_readable: lifetime_orders / customers
   authoritative_source: cube
@@ -48,3 +51,10 @@ deprecated_aliases: []
 ratio_components:
   numerator: customer_ltv.lifetime_orders
   denominator: customer_ltv.customers
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No such ratio is surfaced anywhere in Node-Backend. Part of the broader
+    finding that there is no customer-master or lifetime-aggregation layer.

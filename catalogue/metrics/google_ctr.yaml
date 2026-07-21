@@ -2,7 +2,8 @@ id: google_ctr
 display_name: Google CTR
 category: paid_media
 status: certified
-description: Google CTR recomputed from aggregated components.
+description: >
+  Google CTR recomputed from aggregated components (ratio of aggregates).
 formula:
   human_readable: SUM(clicks) / SUM(impressions)
   authoritative_source: cube
@@ -11,18 +12,16 @@ cube_mapping:
   measure: google_ad_performance.google_ctr
 aggregation: ratio
 unit: ratio
-grain: daily campaign grain (brand x customer account x day x campaign)
+grain: daily campaign grain (brand x day x campaign)
 supported_dimensions:
 - brand_id
 - report_date
-- customer_account_id
 - campaign_id
 - campaign_name
 - campaign_type
 supported_filters:
 - date_range
 - brand_id
-- customer_account_id
 - campaign_id
 - campaign_name
 - campaign_type
@@ -36,10 +35,19 @@ access_policy:
   scopes:
   - metrics:read
 validation_tests:
-- google_ctr equals google_clicks / google_impressions recomputed on any slice
+- google_ctr equals (google_clicks / google_impressions) recomputed on any slice
 ratio_components:
   numerator: google_ad_performance.google_clicks
   denominator: google_ad_performance.google_impressions
 companion_measures:
 - google_clicks
 - google_impressions
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js:915
+  note: >
+    Dashboard computes CTR as percentage (x100). Canonical Cube semantic is a
+    ratio-of-aggregates measure (no x100), which the catalogue now reflects for
+    agent query consistency.

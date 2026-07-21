@@ -2,17 +2,8 @@ id: contribution_margin_pct
 display_name: Contribution Margin % (Shopify-only)
 category: finance
 status: certified
-description: 'Contribution margin as a share of net sales (ratio-of-aggregates).
-
-
-  DATA QUALITY CAVEAT: sourced from gold.fct_daily_pnl, whose cost/spend columns are flagged broken in
-  the cube''s own header comment (mage-ai/infra/cube/model/cubes/serve_canonical_pnl.yml). Cross-checked
-  against ClickHouse for June 2026/brand 20: net_cogs summed to ~90.6K vs. the dashboard''s Net COGS card
-  of ~15.86L (17x off), and derived net_profit was positive (~11.9L) vs. the dashboard''s Net Profit card
-  of -2.72L (wrong sign). Marked draft (not queryable) until the fct_daily_pnl cost columns are fixed
-  upstream — do not certify or surface this value. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+description: 'Contribution margin as a share of net sales (ratio of aggregates),
+  aligned to canonical_pnl semantic execution.'
 formula:
   human_readable: 100 x SUM(contribution_margin) / SUM(net_sales)
   authoritative_source: cube
@@ -49,3 +40,9 @@ deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.contribution_margin
   denominator: canonical_pnl.net_sales
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: —
+  note: No percent-of-sales contribution-margin field anywhere in Node-Backend.

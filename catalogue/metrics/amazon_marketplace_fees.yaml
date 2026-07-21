@@ -3,8 +3,9 @@ display_name: Amazon Marketplace Fees
 category: commerce
 status: certified
 description: >
-  Effective Amazon marketplace fees (commission + closing + shipping + other +
-  tax withheld) from serve.amazon_commerce_daily — not Amazon Ads spend.
+  Amazon marketplace fees from `amazon_commerce_performance.marketplace_fees`
+  (serve.amazon_commerce_daily), additive at brand × day grain. Not Amazon Ads
+  spend.
 formula:
   human_readable: SUM(marketplace_fees)
   authoritative_source: cube
@@ -28,3 +29,12 @@ currency_default: INR
 validation_tests:
   - amazon_marketplace_fees >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_amazon_commerce_daily.yml:48-53
+  note: >
+    This metric is aligned to the canonical Cube semantic layer
+    (`amazon_commerce_performance.marketplace_fees`). Dashboard-specific naming
+    differences are tracked separately.

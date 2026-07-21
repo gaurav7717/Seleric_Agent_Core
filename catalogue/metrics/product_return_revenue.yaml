@@ -2,10 +2,9 @@ id: product_return_revenue
 display_name: Product Return Revenue (ex-GST, cohort)
 category: product
 status: certified
-description: >
-  Line-level cohort return revenue deduction (ex-GST) from product_performance.
-  Supports SKU/product and shipping geo breakdowns. Deductions attach to the placement
-  period (order_date), not the return event date.
+description: 'Line-level cohort return revenue deduction (ex-GST) from product_performance. Supports SKU/product and shipping geo breakdowns. Deductions attach to the placement period (order_date), not the return event date.
+
+  '
 formula:
   human_readable: SUM(cohort_return_deduction_ex_gst) on eligible lines
   authoritative_source: cube
@@ -57,13 +56,29 @@ supported_filters:
 - pnl_refund_class
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 examples:
 - question: Return revenue by product and city last month
   request:
-    measures: [product_return_revenue]
-    dimensions: [product_title, shipping_city]
-    time_range: {preset: last_month}
+    measures:
+    - product_return_revenue
+    dimensions:
+    - product_title
+    - shipping_city
+    time_range:
+      preset: last_month
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:1681-1684,1708-1711
+  note: Formula matches but only exists inside channel-scoped attribution query.

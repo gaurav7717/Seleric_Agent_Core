@@ -1,8 +1,9 @@
 id: meta_attr_refund_amount
 display_name: Meta Attributed Refund Amount
 category: attribution
-status: certified
-description: Refund amount on orders last-touch attributed to a Meta ad.
+status: draft
+description: Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. Refund amount on orders last-touch attributed to a Meta ad.
 formula:
   human_readable: SUM(attributed_refund_amount)
   authoritative_source: cube
@@ -52,3 +53,13 @@ examples:
 validation_tests: []
 deprecated_aliases: []
 currency_default: INR
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Same root cause as attributed_refund_amount: total_refund_amount is
+    populated for Amazon attribution only, while Shopify/meta/google
+    attribution track separate return and cancel count/value pairs on event
+    date — no single per-ad refund-amount field is ever summed to
+    campaign/adset/ad grain.

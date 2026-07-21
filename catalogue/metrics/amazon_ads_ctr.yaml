@@ -2,7 +2,8 @@ id: amazon_ads_ctr
 display_name: Amazon Ads CTR
 category: paid_media
 status: certified
-description: Amazon Ads CTR recomputed from aggregated components.
+description: >
+  Amazon Ads CTR recomputed from aggregated components (ratio of aggregates).
 formula:
   human_readable: SUM(clicks) / SUM(impressions)
   authoritative_source: cube
@@ -11,23 +12,17 @@ cube_mapping:
   measure: amazon_ad_performance.amazon_ads_ctr
 aggregation: ratio
 unit: ratio
-grain: daily SP campaign grain (brand x day x campaign_type x campaign)
+grain: daily SP campaign grain (brand x day x campaign)
 supported_dimensions:
 - brand_id
 - report_date
-- campaign_type
 - campaign_id
 - campaign_name
-- campaign_status
-- targeting_type
 supported_filters:
 - date_range
 - brand_id
-- campaign_type
 - campaign_id
 - campaign_name
-- campaign_status
-- targeting_type
 data_owner: Growth / Paid Media
 access_policy:
   roles_allowed:
@@ -38,10 +33,20 @@ access_policy:
   scopes:
   - metrics:read
 validation_tests:
-- amazon_ads_ctr equals amazon_ads_clicks / amazon_ads_impressions recomputed on any slice
+- amazon_ads_ctr equals (amazon_ads_clicks / amazon_ads_impressions) recomputed on
+  any slice
 ratio_components:
   numerator: amazon_ad_performance.amazon_ads_clicks
   denominator: amazon_ad_performance.amazon_ads_impressions
 companion_measures:
 - amazon_ads_clicks
 - amazon_ads_impressions
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/analyticsClickhouse.js:1015
+  note: >
+    Dashboard computes CTR as percentage (x100) and groups only by campaign_id.
+    Canonical Cube semantic is a ratio-of-aggregates measure (no x100), which is
+    what the catalogue now reflects for agent query consistency.

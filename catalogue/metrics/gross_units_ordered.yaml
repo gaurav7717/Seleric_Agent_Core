@@ -1,12 +1,13 @@
 id: gross_units_ordered
 display_name: Gross Units Ordered
 category: product
-status: certified
-description: 'Gross ordered quantity (before refunds) on eligible placement lines
-  from serve.product_performance. The net basis (after refunds) is units_sold — one
-  metric name is never used for both.
-
-  '
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — only net quantity
+  exists in Node-Backend, no gross-before-refunds figure. Gross ordered
+  quantity (before refunds) on eligible placement lines from
+  serve.product_performance. The net basis (after refunds) is units_sold —
+  one metric name is never used for both.
 formula:
   human_readable: Sum of ordered quantity on eligible lines
   authoritative_source: cube
@@ -73,3 +74,11 @@ examples:
 validation_tests:
 - gross_units_ordered >= units_sold for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Only net quantity exists in Node-Backend; no gross-before-refunds figure
+    is computed. Part of the broader finding that there is no all-channel
+    product/SKU rollup.

@@ -1,9 +1,10 @@
 id: channel_orders
 display_name: Channel Orders
 category: attribution
-status: certified
+status: draft
 description: >
-  Orders by closed channel set (meta / google / organic_shopify / amazon /
+  Not implemented in the dashboard — Node-Backend has no equivalent live
+  calculation. Orders by closed channel set (meta / google / organic_shopify / amazon /
   organic_amazon) on serve.channel_attribution_daily.
 formula:
   human_readable: SUM(orders) by channel
@@ -37,3 +38,11 @@ examples:
 validation_tests:
   - channel_orders >= 0
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The catalogued 5-way channel_attribution_daily split has zero references
+    in Node-Backend; the nearest real endpoint uses a different channel
+    definition, excludes cancelled orders, and never merges in Amazon.

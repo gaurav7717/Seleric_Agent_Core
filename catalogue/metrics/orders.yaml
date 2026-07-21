@@ -84,3 +84,8 @@ validation_tests:
 deprecated_aliases:
 - daily_pnl.orders_created
 - daily_pnl.total_orders
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:186-190

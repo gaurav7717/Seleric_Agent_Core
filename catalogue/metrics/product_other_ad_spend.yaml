@@ -1,11 +1,13 @@
 id: product_other_ad_spend
 display_name: Product Other Ad Spend (SKU-attributed)
 category: product
-status: certified
+status: draft
 description: >
-  Non-Meta/non-Google SKU-level ad spend (Amazon product ads, influencers, etc.).
-  Currently zero until Amazon SKU spend is wired; use amazon_ads_spend at campaign
-  grain for Amazon totals today.
+  Not implemented in the dashboard as of this audit — the catalogue itself
+  admits this is unimplemented, and no SKU-attributed ad spend exists
+  anywhere in Node-Backend. Non-Meta/non-Google SKU-level ad spend (Amazon
+  product ads, influencers, etc.). Currently zero until Amazon SKU spend is
+  wired; use amazon_ads_spend at campaign grain for Amazon totals today.
 formula:
   human_readable: SUM(other_spend_attributed) at SKU grain
   authoritative_source: cube
@@ -36,3 +38,10 @@ access_policy:
 validation_tests:
   - product_other_ad_spend >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The catalogue itself admits this is unimplemented; no SKU-attributed ad
+    spend exists anywhere in Node-Backend.

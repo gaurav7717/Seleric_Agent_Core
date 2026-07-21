@@ -3,13 +3,13 @@ display_name: Amazon Platform Fees
 category: finance
 status: certified
 description: >
-  Amazon SP marketplace fees for the period (brand × day): abs(commission) +
-  abs(closing) + abs(shipping) + abs(tax_withheld) + abs(other_service_fees).
-  Matches Amazon Attribution Analysis Amazon Fees card. Not Amazon Ads spend
-  (amazon_ads_spend). Distinct from Shopify Net COGS / Total Operating Cost.
-  P&L TOC uses operational marketplace fees (slightly different rollup).
+  Amazon SP platform fees from `amazon_daily_pnl.marketplace_fees`, defined as
+  the sum of absolute fee components (commission, closing, shipping,
+  tax-withheld, other service fees). This is not Amazon Ads spend
+  (`amazon_ads_spend`) and is distinct from Shopify Net COGS / Total Operating
+  Cost.
 formula:
-  human_readable: SUM(|commission| + |closing| + |shipping| + |tax_withheld| + |other|)
+  human_readable: SUM(ABS(commission) + ABS(closing) + ABS(shipping) + ABS(tax_withheld) + ABS(other_service_fees))
   authoritative_source: cube
 cube_mapping:
   view: amazon_daily_pnl
@@ -35,5 +35,16 @@ examples:
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
   - amazon_platform_fees >= 0 for any slice
+  - amazon_platform_fees equals sum of absolute fee components on
+    amazon_daily_pnl.marketplace_fees
   - June 2026 brand 20 ≈ ₹52,128.10
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_amazon_daily_pnl.yml:15-25
+  note: >
+    Dashboard fee logic and canonical Cube fee logic are not identical. The
+    catalogue is now aligned to the executing Cube semantic used by the Base
+    Agent (`amazon_daily_pnl.marketplace_fees`).

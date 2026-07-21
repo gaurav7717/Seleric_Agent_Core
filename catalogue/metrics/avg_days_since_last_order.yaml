@@ -1,9 +1,11 @@
 id: avg_days_since_last_order
 display_name: Average Days Since Last Order
 category: customer
-status: certified
-description: Average recency (days since last order) across customers. A live snapshot
-  as of query time.
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — no recency field exists
+  anywhere in Node-Backend. Average recency (days since last order) across
+  customers. A live snapshot as of query time.
 formula:
   human_readable: AVG(days_since_last_order)
   authoritative_source: cube
@@ -46,3 +48,11 @@ examples:
     - acquisition_channel
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    No recency (days-since-last-order) field exists anywhere in Node-Backend.
+    Part of the broader finding that there is no customer-master or
+    lifetime-aggregation layer.

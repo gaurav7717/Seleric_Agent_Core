@@ -40,3 +40,8 @@ access_policy:
 validation_tests:
 - google_spend >= 0 for any slice
 currency_default: INR
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js:896

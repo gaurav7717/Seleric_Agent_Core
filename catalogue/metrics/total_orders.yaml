@@ -65,3 +65,8 @@ examples:
 validation_tests:
 - June+range brand 20 All channels ≈ dashboard Total Orders 13,212 for Nov 11–Jul 16
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:613

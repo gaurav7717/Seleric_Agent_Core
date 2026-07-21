@@ -1,9 +1,11 @@
 id: meta_hold_rate_15s
 display_name: Meta Hold Rate (15s)
 category: paid_media
-status: certified
-description: Meta Hold Rate (15s) recomputed from aggregated components — never SUM/AVG of
-  row ratios.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Meta Hold Rate (15s) recomputed from
+  aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(thruplays) / SUM(3s views) — approved gold formula
   authoritative_source: cube
@@ -58,3 +60,11 @@ ratio_components:
 companion_measures:
 - meta_thruplays
 - meta_video_3s_views
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Depends on meta_thruplays, which does not exist anywhere in Node-Backend
+    (zero occurrences of "thruplay" in src/), so this metric is not computed
+    on the dashboard.

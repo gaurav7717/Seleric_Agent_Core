@@ -39,3 +39,8 @@ validation_tests:
   - June 2026 brand 20 ≈ ₹41,44,768.43
   - gross_sales_all_channels >= shopify gross_sales for same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:586

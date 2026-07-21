@@ -2,10 +2,7 @@ id: taxes_on_net_sales
 display_name: Taxes 18% on Shopify Net (Shopify-only)
 category: finance
 status: certified
-description: 'P&L forward output-GST estimate: Net Sales (ex-GST) × 0.18. Matches FE §13 /api/v1/pnl taxes
-  card. Not a stored tax ledger or input GST recovery. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+description: 'P&L forward output-GST estimate: Net Sales (ex-GST) × 0.18. Matches FE §13 /api/v1/pnl taxes card. Not a stored tax ledger or input GST recovery. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: SUM(net_sales_excl_tax) * 0.18
   authoritative_source: cube
@@ -40,3 +37,9 @@ examples:
 validation_tests:
 - equals 0.18 * net_sales for the same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: services/pnlService.js:222-225
+  note: 'Catalogue: flat 18% of net_sales; code subtracts Amazon out first then adds Amazon actual tax back — different formula.'

@@ -2,11 +2,10 @@ id: product_gross_margin_pct
 display_name: Product Gross Margin %
 category: product
 status: certified
-description: 'Gross profit as a share of lifecycle net revenue (ex-GST), fully-loaded
-  COGS basis, from serve.product_performance. A ratio — never sum or average row/daily
-  margin percentages; recompute from components.
-
-  '
+description: >
+  Product gross profit as a share of lifecycle net revenue (ex-GST),
+  fully-loaded COGS basis, from serve.product_performance. A ratio — never sum
+  or average row/daily margin percentages; recompute from components.
 formula:
   human_readable: 100 × product_gross_profit / product_net_revenue
   authoritative_source: cube
@@ -80,3 +79,11 @@ examples:
 validation_tests:
 - period value equals 100 × sum(gross_profit)/sum(net_revenue) for the same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Depends on non-existent fields — Node-Backend has no product-grain gross
+    profit or net revenue rollup. Part of the broader finding that there is
+    no all-channel product/SKU rollup.

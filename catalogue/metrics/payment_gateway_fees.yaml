@@ -42,3 +42,8 @@ validation_tests:
 - payment_gateway_fees >= 0 for any slice
 - June 2026 brand 20 ≈ ₹1,31,068.55
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:618-620

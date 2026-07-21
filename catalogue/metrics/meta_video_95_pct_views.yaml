@@ -1,8 +1,10 @@
 id: meta_video_95_pct_views
 display_name: Meta Video 95% Views
 category: paid_media
-status: certified
-description: Views reaching 95% of video length.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Views reaching 95% of video length.
 formula:
   human_readable: SUM(meta_video_95_pct_views)
   authoritative_source: cube
@@ -51,3 +53,10 @@ access_policy:
   - metrics:read
 validation_tests:
 - meta_video_95_pct_views >= 0 for any slice
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Node-Backend only fetches p25/p50/p75/p100 video-percentile fields; a
+    p95 field does not exist and is not computed on the dashboard.

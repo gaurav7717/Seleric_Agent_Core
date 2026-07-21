@@ -80,3 +80,8 @@ examples:
 validation_tests:
 - total_sales >= commerce_net_revenue for same period when both on placement axis
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalQueryHelpers.js:90

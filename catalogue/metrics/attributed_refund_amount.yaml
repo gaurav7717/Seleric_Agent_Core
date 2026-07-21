@@ -2,16 +2,23 @@ id: attributed_refund_amount
 display_name: Attributed Refund Amount
 category: attribution
 status: certified
-description: Refund amount at order grain from the attribution oracle.
+description: >
+  Refund amount at order grain from the attribution oracle. Dashboard basis:
+  the single total_refund_amount column is populated for Amazon attribution
+  only; Shopify/meta/google attribution instead track separate return and
+  cancel count/value pairs, computed on event date rather than order date —
+  see dashboard_alignment.
 formula:
-  human_readable: SUM(total_refund_amount)
+  human_readable: SUM(total_refund_amount) for Amazon; SUM(return_value) + SUM(cancel_value)
+    on event date for Shopify/meta/google — not a single unified refund-amount column
   authoritative_source: cube
 cube_mapping:
   view: order_attribution
   measure: order_attribution.attributed_refund_amount
 aggregation: additive
 unit: currency
-grain: order (last-touch attribution)
+grain: order (Amazon, order date); event date return/cancel pairs (Shopify/meta/google) — last-touch
+  attribution
 supported_dimensions:
 - brand_id
 - order_date
@@ -76,3 +83,13 @@ examples:
 validation_tests: []
 deprecated_aliases: []
 currency_default: INR
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    total_refund_amount is only used by Amazon attribution modules. Shopify,
+    meta, and google attribution instead track separate return-count/return-value
+    and cancel-count/cancel-value pairs, computed on the event date rather than
+    the order date. Catalogue description, formula, and grain corrected to
+    reflect this split; cube_mapping left as-is.

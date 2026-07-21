@@ -46,3 +46,9 @@ access_policy:
 validation_tests:
 - refund_lines >= 0 for any slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:335-361
+  note: fct_refund_line_items CTE exists but is never joined into output — dead code.

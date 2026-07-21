@@ -35,3 +35,8 @@ access_policy:
 validation_tests:
 - June 2026 brand 20 = 1,299
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: metaAttribution/analyticsClickhouse.js:626-637

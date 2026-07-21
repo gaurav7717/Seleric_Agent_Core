@@ -237,6 +237,10 @@ def main() -> None:
         }
         if om_name:
             entry["om_name"] = om_name
+        alignment = raw.get("dashboard_alignment")
+        if alignment:
+            entry["dashboard_status"] = alignment.get("status")
+            entry["dashboard_audited_on"] = alignment.get("audited_on")
         entries[mid] = entry
 
     doc = {

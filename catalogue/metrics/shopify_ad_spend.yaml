@@ -42,3 +42,8 @@ validation_tests:
 - shopify_ad_spend >= 0 for any slice
 - June 2026 brand 20 ≈ dashboard ₹19,07,629.36
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:647-648

@@ -1,9 +1,12 @@
 id: meta_reach
 display_name: Meta Reach (diagnostic)
 category: paid_media_diagnostic
-status: approved
-description: 'CAVEAT: reach is deduplicated per ad-day only; summing across days/ads overcounts
-  unique people. Diagnostic only — prefer meta_frequency.'
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. CAVEAT: reach is deduplicated per
+  ad-day only; summing across days/ads overcounts unique people. Diagnostic
+  only — prefer meta_frequency.
 formula:
   human_readable: SUM(daily ad-level reach) — non-deduplicated above ad-day grain
   authoritative_source: cube
@@ -51,3 +54,10 @@ access_policy:
   scopes:
   - metrics:read
 validation_tests: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    meta_reach is explicitly hardcoded to 0 in Node-Backend (meta/analytics.js:322),
+    with a comment stating it requires a separate API call that was never added.

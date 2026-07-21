@@ -2,11 +2,7 @@ id: net_roas
 display_name: Net ROAS (Shopify-only)
 category: finance
 status: certified
-description: 'Historical Analytics Net ROAS card: (Net Sales − Net COGS) / Shopify ad spend (Meta + Google).
-  Contribution margin per ad rupee — NOT MER (Net Sales / spend) and NOT platform-reported ROAS. FE buildDashboardStats:
-  safeDiv(netSales - cogs, adSpend). Scope: Shopify-only (Historical Analytics / commerce oracle). Does
-  not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads
-  net profit use net_profit_blended.'
+description: 'Historical Analytics Net ROAS card: (Net Sales − Net COGS) / Shopify ad spend (Meta + Google). Contribution margin per ad rupee — NOT MER (Net Sales / spend) and NOT platform-reported ROAS. FE buildDashboardStats: safeDiv(netSales - cogs, adSpend). Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: (SUM(net_sales) - SUM(net_cogs)) / SUM(shopify_ad_spend)
   authoritative_source: cube
@@ -45,3 +41,9 @@ deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.contribution_margin
   denominator: canonical_pnl.shopify_ad_spend
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: services/dashboardService.js:143
+  note: 'Primary dashboard summary computes net_roas from blended (Amazon-inclusive) net_sales and net_cogs — see cross-cutting #2.'

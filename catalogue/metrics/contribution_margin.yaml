@@ -40,3 +40,8 @@ examples:
 validation_tests:
 - contribution_margin = net_sales - net_cogs for the same slice
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/attributionPnLHelpers.js:195

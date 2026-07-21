@@ -21,9 +21,10 @@ description: >
   use total_ad_spend.
 formula:
   human_readable: >
-    SUM(posted customer refund amount: effective_refunds, else
-    estimated_refunds, else total_refund_amount / refund_principal), incl.
-    GST, on refund-posted date
+    SUM(refund_principal), incl. GST, on refund-posted date. The catalogued
+    effective_refunds → estimated_refunds → total_refund_amount /
+    refund_principal fallback chain is dead code the live query never reaches
+    — see dashboard_alignment.
   authoritative_source: cube
 cube_mapping:
   view: amazon_commerce_performance
@@ -53,3 +54,15 @@ validation_tests:
   - reconciles to Seleric Dashboard Historical Analytics Amazon Seller Partner Returns card (settled refunds only; excludes pending-refund accrual overlay)
 deprecated_aliases:
   - amazon_refund_revenue
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonSpOrderTotals.js:393,430,472
+  note: >
+    The catalogued resolution logic (effective_refunds, falling back to
+    estimated_refunds, falling back to total_refund_amount / refund_principal)
+    is unreachable dead code in Node-Backend; the live query only ever reads
+    refund_principal. Corrected formula.human_readable to describe the actual
+    single-field resolution rather than the fallback chain; the incl.-GST
+    basis claim itself was not flagged as wrong and is left as-is.

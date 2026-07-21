@@ -1,13 +1,14 @@
 id: product_cogs
 display_name: Product COGS (fully-loaded lifecycle)
 category: product
-status: certified
-description: 'Lifecycle cost of goods per line from serve.product_performance: product
-  cost + shipping + packaging + payment fee + RTO, recognized by pnl_refund_class
-  (finance policy, point-in-time SCD2 unit cost at order creation). For merchandise
+status: draft
+description: >
+  Not implemented in the dashboard as of this audit — COGS is only
+  aggregated at brand×day in Node-Backend, never per SKU. Lifecycle cost of
+  goods per line from serve.product_performance: product cost + shipping +
+  packaging + payment fee + RTO, recognized by pnl_refund_class (finance
+  policy, point-in-time SCD2 unit cost at order creation). For merchandise
   cost only, ask for product cost only (product_cost_only measure).
-
-  '
 formula:
   human_readable: Sum of lifecycle net_cogs on eligible lines
   authoritative_source: cube
@@ -76,3 +77,10 @@ validation_tests:
 - product_net_revenue − product_cogs equals product_gross_profit exactly
 - cost coverage >= 99.5% of net revenue (certification threshold)
 deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    COGS is only aggregated at brand×day in Node-Backend, never per SKU. Part
+    of the broader finding that there is no all-channel product/SKU rollup.

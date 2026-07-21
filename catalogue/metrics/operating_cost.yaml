@@ -41,3 +41,8 @@ examples:
 validation_tests:
 - operating_cost = shipping + packaging + gateway + rto
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:616-621

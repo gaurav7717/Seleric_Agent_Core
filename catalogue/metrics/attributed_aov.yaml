@@ -79,3 +79,8 @@ currency_default: INR
 ratio_components:
   numerator: order_attribution.attributed_net_revenue
   denominator: order_attribution.attributed_orders
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: integrations/attributionPnLHelpers.js:220,236

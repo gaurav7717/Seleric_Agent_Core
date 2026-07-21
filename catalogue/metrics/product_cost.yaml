@@ -2,11 +2,7 @@ id: product_cost
 display_name: Product Cost (Shopify-only)
 category: finance
 status: certified
-description: 'Merchandise product-cost arm of Shopify Net COGS (brand × day) — FE §13 Product Cost / /pnl/cogs
-  card. Equals net_cogs − shipping − packaging − gateway − RTO. Not product_cogs (fully-loaded SKU lifecycle)
-  and not Amazon marketplace fees. Scope: Shopify-only (Historical Analytics / commerce oracle). Does
-  not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads
-  net profit use net_profit_blended.'
+description: 'Merchandise product-cost arm of Shopify Net COGS (brand × day) — FE §13 Product Cost / /pnl/cogs card. Equals net_cogs − shipping − packaging − gateway − RTO. Not product_cogs (fully-loaded SKU lifecycle) and not Amazon marketplace fees. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: SUM(product_cost)
   authoritative_source: cube
@@ -42,3 +38,9 @@ validation_tests:
 - product_cost + shipping_cost + packaging_cost + payment_gateway_fees + rto_cost = net_cogs
 - June 2026 brand 20 ≈ ₹11,16,485.37
 deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:615,639
+  note: Value is correct at brand×day but validation_test (product_cost+shipping+packaging+gateway+rto=net_cogs) is falsified because net_cogs also includes Amazon.

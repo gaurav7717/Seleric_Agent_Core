@@ -27,3 +27,8 @@ access_policy:
 currency_default: INR
 validation_tests: []
 deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: amazonShared/amazonOrderPnl.js:98-99

@@ -1,8 +1,11 @@
 id: google_interactions
 display_name: Google Interactions
 category: paid_media
-status: certified
-description: Google Ads interactions (clicks, engagements, video engagements).
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Google Ads interactions (clicks,
+  engagements, video engagements).
 formula:
   human_readable: SUM(google_interactions)
   authoritative_source: cube
@@ -37,3 +40,10 @@ access_policy:
   - metrics:read
 validation_tests:
 - google_interactions >= 0 for any slice
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    The interactions field is never fetched anywhere in Node-Backend — no
+    code path pulls or aggregates a Google Ads "interactions" value.

@@ -1,9 +1,11 @@
 id: meta_cost_per_thruplay
 display_name: Meta Cost per ThruPlay
 category: paid_media
-status: certified
-description: Meta Cost per ThruPlay recomputed from aggregated components — never SUM/AVG
-  of row ratios.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Meta Cost per ThruPlay recomputed from
+  aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(spend) / SUM(thruplays)
   authoritative_source: cube
@@ -59,3 +61,11 @@ companion_measures:
 - meta_spend
 - meta_thruplays
 currency_default: INR
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Depends on meta_thruplays, which does not exist anywhere in Node-Backend
+    (zero occurrences of "thruplay" in src/), so this metric is not computed
+    on the dashboard.

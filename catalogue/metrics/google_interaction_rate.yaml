@@ -1,8 +1,11 @@
 id: google_interaction_rate
 display_name: Google Interaction Rate
 category: paid_media
-status: certified
-description: Google Interaction Rate recomputed from aggregated components.
+status: draft
+description: >
+  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
+  the intended Cube-layer design only. Google Interaction Rate recomputed
+  from aggregated components.
 formula:
   human_readable: SUM(interactions) / SUM(impressions)
   authoritative_source: cube
@@ -44,3 +47,10 @@ ratio_components:
 companion_measures:
 - google_interactions
 - google_impressions
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  note: >
+    Depends on google_interactions, which is never fetched anywhere in
+    Node-Backend, so this rate cannot be and is not computed on the dashboard.
